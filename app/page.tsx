@@ -592,7 +592,7 @@ const DreamHomes = () => {
             <div className="bento-svc-card bento-cell" style={{ gridColumn: 3, gridRow: 1 }}><div className="bento-svc-icon">{services[0].icon}</div><div className="bento-svc-title">{services[0].title}</div><div className="bento-svc-desc">{services[0].description}</div></div>
             <div className="bento-svc-card bento-cell" style={{ gridColumn: 1, gridRow: 2 }}><div className="bento-svc-icon">{services[1].icon}</div><div className="bento-svc-title">{services[1].title}</div><div className="bento-svc-desc">{services[1].description}</div></div>
             <div className="bento-svc-card bento-cell" style={{ gridColumn: 2, gridRow: 2 }}><div className="bento-svc-icon">{services[2].icon}</div><div className="bento-svc-title">{services[2].title}</div><div className="bento-svc-desc">{services[2].description}</div></div>
-            <div className="bento-cta-card bento-cell"><div><div className="bento-cta-card-label">Ready to start?</div><div className="bento-cta-card-title">Let's find your perfect home today.</div></div><a href="/contact" className="bento-cta-card-btn">Get Started <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a></div>
+            <div className="bento-cta-card bento-cell"><div><div className="bento-cta-card-label">Ready to start?</div><div className="bento-cta-card-title">Let's find your perfect home today.</div></div><a href="/contact" className="bento-cta-card-btn">Get<svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a></div>
           </div>
           <div className="about-learn-more"><a href="/about" className="about-learn-btn">Learn More <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a></div>
         </div>
