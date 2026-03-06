@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import Navbar fr    xom '../components/Navbar';
+import Navbar from '../components/Navbar';
 
 const AboutUs = () => {
     const heroRef = useRef<HTMLElement>(null);
