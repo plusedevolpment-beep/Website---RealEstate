@@ -492,7 +492,7 @@ const DreamHomes = () => {
             <span className="desktop-description">Verified properties, transparent pricing, trusted by thousands.</span>
             <span className="mobile-description">Find your perfect home with verified listings.</span>
           </p>
-          <div className="hero-buttons"><button className="btn-primary">Get Started</button></div>
+          <div className="hero-buttons"><button className="btn-primary">Get </button></div>
           <div className="search-toggle">
             <button className={`toggle-option ${searchMode === 'rent' ? 'active' : ''}`} onClick={() => setSearchMode('rent')}>For Rent</button>
             <button className={`toggle-option ${searchMode === 'buy' ? 'active' : ''}`} onClick={() => setSearchMode('buy')}>For Sale</button>
