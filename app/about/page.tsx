@@ -113,7 +113,7 @@ const AboutUs = () => {
             ],
             cta1: { label: 'Get a Maintenance Plan', href: '/contact' },
             cta2: { label: 'View Packages', href: '/services/maintenance' },
-            icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" /><path d="M9 21V12h6v9" /></svg>,
+            image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=85',
             steps: ['Contact us via call or WhatsApp', 'Free on-site assessment', 'We schedule & execute the work', 'Sign-off when you are satisfied'],
         },
         {
@@ -125,7 +125,7 @@ const AboutUs = () => {
             ],
             cta1: { label: 'Request a Repair', href: '/contact' },
             cta2: { label: 'See All Repair Jobs', href: '/services/repairs' },
-            icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" /></svg>,
+            image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&q=85',
             steps: ['Describe the issue to our team', 'Technician arrives same day', 'Repair completed & tested', 'You approve before we leave'],
         },
         {
@@ -137,7 +137,7 @@ const AboutUs = () => {
             ],
             cta1: { label: 'Start Your Renovation', href: '/contact' },
             cta2: { label: 'View Past Projects', href: '/services/renovation' },
-            icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></svg>,
+            image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&q=85',
             steps: ['Share your vision & budget', 'We present a design proposal', 'Construction begins on schedule', 'Final walkthrough & handover'],
         },
     ];
@@ -162,7 +162,12 @@ const AboutUs = () => {
         @keyframes float3   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-15px)} }
         @keyframes float4   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
         @keyframes shimmer  { 0%{background-position:-200% center} 100%{background-position:200% center} }
-        @keyframes panelIn  { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes panelIn    { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes iconBounce { 0%{opacity:0;transform:scale(0.4) rotate(-8deg)} 60%{transform:scale(1.12) rotate(3deg)} 80%{transform:scale(0.95) rotate(-1deg)} 100%{opacity:1;transform:scale(1) rotate(0deg)} }
+        @keyframes slideUp    { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes stepIn     { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+        @keyframes lineDraw   { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+        @keyframes numFlip    { from{opacity:0;transform:translateY(6px) scale(0.8)} to{opacity:1;transform:translateY(0) scale(1)} }
 
         
         .hero-wrap   { position:relative; height:200vh; }
@@ -272,50 +277,58 @@ const AboutUs = () => {
         .serv-section { position:absolute; inset:0; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; transform:translateY(100%); will-change:transform; z-index:10; }
         .serv-section::before { content:''; position:absolute; inset:0; pointer-events:none; background-image:radial-gradient(circle,rgba(0,0,0,.033) 1px,transparent 1px); background-size:28px 28px; }
         .serv-inner { position:relative; z-index:1; max-width:960px; width:100%; padding:0 40px; }
-        .serv-header { text-align:center; margin-bottom:40px; }
+        .serv-header { text-align:center; margin-bottom:36px; padding-top:32px; }
         .serv-eyebrow { display:inline-flex; align-items:center; gap:8px; margin-bottom:14px; font-size:.67rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:#a1a1aa; }
         .serv-eyebrow-line { width:20px; height:1.5px; background:#d4d4d8; }
-        .serv-title { font-family:'Outfit',sans-serif; font-size:clamp(1.9rem,3.5vw,2.8rem); font-weight:900; line-height:1.08; letter-spacing:-.04em; color:#18181b; margin-bottom:12px; }
+        .serv-title { font-family:'Outfit',sans-serif; font-size:clamp(1.9rem,3.5vw,2.8rem); font-weight:900; line-height:1.08; letter-spacing:-.04em; color:#18181b; margin-bottom:10px; }
         .serv-subtitle { font-size:.96rem; color:#71717a; line-height:1.75; max-width:480px; margin:0 auto; }
 
-
-        .serv-tabs-wrap { display:flex; justify-content:center; margin-bottom:40px; }
+        .serv-tabs-wrap { display:flex; justify-content:center; margin-bottom:32px; }
         .serv-tabs { display:inline-flex; gap:6px; padding:6px; background:#f4f4f5; border-radius:16px; }
         .serv-tab { padding:10px 22px; border-radius:11px; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:.875rem; font-weight:600; color:#71717a; background:transparent; transition:background .25s, color .25s, box-shadow .25s, transform .2s cubic-bezier(.34,1.4,.64,1); }
         .serv-tab:hover:not(.active) { color:#3f3f46; background:rgba(255,255,255,.6); }
         .serv-tab.active { background:#fff; color:#18181b; box-shadow:0 2px 12px rgba(0,0,0,.1); transform:translateY(-1px); }
 
-        
-        .serv-panel { display:grid; grid-template-columns:1fr 1fr; gap:52px; align-items:start; animation:panelIn .4s cubic-bezier(.16,1,.3,1) forwards; }
-        .serv-panel-icon { width:52px; height:52px; border-radius:14px; background:#f4f4f5; border:1.5px solid #ebebeb; display:flex; align-items:center; justify-content:center; color:#18181b; margin-bottom:20px; transition:transform .3s cubic-bezier(.34,1.4,.64,1),background .25s; }
-        .serv-panel-icon:hover { transform:scale(1.1); background:#ebebeb; }
-        .serv-panel-headline { font-family:'Outfit',sans-serif; font-size:clamp(1.3rem,2.2vw,1.8rem); font-weight:900; letter-spacing:-.03em; color:#18181b; margin-bottom:10px; line-height:1.15; }
-        .serv-panel-body { font-size:.92rem; color:#52525b; line-height:1.72; margin-bottom:24px; }
+        .serv-panel { display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:start; animation:panelIn .4s cubic-bezier(.16,1,.3,1) forwards; }
 
+        /* Left column */
+        .serv-panel-left-wrap { display:flex; flex-direction:column; }
+        .serv-panel-category-label { font-size:.67rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#a1a1aa; margin-bottom:10px; }
+        .serv-panel-headline { font-family:'Outfit',sans-serif; font-size:clamp(1.4rem,2.2vw,1.9rem); font-weight:900; letter-spacing:-.03em; color:#18181b; margin-bottom:10px; line-height:1.15; }
+        .serv-panel-body { font-size:.92rem; color:#52525b; line-height:1.75; margin-bottom:28px; }
 
-        .serv-groups { display:grid; grid-template-columns:1fr 1fr; gap:16px 28px; margin-bottom:32px; }
+        .serv-groups { display:grid; grid-template-columns:1fr 1fr; gap:16px 28px; margin-bottom:28px; }
         .serv-group-label { font-size:.63rem; font-weight:700; letter-spacing:.10em; text-transform:uppercase; color:#a1a1aa; margin-bottom:9px; }
         .serv-group-items { display:flex; flex-direction:column; gap:7px; }
         .serv-group-item { display:flex; align-items:center; gap:9px; font-size:.86rem; font-weight:500; color:#3f3f46; }
         .serv-group-dot { width:5px; height:5px; border-radius:50%; background:#d4d4d8; flex-shrink:0; }
 
+        .serv-divider { width:100%; height:1px; background:#f0f0f0; margin-bottom:24px; }
         .serv-ctas { display:flex; gap:10px; flex-wrap:wrap; }
         .serv-ctas-mobile { display:none; }
+        .serv-img-wrap-mobile { display:none; }
         .serv-btn-primary { display:inline-flex; align-items:center; gap:8px; background:#18181b; color:#fff; padding:12px 22px; border-radius:11px; font-family:'DM Sans',sans-serif; font-size:.875rem; font-weight:700; text-decoration:none; border:none; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,.18); transition:transform .22s cubic-bezier(.34,1.4,.64,1),box-shadow .22s; }
         .serv-btn-primary:hover { transform:translateY(-3px); box-shadow:0 10px 28px rgba(0,0,0,.25); }
         .serv-btn-primary svg { transition:transform .22s; }
         .serv-btn-primary:hover svg { transform:translateX(3px); }
         .serv-btn-secondary { display:inline-flex; align-items:center; background:transparent; color:#3f3f46; padding:12px 20px; border-radius:11px; font-family:'DM Sans',sans-serif; font-size:.875rem; font-weight:600; text-decoration:none; border:1.5px solid #d4d4d8; cursor:pointer; transition:all .22s cubic-bezier(.34,1.2,.64,1); }
         .serv-btn-secondary:hover { border-color:#a1a1aa; color:#18181b; transform:translateY(-2px); background:#fafafa; }
-        .serv-visual { background:#f8f7f4; border:1.5px solid #ebebeb; border-radius:20px; padding:32px 28px; position:relative; overflow:hidden; box-shadow:0 8px 32px rgba(0,0,0,.06); transition:box-shadow .3s, transform .3s cubic-bezier(.16,1,.3,1); }
-        .serv-visual:hover { box-shadow:0 20px 56px rgba(0,0,0,.11); transform:translateY(-4px); }
-        .serv-visual-label { font-size:.67rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#a1a1aa; margin-bottom:20px; }
-        .serv-step { display:flex; align-items:flex-start; gap:14px; padding:16px 0; border-bottom:1px solid #ebebeb; }
+
+        /* Right column */
+        .serv-panel-right { display:flex; flex-direction:column; gap:16px; }
+        .serv-img-wrap { display:none; }
+        .serv-img { width:100%; height:100%; object-fit:cover; display:block; }
+
+        /* Process card */
+        .serv-visual { background:#18181b; border-radius:18px; padding:26px 24px; position:relative; overflow:hidden; box-shadow:0 12px 36px rgba(0,0,0,.16); }
+        .serv-visual::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 80% 20%,rgba(255,255,255,.05) 0%,transparent 60%); pointer-events:none; }
+        .serv-visual-label { font-size:.63rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.3); margin-bottom:18px; }
+        .serv-step { display:flex; align-items:flex-start; gap:14px; padding:13px 0; border-bottom:1px solid rgba(255,255,255,.07); }
         .serv-step:last-child { border-bottom:none; padding-bottom:0; }
-        .serv-step-num { width:26px; height:26px; border-radius:50%; background:#18181b; color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Outfit',sans-serif; font-size:.72rem; font-weight:900; flex-shrink:0; transition:transform .3s cubic-bezier(.34,1.4,.64,1); }
-        .serv-step:hover .serv-step-num { transform:scale(1.15); }
-        .serv-step-title { font-size:.875rem; font-weight:700; color:#18181b; }
-        .serv-step-sub   { font-size:.78rem; color:#a1a1aa; margin-top:2px; }
+        .serv-step-num { width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15); color:rgba(255,255,255,.8); display:flex; align-items:center; justify-content:center; font-family:'Outfit',sans-serif; font-size:.7rem; font-weight:900; flex-shrink:0; transition:background .25s, transform .3s cubic-bezier(.34,1.4,.64,1); }
+        .serv-step:hover .serv-step-num { background:rgba(255,255,255,.2); transform:scale(1.12); }
+        .serv-step-title { font-size:.84rem; font-weight:600; color:rgba(255,255,255,.85); line-height:1.4; }
+        .serv-step-sub { font-size:.78rem; color:rgba(255,255,255,.35); margin-top:2px; }
 
    
         .mobile-layout { display:none; }
@@ -363,63 +376,193 @@ const AboutUs = () => {
           .stat-label { font-size:.6rem; }
           .stat-desc { display:none; }
 
-    
-          .serv-inner { padding:0 20px; }
-          .serv-header { margin-bottom:20px; }
-          .serv-title { font-size:1.6rem; }
-          .serv-subtitle { font-size:.88rem; max-width:100%; }
+          /* ─── SERVICES: mobile overhaul ─── */
 
-       
+          /* Scrollable container, no clipping */
+          .serv-section {
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            align-items: flex-start;
+          }
+
+          /* Centered column layout */
+          .serv-inner {
+            padding: 28px 20px 48px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+          }
+
+          /* Header */
+          .serv-header { margin-bottom: 18px; width: 100%; }
+          .serv-eyebrow { display: none; }
+          .serv-title { font-size: 1.35rem; letter-spacing: -.03em; }
+          .serv-subtitle { font-size: .82rem; max-width: 100%; margin-top: 5px; line-height: 1.6; }
+
+          /* Animated underline accent under title */
+          .serv-title::after {
+            content: '';
+            display: block;
+            height: 2.5px;
+            width: 36px;
+            background: #18181b;
+            border-radius: 2px;
+            margin: 8px auto 0;
+            animation: lineDraw .6s cubic-bezier(.16,1,.3,1) .2s both;
+            transform-origin: left;
+          }
+
+          /* Tabs: all 3 fit centered on one line */
           .serv-tabs-wrap {
-            justify-content:center;
-            margin-bottom:24px;
-            overflow:visible;
+            justify-content: center;
+            margin-bottom: 22px;
+            width: 100%;
+            overflow: visible;
           }
           .serv-tabs {
-            flex-wrap:wrap;
-            justify-content:center;
-            gap:8px;
-            padding:8px;
-            width:100%;
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 4px;
+            padding: 4px;
+            border-radius: 12px;
+            width: 100%;
           }
           .serv-tab {
-            padding:10px 18px;
-            font-size:.85rem;
-            flex:0 0 auto;
+            flex: 1;
+            padding: 8px 2px;
+            font-size: .69rem;
+            border-radius: 9px;
+            white-space: nowrap;
+            text-align: center;
+            letter-spacing: -.01em;
           }
 
-        
-          .serv-panel { grid-template-columns:1fr; gap:20px; }
-          .serv-panel-icon { width:44px; height:44px; border-radius:12px; margin-bottom:14px; }
-          .serv-panel-icon svg { width:22px; height:22px; }
-          .serv-panel-headline { font-size:1.15rem; margin-bottom:10px; }
-          .serv-panel-body { font-size:.9rem; line-height:1.65; margin-bottom:18px; }
+          /* Panel: single centered column, smooth fade+lift on tab change */
+          .serv-panel {
+            grid-template-columns: 1fr;
+            gap: 16px;
+            width: 100%;
+            animation: none;
+          }
+          .serv-panel { opacity: 0; animation: slideUp .35s cubic-bezier(.16,1,.3,1) .04s forwards; }
 
-          .serv-groups { grid-template-columns:1fr 1fr; gap:16px 20px; margin-bottom:4px; }
-          .serv-group-label { font-size:.67rem; margin-bottom:8px; }
-          .serv-group-item { font-size:.88rem; gap:9px; }
-          .serv-group-dot { width:5px; height:5px; }
+          /* Left column: centered flex */
+          .serv-panel > div:first-child {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+          }
+          /* Icon row stays centered inline */
+          .serv-panel-icon-row {
+            justify-content: center;
+            margin-bottom: 14px;
+          }
+          .serv-panel-category-label { display: none; }
 
-          .serv-ctas { display:none; }
+          /* Hide desktop right column (image + card) on mobile */
+          .serv-panel-right { display: none; }
+
+          /* Mobile image: shown inline in left column, full width, rounded */
+          .serv-img-wrap-mobile {
+            display: block;
+            width: 100%;
+            border-radius: 14px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+            margin-top: 18px;
+            margin-bottom: 4px;
+            box-shadow: 0 10px 32px rgba(0,0,0,.13);
+            animation: slideUp .4s cubic-bezier(.16,1,.3,1) .28s both;
+          }
+          .serv-img-wrap-mobile .serv-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transform: none;
+          }
+
+          /* Headline: delayed slide-up */
+          .serv-panel-headline {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            line-height: 1.2;
+            animation: slideUp .4s cubic-bezier(.16,1,.3,1) .18s both;
+          }
+
+          /* Body: slightly more delayed */
+          .serv-panel-body {
+            font-size: .875rem;
+            line-height: 1.65;
+            margin-bottom: 0;
+            color: #52525b;
+            animation: slideUp .4s cubic-bezier(.16,1,.3,1) .26s both;
+          }
+
+          /* Hide service groups on mobile */
+          .serv-groups { display: none; }
+
+          /* Desktop CTAs hidden */
+          .serv-ctas { display: none; }
+
+          /* Mobile CTAs: stacked, animated */
           .serv-ctas-mobile {
-            display:flex;
-            flex-direction:column;
-            gap:10px;
-            margin-top:20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            margin-top: 18px;
+            margin-bottom: 0;
+            animation: slideUp .4s cubic-bezier(.16,1,.3,1) .34s both;
           }
           .serv-ctas-mobile .serv-btn-primary,
           .serv-ctas-mobile .serv-btn-secondary {
-            width:100%;
-            justify-content:center;
-            font-size:.88rem;
-            padding:13px 16px;
+            width: 100%;
+            justify-content: center;
+            font-size: .875rem;
+            padding: 13px 16px;
+            border-radius: 12px;
           }
 
-          .serv-visual { padding:20px 16px; border-radius:16px; }
-          .serv-visual-label { font-size:.65rem; margin-bottom:14px; }
-          .serv-step { padding:12px 0; gap:12px; }
-          .serv-step-num { width:26px; height:26px; font-size:.72rem; flex-shrink:0; }
-          .serv-step-title { font-size:.88rem; }
+          /* "How it works" card: dark card adapted for mobile */
+          .serv-visual {
+            padding: 20px 18px 16px;
+            border-radius: 18px;
+            margin-top: 0;
+            text-align: left;
+            animation: slideUp .45s cubic-bezier(.16,1,.3,1) .3s both;
+            background: #18181b;
+          }
+          .serv-visual-label {
+            font-size: .63rem;
+            margin-bottom: 14px;
+            text-align: center;
+            letter-spacing: .14em;
+          }
+
+          /* Steps: each step slides in with stagger */
+          .serv-step {
+            padding: 11px 0;
+            gap: 13px;
+            opacity: 0;
+            animation: stepIn .4s cubic-bezier(.16,1,.3,1) forwards;
+          }
+          .serv-step:nth-child(2) { animation-delay: .38s; }
+          .serv-step:nth-child(3) { animation-delay: .48s; }
+          .serv-step:nth-child(4) { animation-delay: .58s; }
+          .serv-step:nth-child(5) { animation-delay: .68s; }
+
+          .serv-step-num {
+            width: 26px;
+            height: 26px;
+            font-size: .7rem;
+            flex-shrink: 0;
+            animation: numFlip .35s cubic-bezier(.34,1.4,.64,1) .4s both;
+          }
+          .serv-step-title { font-size: .84rem; line-height: 1.4; }
         }
 
         @media (min-width:641px) and (max-width:1024px) {
@@ -533,7 +676,6 @@ const AboutUs = () => {
                                 <p className="serv-subtitle">From routine maintenance to full renovations — all under one roof.</p>
                             </div>
 
-                            {/* Tabs — centered on all screen sizes */}
                             <div className="serv-tabs-wrap">
                                 <div className="serv-tabs">
                                     {serviceCategories.map(cat => (
@@ -546,12 +688,11 @@ const AboutUs = () => {
 
                             <div className="serv-panel" key={activeService}>
                                 {/* Left column */}
-                                <div>
-                                    <div className="serv-panel-icon">{svc.icon}</div>
+                                <div className="serv-panel-left-wrap">
+                                    <div className="serv-panel-category-label">{serviceCategories[activeService].tab}</div>
                                     <div className="serv-panel-headline">{svc.headline}</div>
                                     <p className="serv-panel-body">{svc.body}</p>
 
-                                    {/* Grouped 2-col layout replaces old flat bullet list */}
                                     <div className="serv-groups">
                                         {svc.groups.map((group, gi) => (
                                             <div key={gi}>
@@ -567,14 +708,26 @@ const AboutUs = () => {
                                         ))}
                                     </div>
 
+                                    <div className="serv-divider" />
                                     <div className="serv-ctas">
                                         <a href={svc.cta1.href} className="serv-btn-primary">{svc.cta1.label} <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
                                         <a href={svc.cta2.href} className="serv-btn-secondary">{svc.cta2.label}</a>
                                     </div>
+                                    {/* Mobile image shown between body and CTAs */}
+                                    <div className="serv-img-wrap-mobile">
+                                        <img src={svc.image} alt={svc.headline} className="serv-img" />
+                                    </div>
+                                    <div className="serv-ctas-mobile">
+                                        <a href={svc.cta1.href} className="serv-btn-primary">{svc.cta1.label} <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
+                                        <a href={svc.cta2.href} className="serv-btn-secondary">{svc.cta2.label}</a>
+                                    </div>
                                 </div>
 
-                                {/* Right column: process card */}
+                                {/* Right column: image + process card */}
                                 <div className="serv-panel-right">
+                                    <div className="serv-img-wrap">
+                                        <img src={svc.image} alt={svc.headline} className="serv-img" />
+                                    </div>
                                     <div className="serv-visual">
                                         <div className="serv-visual-label">How it works</div>
                                         {svc.steps.map((step, j) => (
@@ -587,11 +740,6 @@ const AboutUs = () => {
                                 </div>
                             </div>
 
-                            {/* Mobile CTAs appear below the stacked panel */}
-                            <div className="serv-ctas-mobile">
-                                <a href={svc.cta1.href} className="serv-btn-primary">{svc.cta1.label} <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
-                                <a href={svc.cta2.href} className="serv-btn-secondary">{svc.cta2.label}</a>
-                            </div>
                         </div>
                     </section>
                 </div>
