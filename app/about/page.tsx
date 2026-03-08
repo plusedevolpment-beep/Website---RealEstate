@@ -9,18 +9,26 @@ const AboutUs = () => {
     const whoWrapRef = useRef<HTMLDivElement>(null);
     const whoRef = useRef<HTMLElement>(null);
     const servRef = useRef<HTMLElement>(null);
+    const teamRef = useRef<HTMLElement>(null);
+    const visionRef = useRef<HTMLElement>(null);
     const statRefs = useRef<HTMLDivElement[]>([]);
+    const teamCardRefs = useRef<HTMLDivElement[]>([]);
+    const teamGridRef = useRef<HTMLDivElement>(null);
     const [activeService, setActiveService] = useState(0);
+    const [activeDot, setActiveDot] = useState(0);
+    const [activeVision, setActiveVision] = useState(0);
 
     useEffect(() => {
         const t = setTimeout(() => heroRef.current?.classList.add('animate'), 80);
 
+        // ─── CEO observer (unchanged) ───
         const ceoObs = new IntersectionObserver(([e]) => {
-            if (e.isIntersecting) { ceoRef.current?.classList.add('in-view'); }
-            else { ceoRef.current?.classList.remove('in-view'); }
+            if (e.isIntersecting) ceoRef.current?.classList.add('in-view');
+            else ceoRef.current?.classList.remove('in-view');
         }, { threshold: 0.3 });
         if (ceoRef.current) ceoObs.observe(ceoRef.current);
 
+        // ─── Block 1: hero blur + CEO slides up ───
         const onScroll1 = () => {
             const wrap = heroWrapRef.current;
             const hero = heroRef.current;
@@ -32,21 +40,57 @@ const AboutUs = () => {
             hero.style.filter = `blur(${(p * 5).toFixed(2)}px)`;
         };
 
+        // ─── Block 2: who blur + serv slides up (first half) + team slides up (second half) ───
         const onScroll2 = () => {
             const wrap = whoWrapRef.current;
             const who = whoRef.current;
             const serv = servRef.current;
-            if (!wrap || !who || !serv) return;
+            const team = teamRef.current;
+            const vision = visionRef.current;
+            if (!wrap || !who || !serv || !team || !vision) return;
+
             const scrolled = Math.max(0, -wrap.getBoundingClientRect().top);
-            const p = Math.min(1, scrolled / window.innerHeight);
-            serv.style.transform = `translateY(${((1 - p) * 100).toFixed(2)}%)`;
-            who.style.filter = `blur(${(p * 4).toFixed(2)}px)`;
+
+            // Services slides in: 0→1 vh
+            const pServ = Math.min(1, scrolled / window.innerHeight);
+            serv.style.transform = `translateY(${((1 - pServ) * 100).toFixed(2)}%)`;
+            who.style.filter = `blur(${(pServ * 4).toFixed(2)}px)`;
+
+            // Team slides in: 1→2 vh
+            const pTeam = Math.min(1, Math.max(0, (scrolled - window.innerHeight) / window.innerHeight));
+            team.style.transform = `translateY(${((1 - pTeam) * 100).toFixed(2)}%)`;
+
+            // Vision slides in: 2→3 vh
+            const pVision = Math.min(1, Math.max(0, (scrolled - window.innerHeight * 2) / window.innerHeight));
+            vision.style.transform = `translateY(${((1 - pVision) * 100).toFixed(2)}%)`;
+
+            // Team card entrance
+            if (pTeam > 0.18 && !team.classList.contains('in-view')) {
+                team.classList.add('in-view');
+                teamCardRefs.current.forEach((el, i) => {
+                    if (!el) return;
+                    setTimeout(() => el.classList.add('card-in'), 160 + i * 110);
+                });
+            }
+            if (pTeam <= 0.02) {
+                team.classList.remove('in-view');
+                teamCardRefs.current.forEach(el => el?.classList.remove('card-in'));
+            }
+
+            // Vision entrance
+            if (pVision > 0.18 && !vision.classList.contains('in-view')) {
+                vision.classList.add('in-view');
+            }
+            if (pVision <= 0.02) {
+                vision.classList.remove('in-view');
+            }
         };
 
         window.addEventListener('scroll', onScroll1, { passive: true });
         window.addEventListener('scroll', onScroll2, { passive: true });
         onScroll1(); onScroll2();
 
+        // ─── Stat count-up ───
         const countUp = (el: HTMLElement, target: number, suffix: string) => {
             let start: number | null = null;
             const step = (ts: number) => {
@@ -90,6 +134,19 @@ const AboutUs = () => {
         };
     }, []);
 
+    // Carousel dot tracking
+    useEffect(() => {
+        const grid = teamGridRef.current;
+        if (!grid) return;
+        const onCarouselScroll = () => {
+            const cardWidth = grid.scrollWidth / 4;
+            const idx = Math.round(grid.scrollLeft / cardWidth);
+            setActiveDot(Math.min(3, Math.max(0, idx)));
+        };
+        grid.addEventListener('scroll', onCarouselScroll, { passive: true });
+        return () => grid.removeEventListener('scroll', onCarouselScroll);
+    }, []);
+
     const stats = [
         { target: 500, suffix: '+', label: 'Properties Sold', desc: 'Across Dubai & the UAE' },
         { target: 12, suffix: '+', label: 'Years Experience', desc: 'Licensed since 2012' },
@@ -101,7 +158,6 @@ const AboutUs = () => {
         { id: 1, tab: 'Repair Work' },
         { id: 2, tab: 'House Renovation' },
     ];
-
 
     const serviceDetails = [
         {
@@ -142,6 +198,41 @@ const AboutUs = () => {
         },
     ];
 
+    const team = [
+        {
+            name: 'Mohammed Al Areeq',
+            role: 'Founder & CEO',
+            specialty: 'Luxury Residential',
+            deals: '340+',
+            image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=85',
+            langs: ['Arabic', 'English'],
+        },
+        {
+            name: 'Sara Al Mansouri',
+            role: 'Senior Property Advisor',
+            specialty: 'Off-Plan & Investment',
+            deals: '180+',
+            image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=85',
+            langs: ['Arabic', 'English', 'French'],
+        },
+        {
+            name: 'James Harrington',
+            role: 'Head of Leasing',
+            specialty: 'Commercial & Retail',
+            deals: '220+',
+            image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=85',
+            langs: ['English'],
+        },
+        {
+            name: 'Priya Sharma',
+            role: 'Client Relations Lead',
+            specialty: 'Expat & Family Homes',
+            deals: '150+',
+            image: 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=400&q=85',
+            langs: ['English', 'Hindi'],
+        },
+    ];
+
     const svc = serviceDetails[activeService];
 
     return (
@@ -162,14 +253,13 @@ const AboutUs = () => {
         @keyframes float3   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-15px)} }
         @keyframes float4   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
         @keyframes shimmer  { 0%{background-position:-200% center} 100%{background-position:200% center} }
-        @keyframes panelIn    { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes iconBounce { 0%{opacity:0;transform:scale(0.4) rotate(-8deg)} 60%{transform:scale(1.12) rotate(3deg)} 80%{transform:scale(0.95) rotate(-1deg)} 100%{opacity:1;transform:scale(1) rotate(0deg)} }
-        @keyframes slideUp    { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes stepIn     { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
-        @keyframes lineDraw   { from{transform:scaleX(0)} to{transform:scaleX(1)} }
-        @keyframes numFlip    { from{opacity:0;transform:translateY(6px) scale(0.8)} to{opacity:1;transform:translateY(0) scale(1)} }
+        @keyframes panelIn  { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes slideUp  { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes stepIn   { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+        @keyframes lineDraw { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+        @keyframes numFlip  { from{opacity:0;transform:translateY(6px) scale(0.8)} to{opacity:1;transform:translateY(0) scale(1)} }
 
-        
+        /* ─── BLOCK 1: HERO ─── */
         .hero-wrap   { position:relative; height:200vh; }
         .hero-sticky { position:sticky; top:0; height:100vh; overflow:hidden; background:#18181b; }
         .hero { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:#f8f7f4; overflow:hidden; will-change:filter; }
@@ -206,6 +296,8 @@ const AboutUs = () => {
         .btn-dark:hover svg { transform:translateX(4px); }
         .btn-ghost { display:inline-flex; align-items:center; background:transparent; color:#3f3f46; padding:13px 20px; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:.875rem; font-weight:600; text-decoration:none; border:1.5px solid #d4d4d8; cursor:pointer; transition:all .22s cubic-bezier(.34,1.2,.64,1); }
         .btn-ghost:hover { border-color:#a1a1aa; color:#18181b; background:#fff; transform:translateY(-3px); }
+
+        /* CEO */
         .ceo-section { position:absolute; inset:0; background:#18181b; display:flex; justify-content:center; align-items:center; overflow:hidden; transform:translateY(100%); will-change:transform; z-index:10; }
         .ceo-section::before { content:'\u201C'; position:absolute; top:-20px; left:50%; transform:translateX(-50%); font-family:'Outfit',sans-serif; font-size:28rem; font-weight:900; color:rgba(255,255,255,.025); line-height:1; pointer-events:none; user-select:none; }
         .ceo-inner { position:relative; z-index:1; max-width:780px; width:100%; padding:0 40px; display:flex; flex-direction:column; align-items:center; text-align:center; }
@@ -229,9 +321,18 @@ const AboutUs = () => {
         .ceo-section.in-view .ceo-divider  { animation:fadeInUp .55s ease .52s forwards; }
         .ceo-section.in-view .ceo-identity { animation:fadeInUp .65s cubic-bezier(.16,1,.3,1) .66s forwards; }
 
-  
-        .who-wrap   { position:relative; height:200vh; }
+        /* ─── BLOCK 2: WHO + SERVICES + TEAM — all inside one 300vh sticky ─── */
+        /*
+          who-wrap  = 300vh  (100vh for who, 100vh for serv, 100vh for team)
+          who-sticky = sticky 100vh container
+          who-section = base layer (always visible, gets blurred)
+          serv-section = overlay #1 (slides up over who)
+          team-section = overlay #2 (slides up over serv)
+        */
+        .who-wrap   { position:relative; height:400vh; }
         .who-sticky { position:sticky; top:0; height:100vh; overflow:hidden; background:#f8f7f4; }
+
+        /* WHO */
         .who-section { position:absolute; inset:0; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; will-change:filter; opacity:0; transition:opacity .9s cubic-bezier(.16,1,.3,1); }
         .who-section.in-view { opacity:1; }
         .who-section::before { content:''; position:absolute; inset:0; pointer-events:none; background-image:radial-gradient(circle,rgba(0,0,0,.035) 1px,transparent 1px); background-size:28px 28px; }
@@ -273,7 +374,7 @@ const AboutUs = () => {
         .stat-label { font-size:.82rem; font-weight:700; color:#18181b; margin-top:4px; }
         .stat-desc  { font-size:.78rem; color:#a1a1aa; }
 
-   
+        /* SERVICES — overlay z:10 */
         .serv-section { position:absolute; inset:0; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; transform:translateY(100%); will-change:transform; z-index:10; }
         .serv-section::before { content:''; position:absolute; inset:0; pointer-events:none; background-image:radial-gradient(circle,rgba(0,0,0,.033) 1px,transparent 1px); background-size:28px 28px; }
         .serv-inner { position:relative; z-index:1; max-width:960px; width:100%; padding:0 40px; }
@@ -282,27 +383,21 @@ const AboutUs = () => {
         .serv-eyebrow-line { width:20px; height:1.5px; background:#d4d4d8; }
         .serv-title { font-family:'Outfit',sans-serif; font-size:clamp(1.9rem,3.5vw,2.8rem); font-weight:900; line-height:1.08; letter-spacing:-.04em; color:#18181b; margin-bottom:10px; }
         .serv-subtitle { font-size:.96rem; color:#71717a; line-height:1.75; max-width:480px; margin:0 auto; }
-
         .serv-tabs-wrap { display:flex; justify-content:center; margin-bottom:32px; }
         .serv-tabs { display:inline-flex; gap:6px; padding:6px; background:#f4f4f5; border-radius:16px; }
         .serv-tab { padding:10px 22px; border-radius:11px; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:.875rem; font-weight:600; color:#71717a; background:transparent; transition:background .25s, color .25s, box-shadow .25s, transform .2s cubic-bezier(.34,1.4,.64,1); }
         .serv-tab:hover:not(.active) { color:#3f3f46; background:rgba(255,255,255,.6); }
         .serv-tab.active { background:#fff; color:#18181b; box-shadow:0 2px 12px rgba(0,0,0,.1); transform:translateY(-1px); }
-
         .serv-panel { display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:start; animation:panelIn .4s cubic-bezier(.16,1,.3,1) forwards; }
-
-        /* Left column */
         .serv-panel-left-wrap { display:flex; flex-direction:column; }
         .serv-panel-category-label { font-size:.67rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#a1a1aa; margin-bottom:10px; }
         .serv-panel-headline { font-family:'Outfit',sans-serif; font-size:clamp(1.4rem,2.2vw,1.9rem); font-weight:900; letter-spacing:-.03em; color:#18181b; margin-bottom:10px; line-height:1.15; }
         .serv-panel-body { font-size:.92rem; color:#52525b; line-height:1.75; margin-bottom:28px; }
-
         .serv-groups { display:grid; grid-template-columns:1fr 1fr; gap:16px 28px; margin-bottom:28px; }
         .serv-group-label { font-size:.63rem; font-weight:700; letter-spacing:.10em; text-transform:uppercase; color:#a1a1aa; margin-bottom:9px; }
         .serv-group-items { display:flex; flex-direction:column; gap:7px; }
         .serv-group-item { display:flex; align-items:center; gap:9px; font-size:.86rem; font-weight:500; color:#3f3f46; }
         .serv-group-dot { width:5px; height:5px; border-radius:50%; background:#d4d4d8; flex-shrink:0; }
-
         .serv-divider { width:100%; height:1px; background:#f0f0f0; margin-bottom:24px; }
         .serv-ctas { display:flex; gap:10px; flex-wrap:wrap; }
         .serv-ctas-mobile { display:none; }
@@ -313,13 +408,9 @@ const AboutUs = () => {
         .serv-btn-primary:hover svg { transform:translateX(3px); }
         .serv-btn-secondary { display:inline-flex; align-items:center; background:transparent; color:#3f3f46; padding:12px 20px; border-radius:11px; font-family:'DM Sans',sans-serif; font-size:.875rem; font-weight:600; text-decoration:none; border:1.5px solid #d4d4d8; cursor:pointer; transition:all .22s cubic-bezier(.34,1.2,.64,1); }
         .serv-btn-secondary:hover { border-color:#a1a1aa; color:#18181b; transform:translateY(-2px); background:#fafafa; }
-
-        /* Right column */
         .serv-panel-right { display:flex; flex-direction:column; gap:16px; }
         .serv-img-wrap { display:none; }
         .serv-img { width:100%; height:100%; object-fit:cover; display:block; }
-
-        /* Process card */
         .serv-visual { background:#18181b; border-radius:18px; padding:26px 24px; position:relative; overflow:hidden; box-shadow:0 12px 36px rgba(0,0,0,.16); }
         .serv-visual::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 80% 20%,rgba(255,255,255,.05) 0%,transparent 60%); pointer-events:none; }
         .serv-visual-label { font-size:.63rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.3); margin-bottom:18px; }
@@ -328,9 +419,249 @@ const AboutUs = () => {
         .serv-step-num { width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15); color:rgba(255,255,255,.8); display:flex; align-items:center; justify-content:center; font-family:'Outfit',sans-serif; font-size:.7rem; font-weight:900; flex-shrink:0; transition:background .25s, transform .3s cubic-bezier(.34,1.4,.64,1); }
         .serv-step:hover .serv-step-num { background:rgba(255,255,255,.2); transform:scale(1.12); }
         .serv-step-title { font-size:.84rem; font-weight:600; color:rgba(255,255,255,.85); line-height:1.4; }
-        .serv-step-sub { font-size:.78rem; color:rgba(255,255,255,.35); margin-top:2px; }
 
-   
+        /* TEAM — overlay z:20, white bg */
+        .team-section {
+          position:absolute; inset:0;
+          background:#fff;
+          display:flex; align-items:center; justify-content:center;
+          overflow:hidden;
+          transform:translateY(100%);
+          will-change:transform;
+          z-index:20;
+        }
+        .team-section::before {
+          content:''; position:absolute; inset:0;
+          background-image:radial-gradient(circle,rgba(0,0,0,.033) 1px,transparent 1px);
+          background-size:28px 28px; pointer-events:none;
+        }
+        .team-inner { position:relative; z-index:1; max-width:1040px; width:100%; padding:0 40px; }
+        .team-header {
+          margin-bottom:44px;
+          opacity:0; transform:translateY(20px);
+          transition:opacity .7s cubic-bezier(.16,1,.3,1) .1s, transform .7s cubic-bezier(.16,1,.3,1) .1s;
+        }
+        .team-section.in-view .team-header { opacity:1; transform:translateY(0); }
+        .team-eyebrow {
+          display:inline-flex; align-items:center; gap:8px; margin-bottom:12px;
+          font-size:.67rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase;
+          color:#a1a1aa;
+        }
+        .team-eyebrow-line { width:0; height:1.5px; background:#d4d4d8; transition:width .6s cubic-bezier(.16,1,.3,1) .4s; }
+        .team-section.in-view .team-eyebrow-line { width:20px; }
+        .team-title {
+          font-family:'Outfit',sans-serif;
+          font-size:clamp(1.9rem,3vw,2.6rem); font-weight:900; line-height:1.08; letter-spacing:-.04em;
+          color:#18181b;
+        }
+        .team-subtitle { font-size:.93rem; color:#71717a; line-height:1.7; margin-top:10px; max-width:420px; }
+        .team-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+        .team-card {
+          background:#fafafa; border:1.5px solid #ebebeb; border-radius:20px;
+          padding:24px 20px 20px; display:flex; flex-direction:column;
+          position:relative; overflow:hidden;
+          opacity:0; transform:translateY(36px);
+          transition:opacity .6s cubic-bezier(.16,1,.3,1),
+                      transform .6s cubic-bezier(.16,1,.3,1),
+                      border-color .25s, background .25s, box-shadow .25s;
+        }
+        .team-card.card-in { opacity:1; transform:translateY(0); }
+        .team-card::before {
+          content:''; position:absolute; top:0; left:0; right:0; height:3px;
+          background:#18181b; transform:scaleX(0); transform-origin:left;
+          transition:transform .4s cubic-bezier(.16,1,.3,1);
+        }
+        .team-card::after {
+          content:''; position:absolute; inset:0;
+          background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.6) 50%,transparent 60%);
+          transform:translateX(-100%); transition:transform .5s ease; pointer-events:none;
+        }
+        .team-card:hover { box-shadow:0 16px 44px rgba(0,0,0,.1); border-color:#d4d4d8; transform:translateY(-6px) !important; }
+        .team-card:hover::before { transform:scaleX(1); }
+        .team-card:hover::after  { transform:translateX(100%); }
+        .team-photo-wrap {
+          width:76px; height:76px; border-radius:50%; overflow:hidden;
+          margin-bottom:16px; border:2px solid #e8e8e8;
+          transition:border-color .25s, transform .35s cubic-bezier(.34,1.4,.64,1);
+        }
+        .team-card:hover .team-photo-wrap { border-color:#d4d4d8; transform:scale(1.05); }
+        .team-photo-wrap img { width:100%; height:100%; object-fit:cover; object-position:center top; display:block; }
+        .team-card-name { font-family:'Outfit',sans-serif; font-size:.97rem; font-weight:800; letter-spacing:-.02em; color:#18181b; margin-bottom:2px; }
+        .team-card-role { font-size:.74rem; font-weight:600; color:#a1a1aa; margin-bottom:14px; }
+        .team-card-divider { width:100%; height:1px; background:#ebebeb; margin-bottom:13px; }
+        .team-card-specialty-label { font-size:.59rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#a1a1aa; margin-bottom:4px; }
+        .team-card-specialty { font-size:.82rem; font-weight:600; color:#3f3f46; margin-bottom:16px; }
+        .team-card-meta { display:flex; align-items:center; justify-content:space-between; margin-top:auto; }
+        .team-card-deals { display:flex; flex-direction:column; gap:1px; }
+        .team-card-deals-num { font-family:'Outfit',sans-serif; font-size:1.2rem; font-weight:900; letter-spacing:-.03em; color:#18181b; line-height:1; }
+        .team-card-deals-label { font-size:.63rem; font-weight:600; color:#a1a1aa; letter-spacing:.05em; text-transform:uppercase; }
+        .team-card-langs { display:flex; flex-wrap:wrap; gap:4px; justify-content:flex-end; max-width:90px; }
+        .team-card-lang {
+          font-size:.59rem; font-weight:700; letter-spacing:.03em;
+          padding:3px 7px; border-radius:99px;
+          background:#f0f0f0; border:1px solid #e4e4e7; color:#71717a;
+          transition:background .2s, color .2s;
+        }
+        .team-card:hover .team-card-lang { background:#e8e8e8; color:#3f3f46; }
+        .team-dots { display:none; }
+        .team-swipe-hint { display:none; }
+
+        /* ─── VISION & MISSION — overlay z:30 ─── */
+        .vision-section {
+          position:absolute; inset:0;
+          background:#f8f7f4;
+          display:flex; align-items:center; justify-content:center;
+          overflow:hidden;
+          transform:translateY(100%);
+          will-change:transform;
+          z-index:30;
+        }
+        .vision-section::before {
+          content:''; position:absolute; inset:0;
+          background-image:radial-gradient(circle,rgba(0,0,0,.035) 1px,transparent 1px);
+          background-size:28px 28px; pointer-events:none;
+        }
+        .vision-inner {
+          position:relative; z-index:1;
+          max-width:700px; width:100%;
+          padding:0 40px;
+          display:flex; flex-direction:column; align-items:center;
+        }
+        /* Header */
+        .vision-header {
+          text-align:center; margin-bottom:44px; width:100%;
+          opacity:0; transform:translateY(18px);
+          transition:opacity .65s cubic-bezier(.16,1,.3,1) .05s, transform .65s cubic-bezier(.16,1,.3,1) .05s;
+        }
+        .vision-section.in-view .vision-header { opacity:1; transform:translateY(0); }
+        .vision-eyebrow {
+          display:inline-flex; align-items:center; gap:8px; margin-bottom:12px;
+          font-size:.65rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:#a1a1aa;
+        }
+        .vision-eyebrow-line { width:20px; height:1.5px; background:#d4d4d8; }
+        .vision-heading {
+          font-family:'Outfit',sans-serif; font-size:clamp(2rem,3.2vw,2.6rem);
+          font-weight:900; line-height:1.08; letter-spacing:-.04em; color:#18181b;
+        }
+        .vision-heading em {
+          font-style:normal;
+          background:linear-gradient(120deg,#18181b 0%,#52525b 100%);
+          -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+        }
+        .vision-sub {
+          font-size:.92rem; color:#71717a; line-height:1.75; margin-top:10px;
+        }
+
+        /* Carousel wrapper */
+        .vision-carousel {
+          width:100%; position:relative;
+          opacity:0; transform:translateY(24px);
+          transition:opacity .65s cubic-bezier(.16,1,.3,1) .2s, transform .65s cubic-bezier(.16,1,.3,1) .2s;
+        }
+        .vision-section.in-view .vision-carousel { opacity:1; transform:translateY(0); }
+
+        /* Track: clips to one card */
+        .vision-track-wrap {
+          width:100%; overflow:hidden; border-radius:24px;
+        }
+        .vision-track {
+          display:flex;
+          transition:transform .52s cubic-bezier(.77,0,.18,1);
+          will-change:transform;
+        }
+
+        /* Each card fills full width */
+        .vision-card {
+          flex:0 0 100%; width:100%;
+          background:#fff; border:1.5px solid #ebebeb;
+          border-radius:24px; padding:44px 44px 40px;
+          position:relative; overflow:hidden;
+          box-sizing:border-box;
+          transition:box-shadow .3s;
+        }
+        .vision-card::before {
+          content:''; position:absolute; top:0; left:0; right:0; height:3px;
+          background:#18181b; transform:scaleX(0); transform-origin:left;
+          transition:transform .5s cubic-bezier(.16,1,.3,1);
+        }
+        .vision-section.in-view .vision-card::before { transform:scaleX(1); transition-delay:.55s; }
+        .vision-card.vision-card--dark {
+          background:#18181b; border-color:#18181b;
+        }
+        .vision-card--dark::before { background:rgba(255,255,255,.15); }
+
+        .vision-card-icon {
+          width:50px; height:50px; border-radius:14px;
+          background:#f4f4f5; display:flex; align-items:center; justify-content:center;
+          color:#18181b; margin-bottom:26px;
+        }
+        .vision-card--dark .vision-card-icon { background:rgba(255,255,255,.1); color:#fff; }
+
+        .vision-card-tag {
+          display:inline-flex; align-items:center; gap:5px;
+          font-size:.6rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+          color:#a1a1aa; background:#f4f4f5; border:1px solid #ebebeb;
+          padding:4px 11px; border-radius:99px; margin-bottom:18px;
+        }
+        .vision-card--dark .vision-card-tag {
+          color:rgba(255,255,255,.4); background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.12);
+        }
+        .vision-card-tag-dot { width:5px; height:5px; border-radius:50%; background:#18181b; flex-shrink:0; }
+        .vision-card--dark .vision-card-tag-dot { background:rgba(255,255,255,.5); }
+
+        .vision-card-title {
+          font-family:'Outfit',sans-serif; font-size:1.55rem; font-weight:900;
+          letter-spacing:-.035em; color:#18181b; margin-bottom:14px; line-height:1.15;
+        }
+        .vision-card--dark .vision-card-title { color:#fff; }
+
+        .vision-card-body {
+          font-size:.94rem; color:#52525b; line-height:1.82; margin-bottom:30px;
+        }
+        .vision-card--dark .vision-card-body { color:rgba(255,255,255,.5); }
+
+        .vision-card-pills { display:flex; flex-wrap:wrap; gap:8px; }
+        .vision-pill {
+          font-size:.72rem; font-weight:600; color:#3f3f46;
+          background:#f4f4f5; border:1px solid #e4e4e7;
+          padding:5px 13px; border-radius:99px;
+        }
+        .vision-card--dark .vision-pill {
+          color:rgba(255,255,255,.6); background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.1);
+        }
+
+        /* Arrow nav row */
+        .vision-nav {
+          display:flex; align-items:center; justify-content:space-between;
+          width:100%; margin-top:28px;
+        }
+        .vision-nav-dots { display:flex; gap:7px; }
+        .vision-nav-dot {
+          width:7px; height:7px; border-radius:50%;
+          background:#d4d4d8; border:none; padding:0; cursor:pointer;
+          transition:background .25s, transform .25s;
+        }
+        .vision-nav-dot.active { background:#18181b; transform:scale(1.25); }
+        .vision-nav-arrows { display:flex; gap:10px; }
+        .vision-arrow {
+          width:42px; height:42px; border-radius:50%;
+          background:#fff; border:1.5px solid #e4e4e7;
+          display:flex; align-items:center; justify-content:center;
+          cursor:pointer; color:#18181b;
+          transition:background .22s, border-color .22s, transform .22s cubic-bezier(.34,1.4,.64,1), box-shadow .22s;
+          box-shadow:0 2px 8px rgba(0,0,0,.06);
+        }
+        .vision-arrow:hover { background:#18181b; color:#fff; border-color:#18181b; transform:scale(1.08); box-shadow:0 6px 20px rgba(0,0,0,.18); }
+        .vision-arrow:disabled { opacity:.3; cursor:default; transform:none; box-shadow:none; }
+        .vision-arrow:disabled:hover { background:#fff; color:#18181b; border-color:#e4e4e7; }
+
+        /* Label beside dots */
+        .vision-nav-label {
+          font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+          color:#a1a1aa; transition:color .3s;
+        }
+
+        /* ─── MOBILE ─── */
         .mobile-layout { display:none; }
 
         @media (max-width:640px) {
@@ -376,193 +707,156 @@ const AboutUs = () => {
           .stat-label { font-size:.6rem; }
           .stat-desc { display:none; }
 
-          /* ─── SERVICES: mobile overhaul ─── */
+          /* Services mobile */
+          .serv-section { overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; align-items:flex-start; }
+          .serv-inner { padding:28px 20px 48px; width:100%; display:flex; flex-direction:column; align-items:center; text-align:center; }
+          .serv-header { margin-bottom:18px; width:100%; }
+          .serv-eyebrow { display:none; }
+          .serv-title { font-size:1.35rem; letter-spacing:-.03em; }
+          .serv-subtitle { font-size:.82rem; max-width:100%; margin-top:5px; line-height:1.6; }
+          .serv-title::after { content:''; display:block; height:2.5px; width:36px; background:#18181b; border-radius:2px; margin:8px auto 0; animation:lineDraw .6s cubic-bezier(.16,1,.3,1) .2s both; transform-origin:left; }
+          .serv-tabs-wrap { justify-content:center; margin-bottom:22px; width:100%; }
+          .serv-tabs { display:flex; flex-wrap:nowrap; gap:4px; padding:4px; border-radius:12px; width:100%; }
+          .serv-tab { flex:1; padding:8px 2px; font-size:.69rem; border-radius:9px; white-space:nowrap; text-align:center; }
+          .serv-panel { grid-template-columns:1fr; gap:16px; width:100%; opacity:0; animation:slideUp .35s cubic-bezier(.16,1,.3,1) .04s forwards; }
+          .serv-panel > div:first-child { display:flex; flex-direction:column; align-items:center; }
+          .serv-panel-category-label { display:none; }
+          .serv-panel-right { display:none; }
+          .serv-img-wrap-mobile { display:block; width:100%; border-radius:14px; overflow:hidden; aspect-ratio:16/9; margin-top:18px; margin-bottom:4px; box-shadow:0 10px 32px rgba(0,0,0,.13); }
+          .serv-img-wrap-mobile .serv-img { width:100%; height:100%; object-fit:cover; display:block; }
+          .serv-panel-headline { font-size:1.2rem; margin-bottom:8px; line-height:1.2; }
+          .serv-panel-body { font-size:.875rem; line-height:1.65; margin-bottom:0; }
+          .serv-groups { display:none; }
+          .serv-ctas { display:none; }
+          .serv-ctas-mobile { display:flex; flex-direction:column; gap:10px; width:100%; margin-top:18px; }
+          .serv-ctas-mobile .serv-btn-primary, .serv-ctas-mobile .serv-btn-secondary { width:100%; justify-content:center; padding:13px 16px; border-radius:12px; }
+          .serv-visual { padding:20px 18px 16px; border-radius:18px; text-align:left; }
+          .serv-visual-label { margin-bottom:14px; text-align:center; }
+          .serv-step { padding:11px 0; gap:13px; }
+          .serv-step-num { width:26px; height:26px; font-size:.7rem; }
+          .serv-step-title { font-size:.84rem; line-height:1.4; }
 
-          /* Scrollable container, no clipping */
-          .serv-section {
+          /* Team mobile — horizontal swipe carousel */
+          .team-section {
             overflow-y: auto;
             overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
             align-items: flex-start;
           }
-
-          /* Centered column layout */
-          .serv-inner {
-            padding: 28px 20px 48px;
-            width: 100%;
+          .team-inner {
+            padding: 56px 0 48px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            text-align: center;
           }
-
-          /* Header */
-          .serv-header { margin-bottom: 18px; width: 100%; }
-          .serv-eyebrow { display: none; }
-          .serv-title { font-size: 1.35rem; letter-spacing: -.03em; }
-          .serv-subtitle { font-size: .82rem; max-width: 100%; margin-top: 5px; line-height: 1.6; }
-
-          /* Animated underline accent under title */
-          .serv-title::after {
-            content: '';
-            display: block;
-            height: 2.5px;
-            width: 36px;
-            background: #18181b;
-            border-radius: 2px;
+          .team-header {
+            margin-bottom: 28px;
+            padding: 0 24px;
+            text-align: center;
+            width: 100%;
+          }
+          .team-eyebrow { justify-content: center; }
+          .team-title { font-size: 1.6rem; text-align: center; }
+          .team-subtitle {
+            font-size: .82rem;
+            max-width: 280px;
+            text-align: center;
             margin: 8px auto 0;
-            animation: lineDraw .6s cubic-bezier(.16,1,.3,1) .2s both;
-            transform-origin: left;
           }
 
-          /* Tabs: all 3 fit centered on one line */
-          .serv-tabs-wrap {
-            justify-content: center;
-            margin-bottom: 22px;
-            width: 100%;
-            overflow: visible;
-          }
-          .serv-tabs {
+          /* Carousel track */
+          .team-grid {
             display: flex;
-            flex-wrap: nowrap;
-            gap: 4px;
-            padding: 4px;
-            border-radius: 12px;
+            flex-direction: row;
+            grid-template-columns: unset;
+            gap: 0;
             width: 100%;
+            overflow-x: scroll;
+            overflow-y: visible;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            padding: 8px 24px 16px;
+            /* Hide scrollbar */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
           }
-          .serv-tab {
-            flex: 1;
-            padding: 8px 2px;
-            font-size: .69rem;
-            border-radius: 9px;
-            white-space: nowrap;
-            text-align: center;
-            letter-spacing: -.01em;
-          }
+          .team-grid::-webkit-scrollbar { display: none; }
 
-          /* Panel: single centered column, smooth fade+lift on tab change */
-          .serv-panel {
-            grid-template-columns: 1fr;
-            gap: 16px;
-            width: 100%;
-            animation: none;
-          }
-          .serv-panel { opacity: 0; animation: slideUp .35s cubic-bezier(.16,1,.3,1) .04s forwards; }
-
-          /* Left column: centered flex */
-          .serv-panel > div:first-child {
+          /* Each card snaps and is centered */
+          .team-card {
+            flex: 0 0 72vw;
+            max-width: 300px;
+            min-width: 220px;
+            scroll-snap-align: center;
+            margin-right: 14px;
+            padding: 24px 20px 20px;
+            border-radius: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-          }
-          /* Icon row stays centered inline */
-          .serv-panel-icon-row {
-            justify-content: center;
-            margin-bottom: 14px;
-          }
-          .serv-panel-category-label { display: none; }
-
-          /* Hide desktop right column (image + card) on mobile */
-          .serv-panel-right { display: none; }
-
-          /* Mobile image: shown inline in left column, full width, rounded */
-          .serv-img-wrap-mobile {
-            display: block;
-            width: 100%;
-            border-radius: 14px;
-            overflow: hidden;
-            aspect-ratio: 16/9;
-            margin-top: 18px;
-            margin-bottom: 4px;
-            box-shadow: 0 10px 32px rgba(0,0,0,.13);
-            animation: slideUp .4s cubic-bezier(.16,1,.3,1) .28s both;
-          }
-          .serv-img-wrap-mobile .serv-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            transform: none;
-          }
-
-          /* Headline: delayed slide-up */
-          .serv-panel-headline {
-            font-size: 1.2rem;
-            margin-bottom: 8px;
-            line-height: 1.2;
-            animation: slideUp .4s cubic-bezier(.16,1,.3,1) .18s both;
-          }
-
-          /* Body: slightly more delayed */
-          .serv-panel-body {
-            font-size: .875rem;
-            line-height: 1.65;
-            margin-bottom: 0;
-            color: #52525b;
-            animation: slideUp .4s cubic-bezier(.16,1,.3,1) .26s both;
-          }
-
-          /* Hide service groups on mobile */
-          .serv-groups { display: none; }
-
-          /* Desktop CTAs hidden */
-          .serv-ctas { display: none; }
-
-          /* Mobile CTAs: stacked, animated */
-          .serv-ctas-mobile {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-            margin-top: 18px;
-            margin-bottom: 0;
-            animation: slideUp .4s cubic-bezier(.16,1,.3,1) .34s both;
-          }
-          .serv-ctas-mobile .serv-btn-primary,
-          .serv-ctas-mobile .serv-btn-secondary {
-            width: 100%;
-            justify-content: center;
-            font-size: .875rem;
-            padding: 13px 16px;
-            border-radius: 12px;
-          }
-
-          /* "How it works" card: dark card adapted for mobile */
-          .serv-visual {
-            padding: 20px 18px 16px;
-            border-radius: 18px;
-            margin-top: 0;
-            text-align: left;
-            animation: slideUp .45s cubic-bezier(.16,1,.3,1) .3s both;
-            background: #18181b;
-          }
-          .serv-visual-label {
-            font-size: .63rem;
-            margin-bottom: 14px;
             text-align: center;
-            letter-spacing: .14em;
           }
+          .team-card:last-child { margin-right: 24px; }
 
-          /* Steps: each step slides in with stagger */
-          .serv-step {
-            padding: 11px 0;
-            gap: 13px;
-            opacity: 0;
-            animation: stepIn .4s cubic-bezier(.16,1,.3,1) forwards;
+          /* Center photo and text */
+          .team-photo-wrap {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 16px;
           }
-          .serv-step:nth-child(2) { animation-delay: .38s; }
-          .serv-step:nth-child(3) { animation-delay: .48s; }
-          .serv-step:nth-child(4) { animation-delay: .58s; }
-          .serv-step:nth-child(5) { animation-delay: .68s; }
+          .team-card-name { font-size: .97rem; text-align: center; }
+          .team-card-role { font-size: .74rem; text-align: center; margin-bottom: 14px; }
+          .team-card-divider { width: 100%; }
+          .team-card-specialty-label { text-align: center; }
+          .team-card-specialty { font-size: .82rem; text-align: center; margin-bottom: 16px; }
+          .team-card-meta { flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+          .team-card-deals { align-items: center; }
+          .team-card-langs { max-width: 100%; justify-content: center; }
 
-          .serv-step-num {
-            width: 26px;
-            height: 26px;
-            font-size: .7rem;
+          /* Swipe hint dots */
+          .team-dots {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            margin-top: 4px;
+          }
+          .team-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: #d4d4d8;
+            transition: background .2s, transform .2s;
             flex-shrink: 0;
-            animation: numFlip .35s cubic-bezier(.34,1.4,.64,1) .4s both;
           }
-          .serv-step-title { font-size: .84rem; line-height: 1.4; }
+          .team-dot.active { background: #18181b; transform: scale(1.3); }
+
+          /* Swipe hint label */
+          .team-swipe-hint {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: .68rem;
+            font-weight: 600;
+            color: #a1a1aa;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+          }
+          .team-swipe-hint svg { opacity: .5; }
+        }
+
+        @media (max-width:640px) {
+          .vision-section { overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; align-items:flex-start; }
+          .vision-inner { padding:36px 20px 52px; }
+          .vision-header { margin-bottom:28px; }
+          .vision-heading { font-size:1.6rem; }
+          .vision-sub { font-size:.82rem; }
+          .vision-card { padding:28px 22px 26px; border-radius:18px; }
+          .vision-card-icon { width:42px; height:42px; border-radius:11px; margin-bottom:18px; }
+          .vision-card-title { font-size:1.2rem; }
+          .vision-card-body { font-size:.87rem; margin-bottom:22px; }
+          .vision-track-wrap { border-radius:18px; }
+          .vision-nav { margin-top:22px; }
+          .vision-arrow { width:38px; height:38px; }
         }
 
         @media (min-width:641px) and (max-width:1024px) {
@@ -573,6 +867,7 @@ const AboutUs = () => {
           .heading { font-size:2.6rem; }
           .who-top { gap:40px; }
           .serv-panel { gap:36px; }
+          .team-grid { grid-template-columns:repeat(2,1fr); gap:16px; }
         }
       `}</style>
 
@@ -634,9 +929,11 @@ const AboutUs = () => {
                 </div>
             </div>
 
-            {/* BLOCK 2: Who + Services overlay */}
-            <div className="who-wrap" ref={whoWrapRef}>
+            {/* BLOCK 2: Who + Services + Team — all 3 layers in ONE 300vh sticky container */}
+            <div className="who-wrap" ref={whoWrapRef} id="team">
                 <div className="who-sticky">
+
+                    {/* Layer 0 — base: Who We Are */}
                     <section className="who-section" ref={whoRef}>
                         <div className="who-inner">
                             <div className="who-top">
@@ -668,6 +965,7 @@ const AboutUs = () => {
                         </div>
                     </section>
 
+                    {/* Layer 1 — overlay: Services */}
                     <section className="serv-section" ref={servRef}>
                         <div className="serv-inner">
                             <div className="serv-header">
@@ -675,7 +973,6 @@ const AboutUs = () => {
                                 <h2 className="serv-title">Everything your property needs.</h2>
                                 <p className="serv-subtitle">From routine maintenance to full renovations — all under one roof.</p>
                             </div>
-
                             <div className="serv-tabs-wrap">
                                 <div className="serv-tabs">
                                     {serviceCategories.map(cat => (
@@ -685,49 +982,36 @@ const AboutUs = () => {
                                     ))}
                                 </div>
                             </div>
-
                             <div className="serv-panel" key={activeService}>
-                                {/* Left column */}
                                 <div className="serv-panel-left-wrap">
                                     <div className="serv-panel-category-label">{serviceCategories[activeService].tab}</div>
                                     <div className="serv-panel-headline">{svc.headline}</div>
                                     <p className="serv-panel-body">{svc.body}</p>
-
                                     <div className="serv-groups">
                                         {svc.groups.map((group, gi) => (
                                             <div key={gi}>
                                                 <div className="serv-group-label">{group.label}</div>
                                                 <div className="serv-group-items">
                                                     {group.items.map((item, ii) => (
-                                                        <div key={ii} className="serv-group-item">
-                                                            <div className="serv-group-dot" />{item}
-                                                        </div>
+                                                        <div key={ii} className="serv-group-item"><div className="serv-group-dot" />{item}</div>
                                                     ))}
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
-
                                     <div className="serv-divider" />
                                     <div className="serv-ctas">
                                         <a href={svc.cta1.href} className="serv-btn-primary">{svc.cta1.label} <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
                                         <a href={svc.cta2.href} className="serv-btn-secondary">{svc.cta2.label}</a>
                                     </div>
-                                    {/* Mobile image shown between body and CTAs */}
-                                    <div className="serv-img-wrap-mobile">
-                                        <img src={svc.image} alt={svc.headline} className="serv-img" />
-                                    </div>
+                                    <div className="serv-img-wrap-mobile"><img src={svc.image} alt={svc.headline} className="serv-img" /></div>
                                     <div className="serv-ctas-mobile">
                                         <a href={svc.cta1.href} className="serv-btn-primary">{svc.cta1.label} <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
                                         <a href={svc.cta2.href} className="serv-btn-secondary">{svc.cta2.label}</a>
                                     </div>
                                 </div>
-
-                                {/* Right column: image + process card */}
                                 <div className="serv-panel-right">
-                                    <div className="serv-img-wrap">
-                                        <img src={svc.image} alt={svc.headline} className="serv-img" />
-                                    </div>
+                                    <div className="serv-img-wrap"><img src={svc.image} alt={svc.headline} className="serv-img" /></div>
                                     <div className="serv-visual">
                                         <div className="serv-visual-label">How it works</div>
                                         {svc.steps.map((step, j) => (
@@ -739,9 +1023,126 @@ const AboutUs = () => {
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </section>
+
+                    {/* Layer 2 — overlay: Team (white, slides over services) */}
+                    <section className="team-section" ref={teamRef}>
+                        <div className="team-inner">
+                            <div className="team-header">
+                                <div className="team-eyebrow">
+                                    <div className="team-eyebrow-line" />
+                                    The People Behind Every Deal
+                                    <div className="team-eyebrow-line" />
+                                </div>
+                                <h2 className="team-title">Meet our team.</h2>
+                                <p className="team-subtitle">Specialists across every segment of Dubai real estate — residential, commercial, and beyond.</p>
+                            </div>
+                            <div className="team-swipe-hint">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
+                                swipe
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                            </div>
+                            <div className="team-grid" ref={teamGridRef}>
+                                {team.map((member, i) => (
+                                    <div key={i} className="team-card" ref={el => { if (el) teamCardRefs.current[i] = el; }}>
+                                        <div className="team-photo-wrap">
+                                            <img src={member.image} alt={member.name} />
+                                        </div>
+                                        <div className="team-card-name">{member.name}</div>
+                                        <div className="team-card-role">{member.role}</div>
+                                        <div className="team-card-divider" />
+                                        <div className="team-card-specialty-label">Speciality</div>
+                                        <div className="team-card-specialty">{member.specialty}</div>
+                                        <div className="team-card-meta">
+                                            <div className="team-card-deals">
+                                                <div className="team-card-deals-num">{member.deals}</div>
+                                                <div className="team-card-deals-label">Deals closed</div>
+                                            </div>
+                                            <div className="team-card-langs">
+                                                {member.langs.map((lang, li) => (
+                                                    <span key={li} className="team-card-lang">{lang}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="team-dots">
+                                {team.map((_, i) => (
+                                    <div key={i} className={`team-dot${activeDot === i ? ' active' : ''}`} />
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Layer 3 — overlay: Vision & Mission */}
+                    <section className="vision-section" ref={visionRef}>
+                        <div className="vision-inner">
+                            <div className="vision-header">
+                                <div className="vision-eyebrow">
+                                    <div className="vision-eyebrow-line" />
+                                    Our Purpose
+                                    <div className="vision-eyebrow-line" />
+                                </div>
+                                <h2 className="vision-heading">Vision &amp; <em>Mission.</em></h2>
+                                <p className="vision-sub">Two sides of the same promise — where we stand today, and where we&#39;re taking our clients tomorrow.</p>
+                            </div>
+
+                            <div className="vision-carousel">
+                                <div className="vision-track-wrap">
+                                    <div className="vision-track" style={{ transform: `translateX(-${activeVision * 100}%)` }}>
+                                        {/* Slide 0 — Mission */}
+                                        <div className="vision-card">
+                                            <div className="vision-card-icon">
+                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" /></svg>
+                                            </div>
+                                            <div className="vision-card-tag"><div className="vision-card-tag-dot" />Mission</div>
+                                            <div className="vision-card-title">What we do, every single day.</div>
+                                            <p className="vision-card-body">We deliver honest, expert guidance to every client — buyers, sellers, and investors alike. No pressure, no gimmicks. Just 12 years of doing the right thing, one deal at a time.</p>
+                                            <div className="vision-card-pills">
+                                                <span className="vision-pill">Transparent Advice</span>
+                                                <span className="vision-pill">Client-First</span>
+                                                <span className="vision-pill">RERA Licensed</span>
+                                            </div>
+                                        </div>
+                                        {/* Slide 1 — Vision */}
+                                        <div className="vision-card vision-card--dark">
+                                            <div className="vision-card-icon">
+                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                                            </div>
+                                            <div className="vision-card-tag"><div className="vision-card-tag-dot" />Vision</div>
+                                            <div className="vision-card-title">Where we&#39;re heading.</div>
+                                            <p className="vision-card-body">To become Dubai&#39;s most trusted real estate name — not the largest, but the most referred. A firm where every client becomes a lifelong advocate because we never stopped earning their trust.</p>
+                                            <div className="vision-card-pills">
+                                                <span className="vision-pill">Long-Term Trust</span>
+                                                <span className="vision-pill">Built on Referrals</span>
+                                                <span className="vision-pill">Dubai &amp; Beyond</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Arrow navigation */}
+                                <div className="vision-nav">
+                                    <div className="vision-nav-dots">
+                                        <button className={`vision-nav-dot${activeVision === 0 ? ' active' : ''}`} onClick={() => setActiveVision(0)} aria-label="Mission" />
+                                        <button className={`vision-nav-dot${activeVision === 1 ? ' active' : ''}`} onClick={() => setActiveVision(1)} aria-label="Vision" />
+                                    </div>
+                                    <div className="vision-nav-label">{activeVision === 0 ? 'Mission' : 'Vision'}</div>
+                                    <div className="vision-nav-arrows">
+                                        <button className="vision-arrow" onClick={() => setActiveVision(0)} disabled={activeVision === 0} aria-label="Previous">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                                        </button>
+                                        <button className="vision-arrow" onClick={() => setActiveVision(1)} disabled={activeVision === 1} aria-label="Next">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
                 </div>
             </div>
         </>
