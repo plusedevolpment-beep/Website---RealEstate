@@ -241,7 +241,7 @@ const DreamHomes = () => {
         .search-field:hover { background:var(--gray-100); }
         .search-field-label { font-size:0.6875rem; color:var(--gray-500); text-transform:uppercase; letter-spacing:0.08em; font-weight:600; }
         .search-field select { border:none; background:transparent; font-size:0.875rem; color:var(--gray-900); font-weight:500; outline:none; font-family:'Inter',sans-serif; -webkit-appearance:none; width:100%; }
-        .search-button { background:linear-gradient(135deg,#18181b,#27272a); border:none; border-radius:10px; padding:0 2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; min-width:72px; height:100%; transition:transform 0.2s; }
+        .search-button { background:linear-gradient(135deg,#18181b,#27272a); border:none; border-radius:10px; padding:0 2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; min-width:72px; height:100%; min-height:52px; transition:transform 0.2s; }
         .search-button:hover { transform:scale(1.03); }
         .search-icon { width:22px; height:22px; stroke:#fff; stroke-width:2.5; fill:none; }
 
@@ -438,6 +438,7 @@ const DreamHomes = () => {
           .hero-buttons { flex-direction:column; gap:0.75rem; margin-bottom:1.5rem; width:100%; }
           .btn-primary { width:100%; justify-content:center; }
           .search-bar { grid-template-columns:1fr; max-width:100%; width:100%; }
+          .search-button { min-height:52px; padding:0.875rem 2rem; height:52px; }
           .hero-right { display:none !important; }
           .listings-heading { font-size:2rem; }
           .floating-whatsapp { width:56px; height:56px; padding:0; bottom:1.5rem; right:1.5rem; border-radius:50%; justify-content:center; }

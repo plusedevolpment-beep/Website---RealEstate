@@ -11,6 +11,7 @@ const AboutUs = () => {
     const servRef = useRef<HTMLElement>(null);
     const teamRef = useRef<HTMLElement>(null);
     const visionRef = useRef<HTMLElement>(null);
+    const testimonialsRef = useRef<HTMLElement>(null);
     const statRefs = useRef<HTMLDivElement[]>([]);
     const teamCardRefs = useRef<HTMLDivElement[]>([]);
     const teamGridRef = useRef<HTMLDivElement>(null);
@@ -32,29 +33,30 @@ const AboutUs = () => {
         const onScroll1 = () => {
             const wrap = heroWrapRef.current;
             const hero = heroRef.current;
-            const ceo = ceoRef.current;
+            const ceo  = ceoRef.current;
             if (!wrap || !hero || !ceo) return;
             const scrolled = Math.max(0, -wrap.getBoundingClientRect().top);
             const p = Math.min(1, scrolled / window.innerHeight);
-            ceo.style.transform = `translateY(${((1 - p) * 100).toFixed(2)}%)`;
-            hero.style.filter = `blur(${(p * 5).toFixed(2)}px)`;
+            ceo.style.transform  = `translateY(${((1 - p) * 100).toFixed(2)}%)`;
+            hero.style.filter    = `blur(${(p * 5).toFixed(2)}px)`;
         };
 
         // ─── Block 2: who blur + serv slides up (first half) + team slides up (second half) ───
         const onScroll2 = () => {
-            const wrap = whoWrapRef.current;
-            const who = whoRef.current;
-            const serv = servRef.current;
-            const team = teamRef.current;
+            const wrap   = whoWrapRef.current;
+            const who    = whoRef.current;
+            const serv   = servRef.current;
+            const team   = teamRef.current;
             const vision = visionRef.current;
-            if (!wrap || !who || !serv || !team || !vision) return;
+            const testimonials = testimonialsRef.current;
+            if (!wrap || !who || !serv || !team || !vision || !testimonials) return;
 
             const scrolled = Math.max(0, -wrap.getBoundingClientRect().top);
 
             // Services slides in: 0→1 vh
             const pServ = Math.min(1, scrolled / window.innerHeight);
             serv.style.transform = `translateY(${((1 - pServ) * 100).toFixed(2)}%)`;
-            who.style.filter = `blur(${(pServ * 4).toFixed(2)}px)`;
+            who.style.filter     = `blur(${(pServ * 4).toFixed(2)}px)`;
 
             // Team slides in: 1→2 vh
             const pTeam = Math.min(1, Math.max(0, (scrolled - window.innerHeight) / window.innerHeight));
@@ -63,6 +65,10 @@ const AboutUs = () => {
             // Vision slides in: 2→3 vh
             const pVision = Math.min(1, Math.max(0, (scrolled - window.innerHeight * 2) / window.innerHeight));
             vision.style.transform = `translateY(${((1 - pVision) * 100).toFixed(2)}%)`;
+
+            // Testimonials slides in: 3→4 vh
+            const pTest = Math.min(1, Math.max(0, (scrolled - window.innerHeight * 3) / window.innerHeight));
+            testimonials.style.transform = `translateY(${((1 - pTest) * 100).toFixed(2)}%)`;
 
             // Team card entrance
             if (pTeam > 0.18 && !team.classList.contains('in-view')) {
@@ -83,6 +89,14 @@ const AboutUs = () => {
             }
             if (pVision <= 0.02) {
                 vision.classList.remove('in-view');
+            }
+
+            // Testimonials entrance
+            if (pTest > 0.18 && !testimonials.classList.contains('in-view')) {
+                testimonials.classList.add('in-view');
+            }
+            if (pTest <= 0.02) {
+                testimonials.classList.remove('in-view');
             }
         };
 
@@ -148,9 +162,9 @@ const AboutUs = () => {
     }, []);
 
     const stats = [
-        { target: 500, suffix: '+', label: 'Properties Sold', desc: 'Across Dubai & the UAE' },
-        { target: 12, suffix: '+', label: 'Years Experience', desc: 'Licensed since 2012' },
-        { target: 1000, suffix: '+', label: 'Happy Clients', desc: 'Families & investors' },
+        { target: 500, suffix: '+', label: 'Properties Sold',  desc: 'Across Dubai & the UAE' },
+        { target: 12,  suffix: '+', label: 'Years Experience', desc: 'Licensed since 2012' },
+        { target: 1000,suffix: '+', label: 'Happy Clients',    desc: 'Families & investors' },
     ];
 
     const serviceCategories = [
@@ -176,8 +190,8 @@ const AboutUs = () => {
             headline: 'Fast fixes. Zero hassle.',
             body: 'Our vetted team responds the same day and gets it right the first time — 7 days a week.',
             groups: [
-                { label: 'Common', items: ['Plumbing & electrical', 'Carpentry & flooring'] },
-                { label: 'Finishes', items: ['Painting & patching', 'Fixture replacement'] },
+                { label: 'Common',  items: ['Plumbing & electrical', 'Carpentry & flooring'] },
+                { label: 'Finishes',items: ['Painting & patching',  'Fixture replacement'] },
             ],
             cta1: { label: 'Request a Repair', href: '/contact' },
             cta2: { label: 'See All Repair Jobs', href: '/services/repairs' },
@@ -188,8 +202,8 @@ const AboutUs = () => {
             headline: 'Reimagine your space.',
             body: 'From a single room to a full fit-out — on budget, on schedule, beautifully finished.',
             groups: [
-                { label: 'Spaces', items: ['Kitchen & bathroom', 'Full interior fit-out'] },
-                { label: 'Finishes', items: ['Flooring & tiling', 'Painting & joinery'] },
+                { label: 'Spaces',  items: ['Kitchen & bathroom',  'Full interior fit-out'] },
+                { label: 'Finishes',items: ['Flooring & tiling',   'Painting & joinery'] },
             ],
             cta1: { label: 'Start Your Renovation', href: '/contact' },
             cta2: { label: 'View Past Projects', href: '/services/renovation' },
@@ -329,7 +343,7 @@ const AboutUs = () => {
           serv-section = overlay #1 (slides up over who)
           team-section = overlay #2 (slides up over serv)
         */
-        .who-wrap   { position:relative; height:400vh; }
+        .who-wrap   { position:relative; height:500vh; }
         .who-sticky { position:sticky; top:0; height:100vh; overflow:hidden; background:#f8f7f4; }
 
         /* WHO */
@@ -844,6 +858,124 @@ const AboutUs = () => {
           .team-swipe-hint svg { opacity: .5; }
         }
 
+        /* ─── TESTIMONIALS — overlay z:40 ─── */
+        .test-section {
+          position:absolute; inset:0;
+          background:#fff;
+          display:flex; align-items:center; justify-content:center;
+          overflow:hidden;
+          transform:translateY(100%);
+          will-change:transform;
+          z-index:40;
+        }
+
+        /* Floating photo columns */
+        .test-photos-left, .test-photos-right {
+          position:absolute; top:0; bottom:0;
+          display:flex; flex-direction:column; gap:16px;
+          padding:20px 0; pointer-events:none;
+        }
+        .test-photos-left  { left:0;  width:200px; align-items:flex-end; }
+        .test-photos-right { right:0; width:200px; align-items:flex-start; }
+
+        .test-photo {
+          border-radius:16px; overflow:hidden;
+          box-shadow:0 8px 32px rgba(0,0,0,.10);
+          opacity:0; transform:translateY(30px);
+          transition:opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1);
+          background:#f4f4f5;
+          flex-shrink:0;
+        }
+        .test-photo img { width:100%; height:100%; object-fit:cover; display:block; }
+
+        /* staggered entrance */
+        .test-section.in-view .test-photo { opacity:1; transform:translateY(0); }
+        .test-photo:nth-child(1) { transition-delay:.10s; }
+        .test-photo:nth-child(2) { transition-delay:.20s; }
+        .test-photo:nth-child(3) { transition-delay:.32s; }
+        .test-photo:nth-child(4) { transition-delay:.44s; }
+
+        /* subtle float animations */
+        .test-photo:nth-child(1) { animation:none; }
+        .test-section.in-view .test-photo:nth-child(1) { animation:float1 5.5s ease-in-out 1s infinite; }
+        .test-section.in-view .test-photo:nth-child(2) { animation:float2 6.2s ease-in-out 1.3s infinite; }
+        .test-section.in-view .test-photo:nth-child(3) { animation:float3 5.8s ease-in-out 1.1s infinite; }
+        .test-section.in-view .test-photo:nth-child(4) { animation:float4 6.5s ease-in-out 1.5s infinite; }
+
+        /* left col sizing */
+        .test-photos-left .test-photo:nth-child(1)  { width:140px; height:170px; }
+        .test-photos-left .test-photo:nth-child(2)  { width:110px; height:136px; }
+        .test-photos-left .test-photo:nth-child(3)  { width:130px; height:158px; }
+        .test-photos-left .test-photo:nth-child(4)  { width:105px; height:128px; }
+        /* right col sizing */
+        .test-photos-right .test-photo:nth-child(1) { width:115px; height:140px; }
+        .test-photos-right .test-photo:nth-child(2) { width:140px; height:170px; }
+        .test-photos-right .test-photo:nth-child(3) { width:108px; height:132px; }
+        .test-photos-right .test-photo:nth-child(4) { width:132px; height:160px; }
+
+        /* Center content */
+        .test-center {
+          position:relative; z-index:2;
+          max-width:480px; width:100%;
+          display:flex; flex-direction:column; align-items:center;
+          text-align:center; padding:0 20px;
+        }
+        .test-badge {
+          display:inline-flex; align-items:center; gap:7px;
+          background:#f4f4f5; border:1px solid #e4e4e7;
+          padding:6px 14px; border-radius:99px; margin-bottom:22px;
+          font-size:.65rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#71717a;
+          opacity:0; transform:translateY(14px);
+          transition:opacity .6s cubic-bezier(.16,1,.3,1) .12s, transform .6s cubic-bezier(.16,1,.3,1) .12s;
+        }
+        .test-section.in-view .test-badge { opacity:1; transform:translateY(0); }
+        .test-badge-dot { width:6px; height:6px; border-radius:50%; background:#18181b; }
+
+        .test-heading {
+          font-family:'Outfit',sans-serif;
+          font-size:clamp(2rem,3.8vw,3rem); font-weight:900;
+          line-height:1.08; letter-spacing:-.04em; color:#18181b;
+          margin-bottom:0;
+          opacity:0; transform:translateY(18px);
+          transition:opacity .65s cubic-bezier(.16,1,.3,1) .22s, transform .65s cubic-bezier(.16,1,.3,1) .22s;
+        }
+        .test-heading-muted { color:#a1a1aa; display:block; font-weight:800; }
+        .test-section.in-view .test-heading { opacity:1; transform:translateY(0); }
+
+        .test-sub {
+          font-size:.9rem; color:#71717a; line-height:1.75; margin-top:16px; max-width:360px;
+          opacity:0; transform:translateY(14px);
+          transition:opacity .6s cubic-bezier(.16,1,.3,1) .34s, transform .6s cubic-bezier(.16,1,.3,1) .34s;
+        }
+        .test-section.in-view .test-sub { opacity:1; transform:translateY(0); }
+
+        .test-cta {
+          display:inline-flex; align-items:center; gap:9px;
+          background:#18181b; color:#fff;
+          padding:14px 26px; border-radius:99px;
+          font-family:'DM Sans',sans-serif; font-size:.88rem; font-weight:700;
+          text-decoration:none; border:none; cursor:pointer; margin-top:28px;
+          box-shadow:0 4px 20px rgba(0,0,0,.18);
+          opacity:0; transform:translateY(14px);
+          transition:opacity .6s cubic-bezier(.16,1,.3,1) .44s, transform .6s cubic-bezier(.16,1,.3,1) .44s,
+                      box-shadow .25s, background .25s, scale .22s cubic-bezier(.34,1.4,.64,1);
+        }
+        .test-section.in-view .test-cta { opacity:1; transform:translateY(0); }
+        .test-cta:hover { background:#27272a; box-shadow:0 10px 32px rgba(0,0,0,.28); scale:1.04; }
+        .test-cta svg { transition:transform .22s cubic-bezier(.34,1.4,.64,1); }
+        .test-cta:hover svg { transform:translateX(3px); }
+
+        /* ── mobile: hide photo columns, center everything ── */
+        @media (max-width:640px) {
+          .test-section { align-items:center; }
+          .test-photos-left, .test-photos-right { display:none; }
+          .test-center { max-width:100%; padding:0 28px; }
+          .test-heading { font-size:1.8rem; }
+          .test-sub { font-size:.82rem; margin-top:12px; }
+          .test-cta { padding:13px 22px; font-size:.83rem; margin-top:22px; }
+          .test-badge { margin-bottom:18px; }
+        }
+
         @media (max-width:640px) {
           .vision-section { overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; align-items:flex-start; }
           .vision-inner { padding:36px 20px 52px; }
@@ -1039,9 +1171,9 @@ const AboutUs = () => {
                                 <p className="team-subtitle">Specialists across every segment of Dubai real estate — residential, commercial, and beyond.</p>
                             </div>
                             <div className="team-swipe-hint">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
                                 swipe
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                             </div>
                             <div className="team-grid" ref={teamGridRef}>
                                 {team.map((member, i) => (
@@ -1095,9 +1227,9 @@ const AboutUs = () => {
                                         {/* Slide 0 — Mission */}
                                         <div className="vision-card">
                                             <div className="vision-card-icon">
-                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" /></svg>
+                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
                                             </div>
-                                            <div className="vision-card-tag"><div className="vision-card-tag-dot" />Mission</div>
+                                            <div className="vision-card-tag"><div className="vision-card-tag-dot"/>Mission</div>
                                             <div className="vision-card-title">What we do, every single day.</div>
                                             <p className="vision-card-body">We deliver honest, expert guidance to every client — buyers, sellers, and investors alike. No pressure, no gimmicks. Just 12 years of doing the right thing, one deal at a time.</p>
                                             <div className="vision-card-pills">
@@ -1109,9 +1241,9 @@ const AboutUs = () => {
                                         {/* Slide 1 — Vision */}
                                         <div className="vision-card vision-card--dark">
                                             <div className="vision-card-icon">
-                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                             </div>
-                                            <div className="vision-card-tag"><div className="vision-card-tag-dot" />Vision</div>
+                                            <div className="vision-card-tag"><div className="vision-card-tag-dot"/>Vision</div>
                                             <div className="vision-card-title">Where we&#39;re heading.</div>
                                             <p className="vision-card-body">To become Dubai&#39;s most trusted real estate name — not the largest, but the most referred. A firm where every client becomes a lifelong advocate because we never stopped earning their trust.</p>
                                             <div className="vision-card-pills">
@@ -1132,15 +1264,50 @@ const AboutUs = () => {
                                     <div className="vision-nav-label">{activeVision === 0 ? 'Mission' : 'Vision'}</div>
                                     <div className="vision-nav-arrows">
                                         <button className="vision-arrow" onClick={() => setActiveVision(0)} disabled={activeVision === 0} aria-label="Previous">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                                         </button>
                                         <button className="vision-arrow" onClick={() => setActiveVision(1)} disabled={activeVision === 1} aria-label="Next">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                                         </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </section>
+
+                    {/* Layer 4 — overlay: Testimonials */}
+                    <section className="test-section" ref={testimonialsRef}>
+
+                        {/* Left floating photos */}
+                        <div className="test-photos-left">
+                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=85" alt="" /></div>
+                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=85" alt="" /></div>
+                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&q=85" alt="" /></div>
+                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&q=85" alt="" /></div>
+                        </div>
+
+                        {/* Center headline */}
+                        <div className="test-center">
+                            <div className="test-badge"><div className="test-badge-dot"/>Testimonials</div>
+                            <h2 className="test-heading">
+                                Trusted by clients
+                                <span className="test-heading-muted">across Dubai.</span>
+                            </h2>
+                            <p className="test-sub">Every client we&#39;ve ever had came through a referral. Here&#39;s what they say about working with us.</p>
+                            <a href="#contact" className="test-cta">
+                                Read Success Stories
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </a>
+                        </div>
+
+                        {/* Right floating photos */}
+                        <div className="test-photos-right">
+                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&q=85" alt="" /></div>
+                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=300&q=85" alt="" /></div>
+                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=85" alt="" /></div>
+                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&q=85" alt="" /></div>
+                        </div>
+
                     </section>
 
                 </div>
