@@ -51,6 +51,14 @@ const NAV_ITEMS = [
     { label: 'Contact', href: '#contact' },
 ];
 
+// ─── NAVBAR HEIGHT CONSTANTS ──────────────────────────────────────────────────
+// Desktop: utility bar (32px) + main bar (70px) = 102px total
+// Desktop scrolled: main bar only = 60px
+// Mobile (≤980px): utility bar hidden, main bar = 64px
+// Export so page.tsx can import and use for hero padding-top
+export const NAVBAR_HEIGHT_DESKTOP = 102; // px (utility + main)
+export const NAVBAR_HEIGHT_MOBILE = 64;  // px (main only, no utility on mobile)
+
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -82,17 +90,42 @@ const Navbar = () => {
         <>
             <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
-        :root { --g50:#fafafa; --g100:#f4f4f5; --g200:#e4e4e7; --g300:#d4d4d8; --g400:#a1a1aa; --g500:#71717a; --g600:#52525b; --g700:#3f3f46; --g800:#27272a; --g900:#18181b; }
+        :root {
+          --g50:#fafafa; --g100:#f4f4f5; --g200:#e4e4e7; --g300:#d4d4d8; --g400:#a1a1aa;
+          --g500:#71717a; --g600:#52525b; --g700:#3f3f46; --g800:#27272a; --g900:#18181b;
+
+          /* ── Navbar height tokens used by hero padding-top ── */
+          --nv-utility-h: 32px;   /* utility bar height */
+          --nv-main-h: 70px;      /* main bar height */
+          --nv-total-h: 102px;    /* utility + main (desktop) */
+          --nv-mobile-h: 64px;    /* mobile: main bar only */
+        }
         .nv { position:fixed; top:0; left:0; right:0; z-index:1000; font-family:'Inter',sans-serif; }
         .nv.scrolled .nv-utility { display:none; }
-        .nv.scrolled .nv-main { background:rgba(255,255,255,0.98); backdrop-filter:blur(16px); box-shadow:0 1px 0 var(--g200),0 4px 24px rgba(0,0,0,0.05); height:60px; }
-        .nv-utility { display:flex; justify-content:flex-end; align-items:center; gap:1.25rem; padding:0.4rem 6%; background:var(--g900); }
+        .nv.scrolled .nv-main {
+          background:rgba(255,255,255,0.98);
+          backdrop-filter:blur(16px);
+          box-shadow:0 1px 0 var(--g200),0 4px 24px rgba(0,0,0,0.05);
+          height:60px;
+        }
+        .nv-utility {
+          display:flex; justify-content:flex-end; align-items:center;
+          gap:1.25rem; padding:0.4rem 6%;
+          background:var(--g900);
+          height:var(--nv-utility-h);
+        }
         .nv-util-link { display:inline-flex; align-items:center; gap:0.4rem; font-size:0.74rem; font-weight:500; color:rgba(255,255,255,0.55); text-decoration:none; transition:color 0.18s; }
         .nv-util-link:hover { color:#fff; }
         .nv-util-sep { width:1px; height:12px; background:rgba(255,255,255,0.14); }
         .nv-util-lang { display:inline-flex; align-items:center; gap:0.35rem; font-size:0.74rem; color:rgba(255,255,255,0.55); background:none; border:none; font-family:'Inter',sans-serif; cursor:pointer; transition:color 0.18s; padding:0; }
         .nv-util-lang:hover { color:#fff; }
-        .nv-main { display:flex; align-items:center; justify-content:space-between; padding:0 6%; height:70px; background:#fff; transition:height 0.3s,background 0.3s,box-shadow 0.3s; gap:1rem; }
+        .nv-main {
+          display:flex; align-items:center; justify-content:space-between;
+          padding:0 6%; height:var(--nv-main-h);
+          background:#fff;
+          transition:height 0.3s,background 0.3s,box-shadow 0.3s;
+          gap:1rem;
+        }
         .nv-logo { display:flex; flex-direction:column; text-decoration:none; flex-shrink:0; gap:6px; }
         .nv-logo-name { font-family:'Outfit',sans-serif; font-size:1.3rem; font-weight:800; color:var(--g900); letter-spacing:-0.03em; line-height:1; transition:color 0.18s; }
         .nv-logo-tag { font-size:0.59rem; font-weight:600; letter-spacing:0.14em; color:var(--g400); text-transform:uppercase; line-height:1; }
@@ -145,12 +178,20 @@ const Navbar = () => {
         .sg { padding:0 0.9rem; background:var(--g900); border:none; border-radius:8px; color:#fff; cursor:pointer; display:flex; align-items:center; gap:0.375rem; font-size:0.8rem; font-weight:700; font-family:'Inter',sans-serif; transition:background 0.15s; white-space:nowrap; }
         .sg:hover { background:var(--g700); }
         .sg svg { width:13px; height:13px; stroke:#fff; stroke-width:2.5; fill:none; }
-        .nv-ham { display:none; flex-direction:column; justify-content:center; align-items:center; gap:5px; width:38px; height:38px; border:none; background:none; cursor:pointer; border-radius:9px; transition:background 0.15s; padding:0; flex-shrink:0; }
+
+        /* ── Hamburger ── */
+        .nv-ham {
+          display:none; flex-direction:column; justify-content:center; align-items:center;
+          gap:5px; width:38px; height:38px; border:none; background:none; cursor:pointer;
+          border-radius:9px; transition:background 0.15s; padding:0; flex-shrink:0;
+        }
         .nv-ham:hover { background:var(--g100); }
         .ham-l { width:20px; height:2px; background:var(--g900); border-radius:2px; transition:transform 0.28s,opacity 0.28s,width 0.28s; transform-origin:center; }
         .nv-ham.open .ham-l:nth-child(1) { transform:translateY(7px) rotate(45deg); }
         .nv-ham.open .ham-l:nth-child(2) { opacity:0; width:0; }
         .nv-ham.open .ham-l:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+
+        /* ── Mobile overlay + drawer ── */
         .nv-ov { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.42); backdrop-filter:blur(4px); z-index:998; opacity:0; pointer-events:none; transition:opacity 0.28s; }
         .nv-ov.open { opacity:1; pointer-events:auto; }
         .nv-dr { position:fixed; top:0; right:-100%; width:min(320px,88vw); height:100vh; background:#fff; z-index:999; overflow-y:auto; transition:right 0.32s cubic-bezier(0.4,0,0.2,1); display:flex; flex-direction:column; box-shadow:-16px 0 48px rgba(0,0,0,0.1); }
@@ -181,8 +222,20 @@ const Navbar = () => {
         .mob-cp:hover { background:var(--g700); }
         .mob-cs { width:100%; padding:0.8rem; background:none; border:1.5px solid var(--g200); border-radius:10px; font-family:'Inter',sans-serif; font-size:0.9rem; font-weight:600; color:var(--g700); cursor:pointer; transition:all 0.15s; }
         .mob-cs:hover { border-color:var(--g900); color:var(--g900); }
+
+        /* ── Breakpoints ── */
         @media (max-width:1120px) { .nv-btn-out { display:none; } }
-        @media (max-width:980px) { .nv-links { display:none; } .nv-ham { display:flex; } .nv-ov { display:block; } .nv-sw { display:none; } .nv-btn-prim { display:none; } }
+        @media (max-width:980px) {
+          .nv-links { display:none; }
+          .nv-ham { display:flex; }
+          .nv-ov { display:block; }
+          .nv-sw { display:none; }
+          .nv-btn-prim { display:none; }
+
+          /* ── FIX: consistent mobile navbar height ── */
+          .nv-main { height:var(--nv-mobile-h); }
+          .nv-utility { display:none !important; }  /* always hide utility bar on mobile */
+        }
         @media (max-width:480px) { .nv-main,.nv-utility { padding-left:4%; padding-right:4%; } }
       `}</style>
 
