@@ -10,11 +10,14 @@ const AboutUs = () => {
     const whoRef = useRef<HTMLElement>(null);
     const servRef = useRef<HTMLElement>(null);
     const teamRef = useRef<HTMLElement>(null);
+    const visionRef = useRef<HTMLElement>(null);
+    const testimonialsRef = useRef<HTMLElement>(null);
     const statRefs = useRef<HTMLDivElement[]>([]);
     const teamCardRefs = useRef<HTMLDivElement[]>([]);
     const teamGridRef = useRef<HTMLDivElement>(null);
     const [activeService, setActiveService] = useState(0);
     const [activeDot, setActiveDot] = useState(0);
+    const [activeVision, setActiveVision] = useState(0);
 
     useEffect(() => {
         const t = setTimeout(() => heroRef.current?.classList.add('animate'), 80);
@@ -30,35 +33,44 @@ const AboutUs = () => {
         const onScroll1 = () => {
             const wrap = heroWrapRef.current;
             const hero = heroRef.current;
-            const ceo = ceoRef.current;
+            const ceo  = ceoRef.current;
             if (!wrap || !hero || !ceo) return;
             const scrolled = Math.max(0, -wrap.getBoundingClientRect().top);
             const p = Math.min(1, scrolled / window.innerHeight);
-            ceo.style.transform = `translateY(${((1 - p) * 100).toFixed(2)}%)`;
-            hero.style.filter = `blur(${(p * 5).toFixed(2)}px)`;
+            ceo.style.transform  = `translateY(${((1 - p) * 100).toFixed(2)}%)`;
+            hero.style.filter    = `blur(${(p * 5).toFixed(2)}px)`;
         };
 
         // ─── Block 2: who blur + serv slides up (first half) + team slides up (second half) ───
         const onScroll2 = () => {
-            const wrap = whoWrapRef.current;
-            const who = whoRef.current;
-            const serv = servRef.current;
-            const team = teamRef.current;
-            if (!wrap || !who || !serv || !team) return;
+            const wrap   = whoWrapRef.current;
+            const who    = whoRef.current;
+            const serv   = servRef.current;
+            const team   = teamRef.current;
+            const vision = visionRef.current;
+            const testimonials = testimonialsRef.current;
+            if (!wrap || !who || !serv || !team || !vision || !testimonials) return;
 
             const scrolled = Math.max(0, -wrap.getBoundingClientRect().top);
-            const total = wrap.getBoundingClientRect().height - window.innerHeight; // ≈ 200vh
 
-            // Services slides in during 0→50% of the scroll range
+            // Services slides in: 0→1 vh
             const pServ = Math.min(1, scrolled / window.innerHeight);
             serv.style.transform = `translateY(${((1 - pServ) * 100).toFixed(2)}%)`;
-            who.style.filter = `blur(${(pServ * 4).toFixed(2)}px)`;
+            who.style.filter     = `blur(${(pServ * 4).toFixed(2)}px)`;
 
-            // Team slides in during 50%→100% of the scroll range
+            // Team slides in: 1→2 vh
             const pTeam = Math.min(1, Math.max(0, (scrolled - window.innerHeight) / window.innerHeight));
             team.style.transform = `translateY(${((1 - pTeam) * 100).toFixed(2)}%)`;
 
-            // Trigger card entrance once team is mostly visible
+            // Vision slides in: 2→3 vh
+            const pVision = Math.min(1, Math.max(0, (scrolled - window.innerHeight * 2) / window.innerHeight));
+            vision.style.transform = `translateY(${((1 - pVision) * 100).toFixed(2)}%)`;
+
+            // Testimonials slides in: 3→4 vh
+            const pTest = Math.min(1, Math.max(0, (scrolled - window.innerHeight * 3) / window.innerHeight));
+            testimonials.style.transform = `translateY(${((1 - pTest) * 100).toFixed(2)}%)`;
+
+            // Team card entrance
             if (pTeam > 0.18 && !team.classList.contains('in-view')) {
                 team.classList.add('in-view');
                 teamCardRefs.current.forEach((el, i) => {
@@ -69,6 +81,22 @@ const AboutUs = () => {
             if (pTeam <= 0.02) {
                 team.classList.remove('in-view');
                 teamCardRefs.current.forEach(el => el?.classList.remove('card-in'));
+            }
+
+            // Vision entrance
+            if (pVision > 0.18 && !vision.classList.contains('in-view')) {
+                vision.classList.add('in-view');
+            }
+            if (pVision <= 0.02) {
+                vision.classList.remove('in-view');
+            }
+
+            // Testimonials entrance
+            if (pTest > 0.18 && !testimonials.classList.contains('in-view')) {
+                testimonials.classList.add('in-view');
+            }
+            if (pTest <= 0.02) {
+                testimonials.classList.remove('in-view');
             }
         };
 
@@ -134,9 +162,9 @@ const AboutUs = () => {
     }, []);
 
     const stats = [
-        { target: 500, suffix: '+', label: 'Properties Sold', desc: 'Across Dubai & the UAE' },
-        { target: 12, suffix: '+', label: 'Years Experience', desc: 'Licensed since 2012' },
-        { target: 1000, suffix: '+', label: 'Happy Clients', desc: 'Families & investors' },
+        { target: 500, suffix: '+', label: 'Properties Sold',  desc: 'Across Dubai & the UAE' },
+        { target: 12,  suffix: '+', label: 'Years Experience', desc: 'Licensed since 2012' },
+        { target: 1000,suffix: '+', label: 'Happy Clients',    desc: 'Families & investors' },
     ];
 
     const serviceCategories = [
@@ -162,8 +190,8 @@ const AboutUs = () => {
             headline: 'Fast fixes. Zero hassle.',
             body: 'Our vetted team responds the same day and gets it right the first time — 7 days a week.',
             groups: [
-                { label: 'Common', items: ['Plumbing & electrical', 'Carpentry & flooring'] },
-                { label: 'Finishes', items: ['Painting & patching', 'Fixture replacement'] },
+                { label: 'Common',  items: ['Plumbing & electrical', 'Carpentry & flooring'] },
+                { label: 'Finishes',items: ['Painting & patching',  'Fixture replacement'] },
             ],
             cta1: { label: 'Request a Repair', href: '/contact' },
             cta2: { label: 'See All Repair Jobs', href: '/services/repairs' },
@@ -174,8 +202,8 @@ const AboutUs = () => {
             headline: 'Reimagine your space.',
             body: 'From a single room to a full fit-out — on budget, on schedule, beautifully finished.',
             groups: [
-                { label: 'Spaces', items: ['Kitchen & bathroom', 'Full interior fit-out'] },
-                { label: 'Finishes', items: ['Flooring & tiling', 'Painting & joinery'] },
+                { label: 'Spaces',  items: ['Kitchen & bathroom',  'Full interior fit-out'] },
+                { label: 'Finishes',items: ['Flooring & tiling',   'Painting & joinery'] },
             ],
             cta1: { label: 'Start Your Renovation', href: '/contact' },
             cta2: { label: 'View Past Projects', href: '/services/renovation' },
@@ -315,7 +343,7 @@ const AboutUs = () => {
           serv-section = overlay #1 (slides up over who)
           team-section = overlay #2 (slides up over serv)
         */
-        .who-wrap   { position:relative; height:300vh; }
+        .who-wrap   { position:relative; height:500vh; }
         .who-sticky { position:sticky; top:0; height:100vh; overflow:hidden; background:#f8f7f4; }
 
         /* WHO */
@@ -491,6 +519,161 @@ const AboutUs = () => {
         .team-card:hover .team-card-lang { background:#e8e8e8; color:#3f3f46; }
         .team-dots { display:none; }
         .team-swipe-hint { display:none; }
+
+        /* ─── VISION & MISSION — overlay z:30 ─── */
+        .vision-section {
+          position:absolute; inset:0;
+          background:#f8f7f4;
+          display:flex; align-items:center; justify-content:center;
+          overflow:hidden;
+          transform:translateY(100%);
+          will-change:transform;
+          z-index:30;
+        }
+        .vision-section::before {
+          content:''; position:absolute; inset:0;
+          background-image:radial-gradient(circle,rgba(0,0,0,.035) 1px,transparent 1px);
+          background-size:28px 28px; pointer-events:none;
+        }
+        .vision-inner {
+          position:relative; z-index:1;
+          max-width:700px; width:100%;
+          padding:0 40px;
+          display:flex; flex-direction:column; align-items:center;
+        }
+        /* Header */
+        .vision-header {
+          text-align:center; margin-bottom:44px; width:100%;
+          opacity:0; transform:translateY(18px);
+          transition:opacity .65s cubic-bezier(.16,1,.3,1) .05s, transform .65s cubic-bezier(.16,1,.3,1) .05s;
+        }
+        .vision-section.in-view .vision-header { opacity:1; transform:translateY(0); }
+        .vision-eyebrow {
+          display:inline-flex; align-items:center; gap:8px; margin-bottom:12px;
+          font-size:.65rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:#a1a1aa;
+        }
+        .vision-eyebrow-line { width:20px; height:1.5px; background:#d4d4d8; }
+        .vision-heading {
+          font-family:'Outfit',sans-serif; font-size:clamp(2rem,3.2vw,2.6rem);
+          font-weight:900; line-height:1.08; letter-spacing:-.04em; color:#18181b;
+        }
+        .vision-heading em {
+          font-style:normal;
+          background:linear-gradient(120deg,#18181b 0%,#52525b 100%);
+          -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+        }
+        .vision-sub {
+          font-size:.92rem; color:#71717a; line-height:1.75; margin-top:10px;
+        }
+
+        /* Carousel wrapper */
+        .vision-carousel {
+          width:100%; position:relative;
+          opacity:0; transform:translateY(24px);
+          transition:opacity .65s cubic-bezier(.16,1,.3,1) .2s, transform .65s cubic-bezier(.16,1,.3,1) .2s;
+        }
+        .vision-section.in-view .vision-carousel { opacity:1; transform:translateY(0); }
+
+        /* Track: clips to one card */
+        .vision-track-wrap {
+          width:100%; overflow:hidden; border-radius:24px;
+        }
+        .vision-track {
+          display:flex;
+          transition:transform .52s cubic-bezier(.77,0,.18,1);
+          will-change:transform;
+        }
+
+        /* Each card fills full width */
+        .vision-card {
+          flex:0 0 100%; width:100%;
+          background:#fff; border:1.5px solid #ebebeb;
+          border-radius:24px; padding:44px 44px 40px;
+          position:relative; overflow:hidden;
+          box-sizing:border-box;
+          transition:box-shadow .3s;
+        }
+        .vision-card::before {
+          content:''; position:absolute; top:0; left:0; right:0; height:3px;
+          background:#18181b; transform:scaleX(0); transform-origin:left;
+          transition:transform .5s cubic-bezier(.16,1,.3,1);
+        }
+        .vision-section.in-view .vision-card::before { transform:scaleX(1); transition-delay:.55s; }
+        .vision-card.vision-card--dark {
+          background:#18181b; border-color:#18181b;
+        }
+        .vision-card--dark::before { background:rgba(255,255,255,.15); }
+
+        .vision-card-icon {
+          width:50px; height:50px; border-radius:14px;
+          background:#f4f4f5; display:flex; align-items:center; justify-content:center;
+          color:#18181b; margin-bottom:26px;
+        }
+        .vision-card--dark .vision-card-icon { background:rgba(255,255,255,.1); color:#fff; }
+
+        .vision-card-tag {
+          display:inline-flex; align-items:center; gap:5px;
+          font-size:.6rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+          color:#a1a1aa; background:#f4f4f5; border:1px solid #ebebeb;
+          padding:4px 11px; border-radius:99px; margin-bottom:18px;
+        }
+        .vision-card--dark .vision-card-tag {
+          color:rgba(255,255,255,.4); background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.12);
+        }
+        .vision-card-tag-dot { width:5px; height:5px; border-radius:50%; background:#18181b; flex-shrink:0; }
+        .vision-card--dark .vision-card-tag-dot { background:rgba(255,255,255,.5); }
+
+        .vision-card-title {
+          font-family:'Outfit',sans-serif; font-size:1.55rem; font-weight:900;
+          letter-spacing:-.035em; color:#18181b; margin-bottom:14px; line-height:1.15;
+        }
+        .vision-card--dark .vision-card-title { color:#fff; }
+
+        .vision-card-body {
+          font-size:.94rem; color:#52525b; line-height:1.82; margin-bottom:30px;
+        }
+        .vision-card--dark .vision-card-body { color:rgba(255,255,255,.5); }
+
+        .vision-card-pills { display:flex; flex-wrap:wrap; gap:8px; }
+        .vision-pill {
+          font-size:.72rem; font-weight:600; color:#3f3f46;
+          background:#f4f4f5; border:1px solid #e4e4e7;
+          padding:5px 13px; border-radius:99px;
+        }
+        .vision-card--dark .vision-pill {
+          color:rgba(255,255,255,.6); background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.1);
+        }
+
+        /* Arrow nav row */
+        .vision-nav {
+          display:flex; align-items:center; justify-content:space-between;
+          width:100%; margin-top:28px;
+        }
+        .vision-nav-dots { display:flex; gap:7px; }
+        .vision-nav-dot {
+          width:7px; height:7px; border-radius:50%;
+          background:#d4d4d8; border:none; padding:0; cursor:pointer;
+          transition:background .25s, transform .25s;
+        }
+        .vision-nav-dot.active { background:#18181b; transform:scale(1.25); }
+        .vision-nav-arrows { display:flex; gap:10px; }
+        .vision-arrow {
+          width:42px; height:42px; border-radius:50%;
+          background:#fff; border:1.5px solid #e4e4e7;
+          display:flex; align-items:center; justify-content:center;
+          cursor:pointer; color:#18181b;
+          transition:background .22s, border-color .22s, transform .22s cubic-bezier(.34,1.4,.64,1), box-shadow .22s;
+          box-shadow:0 2px 8px rgba(0,0,0,.06);
+        }
+        .vision-arrow:hover { background:#18181b; color:#fff; border-color:#18181b; transform:scale(1.08); box-shadow:0 6px 20px rgba(0,0,0,.18); }
+        .vision-arrow:disabled { opacity:.3; cursor:default; transform:none; box-shadow:none; }
+        .vision-arrow:disabled:hover { background:#fff; color:#18181b; border-color:#e4e4e7; }
+
+        /* Label beside dots */
+        .vision-nav-label {
+          font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+          color:#a1a1aa; transition:color .3s;
+        }
 
         /* ─── MOBILE ─── */
         .mobile-layout { display:none; }
@@ -675,6 +858,139 @@ const AboutUs = () => {
           .team-swipe-hint svg { opacity: .5; }
         }
 
+        /* ─── TESTIMONIALS — overlay z:40 ─── */
+        .test-section {
+          position:absolute; inset:0;
+          background:#fff;
+          display:flex; align-items:center; justify-content:center;
+          overflow:hidden;
+          transform:translateY(100%);
+          will-change:transform;
+          z-index:40;
+        }
+
+        /* Floating photo columns */
+        .test-photos-left, .test-photos-right {
+          position:absolute; top:0; bottom:0;
+          display:flex; flex-direction:column; gap:16px;
+          padding:20px 0; pointer-events:none;
+        }
+        .test-photos-left  { left:0;  width:200px; align-items:flex-end; }
+        .test-photos-right { right:0; width:200px; align-items:flex-start; }
+
+        .test-photo {
+          border-radius:16px; overflow:hidden;
+          box-shadow:0 8px 32px rgba(0,0,0,.10);
+          opacity:0; transform:translateY(30px);
+          transition:opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1);
+          background:#f4f4f5;
+          flex-shrink:0;
+        }
+        .test-photo img { width:100%; height:100%; object-fit:cover; display:block; }
+
+        /* staggered entrance */
+        .test-section.in-view .test-photo { opacity:1; transform:translateY(0); }
+        .test-photo:nth-child(1) { transition-delay:.10s; }
+        .test-photo:nth-child(2) { transition-delay:.20s; }
+        .test-photo:nth-child(3) { transition-delay:.32s; }
+        .test-photo:nth-child(4) { transition-delay:.44s; }
+
+        /* subtle float animations */
+        .test-photo:nth-child(1) { animation:none; }
+        .test-section.in-view .test-photo:nth-child(1) { animation:float1 5.5s ease-in-out 1s infinite; }
+        .test-section.in-view .test-photo:nth-child(2) { animation:float2 6.2s ease-in-out 1.3s infinite; }
+        .test-section.in-view .test-photo:nth-child(3) { animation:float3 5.8s ease-in-out 1.1s infinite; }
+        .test-section.in-view .test-photo:nth-child(4) { animation:float4 6.5s ease-in-out 1.5s infinite; }
+
+        /* left col sizing */
+        .test-photos-left .test-photo:nth-child(1)  { width:140px; height:170px; }
+        .test-photos-left .test-photo:nth-child(2)  { width:110px; height:136px; }
+        .test-photos-left .test-photo:nth-child(3)  { width:130px; height:158px; }
+        .test-photos-left .test-photo:nth-child(4)  { width:105px; height:128px; }
+        /* right col sizing */
+        .test-photos-right .test-photo:nth-child(1) { width:115px; height:140px; }
+        .test-photos-right .test-photo:nth-child(2) { width:140px; height:170px; }
+        .test-photos-right .test-photo:nth-child(3) { width:108px; height:132px; }
+        .test-photos-right .test-photo:nth-child(4) { width:132px; height:160px; }
+
+        /* Center content */
+        .test-center {
+          position:relative; z-index:2;
+          max-width:480px; width:100%;
+          display:flex; flex-direction:column; align-items:center;
+          text-align:center; padding:0 20px;
+        }
+        .test-badge {
+          display:inline-flex; align-items:center; gap:7px;
+          background:#f4f4f5; border:1px solid #e4e4e7;
+          padding:6px 14px; border-radius:99px; margin-bottom:22px;
+          font-size:.65rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#71717a;
+          opacity:0; transform:translateY(14px);
+          transition:opacity .6s cubic-bezier(.16,1,.3,1) .12s, transform .6s cubic-bezier(.16,1,.3,1) .12s;
+        }
+        .test-section.in-view .test-badge { opacity:1; transform:translateY(0); }
+        .test-badge-dot { width:6px; height:6px; border-radius:50%; background:#18181b; }
+
+        .test-heading {
+          font-family:'Outfit',sans-serif;
+          font-size:clamp(2rem,3.8vw,3rem); font-weight:900;
+          line-height:1.08; letter-spacing:-.04em; color:#18181b;
+          margin-bottom:0;
+          opacity:0; transform:translateY(18px);
+          transition:opacity .65s cubic-bezier(.16,1,.3,1) .22s, transform .65s cubic-bezier(.16,1,.3,1) .22s;
+        }
+        .test-heading-muted { color:#a1a1aa; display:block; font-weight:800; }
+        .test-section.in-view .test-heading { opacity:1; transform:translateY(0); }
+
+        .test-sub {
+          font-size:.9rem; color:#71717a; line-height:1.75; margin-top:16px; max-width:360px;
+          opacity:0; transform:translateY(14px);
+          transition:opacity .6s cubic-bezier(.16,1,.3,1) .34s, transform .6s cubic-bezier(.16,1,.3,1) .34s;
+        }
+        .test-section.in-view .test-sub { opacity:1; transform:translateY(0); }
+
+        .test-cta {
+          display:inline-flex; align-items:center; gap:9px;
+          background:#18181b; color:#fff;
+          padding:14px 26px; border-radius:99px;
+          font-family:'DM Sans',sans-serif; font-size:.88rem; font-weight:700;
+          text-decoration:none; border:none; cursor:pointer; margin-top:28px;
+          box-shadow:0 4px 20px rgba(0,0,0,.18);
+          opacity:0; transform:translateY(14px);
+          transition:opacity .6s cubic-bezier(.16,1,.3,1) .44s, transform .6s cubic-bezier(.16,1,.3,1) .44s,
+                      box-shadow .25s, background .25s, scale .22s cubic-bezier(.34,1.4,.64,1);
+        }
+        .test-section.in-view .test-cta { opacity:1; transform:translateY(0); }
+        .test-cta:hover { background:#27272a; box-shadow:0 10px 32px rgba(0,0,0,.28); scale:1.04; }
+        .test-cta svg { transition:transform .22s cubic-bezier(.34,1.4,.64,1); }
+        .test-cta:hover svg { transform:translateX(3px); }
+
+        /* ── mobile: hide photo columns, center everything ── */
+        @media (max-width:640px) {
+          .test-section { align-items:center; }
+          .test-photos-left, .test-photos-right { display:none; }
+          .test-center { max-width:100%; padding:0 28px; }
+          .test-heading { font-size:1.8rem; }
+          .test-sub { font-size:.82rem; margin-top:12px; }
+          .test-cta { padding:13px 22px; font-size:.83rem; margin-top:22px; }
+          .test-badge { margin-bottom:18px; }
+        }
+
+        @media (max-width:640px) {
+          .vision-section { overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; align-items:flex-start; }
+          .vision-inner { padding:36px 20px 52px; }
+          .vision-header { margin-bottom:28px; }
+          .vision-heading { font-size:1.6rem; }
+          .vision-sub { font-size:.82rem; }
+          .vision-card { padding:28px 22px 26px; border-radius:18px; }
+          .vision-card-icon { width:42px; height:42px; border-radius:11px; margin-bottom:18px; }
+          .vision-card-title { font-size:1.2rem; }
+          .vision-card-body { font-size:.87rem; margin-bottom:22px; }
+          .vision-track-wrap { border-radius:18px; }
+          .vision-nav { margin-top:22px; }
+          .vision-arrow { width:38px; height:38px; }
+        }
+
         @media (min-width:641px) and (max-width:1024px) {
           .desktop-layout { grid-template-columns:130px 320px 130px; gap:0 48px; }
           .photo-item,.photo-circle { width:118px; height:118px; }
@@ -855,9 +1171,9 @@ const AboutUs = () => {
                                 <p className="team-subtitle">Specialists across every segment of Dubai real estate — residential, commercial, and beyond.</p>
                             </div>
                             <div className="team-swipe-hint">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
                                 swipe
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                             </div>
                             <div className="team-grid" ref={teamGridRef}>
                                 {team.map((member, i) => (
@@ -890,6 +1206,108 @@ const AboutUs = () => {
                                 ))}
                             </div>
                         </div>
+                    </section>
+
+                    {/* Layer 3 — overlay: Vision & Mission */}
+                    <section className="vision-section" ref={visionRef}>
+                        <div className="vision-inner">
+                            <div className="vision-header">
+                                <div className="vision-eyebrow">
+                                    <div className="vision-eyebrow-line" />
+                                    Our Purpose
+                                    <div className="vision-eyebrow-line" />
+                                </div>
+                                <h2 className="vision-heading">Vision &amp; <em>Mission.</em></h2>
+                                <p className="vision-sub">Two sides of the same promise — where we stand today, and where we&#39;re taking our clients tomorrow.</p>
+                            </div>
+
+                            <div className="vision-carousel">
+                                <div className="vision-track-wrap">
+                                    <div className="vision-track" style={{ transform: `translateX(-${activeVision * 100}%)` }}>
+                                        {/* Slide 0 — Mission */}
+                                        <div className="vision-card">
+                                            <div className="vision-card-icon">
+                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                                            </div>
+                                            <div className="vision-card-tag"><div className="vision-card-tag-dot"/>Mission</div>
+                                            <div className="vision-card-title">What we do, every single day.</div>
+                                            <p className="vision-card-body">We deliver honest, expert guidance to every client — buyers, sellers, and investors alike. No pressure, no gimmicks. Just 12 years of doing the right thing, one deal at a time.</p>
+                                            <div className="vision-card-pills">
+                                                <span className="vision-pill">Transparent Advice</span>
+                                                <span className="vision-pill">Client-First</span>
+                                                <span className="vision-pill">RERA Licensed</span>
+                                            </div>
+                                        </div>
+                                        {/* Slide 1 — Vision */}
+                                        <div className="vision-card vision-card--dark">
+                                            <div className="vision-card-icon">
+                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                            </div>
+                                            <div className="vision-card-tag"><div className="vision-card-tag-dot"/>Vision</div>
+                                            <div className="vision-card-title">Where we&#39;re heading.</div>
+                                            <p className="vision-card-body">To become Dubai&#39;s most trusted real estate name — not the largest, but the most referred. A firm where every client becomes a lifelong advocate because we never stopped earning their trust.</p>
+                                            <div className="vision-card-pills">
+                                                <span className="vision-pill">Long-Term Trust</span>
+                                                <span className="vision-pill">Built on Referrals</span>
+                                                <span className="vision-pill">Dubai &amp; Beyond</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Arrow navigation */}
+                                <div className="vision-nav">
+                                    <div className="vision-nav-dots">
+                                        <button className={`vision-nav-dot${activeVision === 0 ? ' active' : ''}`} onClick={() => setActiveVision(0)} aria-label="Mission" />
+                                        <button className={`vision-nav-dot${activeVision === 1 ? ' active' : ''}`} onClick={() => setActiveVision(1)} aria-label="Vision" />
+                                    </div>
+                                    <div className="vision-nav-label">{activeVision === 0 ? 'Mission' : 'Vision'}</div>
+                                    <div className="vision-nav-arrows">
+                                        <button className="vision-arrow" onClick={() => setActiveVision(0)} disabled={activeVision === 0} aria-label="Previous">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                                        </button>
+                                        <button className="vision-arrow" onClick={() => setActiveVision(1)} disabled={activeVision === 1} aria-label="Next">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Layer 4 — overlay: Testimonials */}
+                    <section className="test-section" ref={testimonialsRef}>
+
+                        {/* Left floating photos */}
+                        <div className="test-photos-left">
+                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=85" alt="" /></div>
+                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=85" alt="" /></div>
+                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&q=85" alt="" /></div>
+                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&q=85" alt="" /></div>
+                        </div>
+
+                        {/* Center headline */}
+                        <div className="test-center">
+                            <div className="test-badge"><div className="test-badge-dot"/>Testimonials</div>
+                            <h2 className="test-heading">
+                                Trusted by clients
+                                <span className="test-heading-muted">across Dubai.</span>
+                            </h2>
+                            <p className="test-sub">Every client we&#39;ve ever had came through a referral. Here&#39;s what they say about working with us.</p>
+                            <a href="#contact" className="test-cta">
+                                Read Success Stories
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </a>
+                        </div>
+
+                        {/* Right floating photos */}
+                        <div className="test-photos-right">
+                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&q=85" alt="" /></div>
+                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=300&q=85" alt="" /></div>
+                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=85" alt="" /></div>
+                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&q=85" alt="" /></div>
+                        </div>
+
                     </section>
 
                 </div>
