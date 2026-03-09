@@ -59,6 +59,8 @@ const Navbar = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
     const [searchOpen, setSearchOpen] = useState(false);
+    const [langOpen, setLangOpen] = useState(false);
+    const [lang, setLang] = useState<'EN' | 'AR'>('EN');
     const [savedCount] = useState(3);
     const navRef = useRef<HTMLDivElement>(null);
 
@@ -70,7 +72,10 @@ const Navbar = () => {
 
     useEffect(() => {
         const handler = (e: MouseEvent) => {
-            if (navRef.current && !navRef.current.contains(e.target as Node)) setSearchOpen(false);
+            if (navRef.current && !navRef.current.contains(e.target as Node)) {
+                setSearchOpen(false);
+                setLangOpen(false);
+            }
         };
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
@@ -100,8 +105,17 @@ const Navbar = () => {
         .nv-util-link { display:inline-flex; align-items:center; gap:0.4rem; font-size:0.74rem; font-weight:500; color:rgba(255,255,255,0.55); text-decoration:none; transition:color 0.18s; }
         .nv-util-link:hover { color:#fff; }
         .nv-util-sep { width:1px; height:12px; background:rgba(255,255,255,0.14); }
-        .nv-util-lang { display:inline-flex; align-items:center; gap:0.35rem; font-size:0.74rem; color:rgba(255,255,255,0.55); background:none; border:none; font-family:'Inter',sans-serif; cursor:pointer; transition:color 0.18s; padding:0; }
+        .nv-util-lang { display:inline-flex; align-items:center; gap:0.35rem; font-size:0.74rem; color:rgba(255,255,255,0.55); background:none; border:none; font-family:'Inter',sans-serif; cursor:pointer; transition:color 0.18s; padding:0; position:relative; }
         .nv-util-lang:hover { color:#fff; }
+        .nv-lang-dd { position:absolute; top:calc(100% + 10px); right:0; background:#fff; border:1px solid var(--g200); border-radius:12px; padding:0.3rem; box-shadow:0 12px 40px rgba(0,0,0,0.12); min-width:140px; z-index:300; opacity:0; pointer-events:none; transform:translateY(6px); transition:opacity 0.15s,transform 0.15s; }
+        .nv-lang-dd.open { opacity:1; pointer-events:auto; transform:translateY(0); }
+        .nv-lang-opt { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0.55rem 0.75rem; border-radius:8px; cursor:pointer; border:none; background:none; width:100%; font-family:'Inter',sans-serif; font-size:0.8rem; font-weight:500; color:var(--g700); transition:background 0.12s,color 0.12s; text-align:left; }
+        .nv-lang-opt:hover { background:var(--g50); color:var(--g900); }
+        .nv-lang-opt.active { background:var(--g900); color:#fff; font-weight:700; }
+        .nv-lang-opt-sub { font-size:0.68rem; color:var(--g400); font-weight:400; }
+        .nv-lang-opt.active .nv-lang-opt-sub { color:rgba(255,255,255,0.5); }
+        .nv-lang-check { opacity:0; }
+        .nv-lang-opt.active .nv-lang-check { opacity:1; }
         .nv-main { display:flex; align-items:center; justify-content:space-between; padding:0 6%; height:var(--nv-main-h); background:#fff; transition:height 0.3s,background 0.3s,box-shadow 0.3s; gap:1rem; }
         .nv-logo { display:flex; flex-direction:column; text-decoration:none; flex-shrink:0; gap:6px; }
         .nv-logo-name { font-family:'Outfit',sans-serif; font-size:1.3rem; font-weight:800; color:var(--g900); letter-spacing:-0.03em; line-height:1; transition:color 0.18s; }
@@ -176,6 +190,7 @@ const Navbar = () => {
         .mob-utils { display:flex; justify-content:center; gap:1.25rem; padding:0.625rem 1.25rem; border-bottom:1px solid var(--g100); }
         .mob-ua { font-size:0.8rem; font-weight:500; color:var(--g500); text-decoration:none; transition:color 0.15s; }
         .mob-ua:hover { color:var(--g900); }
+        .mob-lang-btn { display:inline-flex; align-items:center; gap:0.3rem; background:none; border:none; cursor:pointer; font-family:'Inter',sans-serif; padding:0; }
         .mob-list { list-style:none; padding:0.375rem 0; flex:1; }
         .mob-li { border-bottom:1px solid var(--g50); }
         .mob-lbtn { width:100%; display:flex; align-items:center; justify-content:space-between; padding:0.8rem 1.25rem; border:none; background:none; cursor:pointer; font-family:'Inter',sans-serif; font-size:0.9rem; font-weight:600; color:var(--g800); text-align:left; text-decoration:none; transition:background 0.12s; }
@@ -216,7 +231,21 @@ const Navbar = () => {
                         <div className="nv-util-sep" />
                         <a href="mailto:info@alareeq.com" className="nv-util-link"><IcMail /> info@alareeq.com</a>
                         <div className="nv-util-sep" />
-                        <button className="nv-util-lang"><IcGlobe /> EN <IcChevron /></button>
+                        <div className="nv-util-lang" onClick={() => setLangOpen(o => !o)} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && setLangOpen(o => !o)}>
+                            <IcGlobe /> {lang} <IcChevron />
+                            <div className={`nv-lang-dd ${langOpen ? 'open' : ''}`}>
+                                <button className={`nv-lang-opt ${lang === 'EN' ? 'active' : ''}`} onClick={e => { e.stopPropagation(); setLang('EN'); setLangOpen(false); }}>
+                                    <span>English</span>
+                                    <span className="nv-lang-opt-sub">EN</span>
+                                    <svg className="nv-lang-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                </button>
+                                <button className={`nv-lang-opt ${lang === 'AR' ? 'active' : ''}`} onClick={e => { e.stopPropagation(); setLang('AR'); setLangOpen(false); }}>
+                                    <span>العربية</span>
+                                    <span className="nv-lang-opt-sub">AR</span>
+                                    <svg className="nv-lang-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
                 <div className="nv-main">
@@ -311,7 +340,9 @@ const Navbar = () => {
                 <div className="mob-utils">
                     <a href="#" className="mob-ua">Log In</a>
                     <a href="#" className="mob-ua">Sign Up</a>
-                    <a href="#" className="mob-ua">EN / AR</a>
+                    <button className="mob-ua mob-lang-btn" onClick={() => setLang(l => l === 'EN' ? 'AR' : 'EN')}>
+                        <IcGlobe /> {lang === 'EN' ? 'العربية' : 'English'}
+                    </button>
                 </div>
                 <ul className="mob-list">
                     {NAV_ITEMS.map((item) => {
