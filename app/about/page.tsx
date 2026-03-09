@@ -18,59 +18,55 @@ const AboutUs = () => {
     const [activeService, setActiveService] = useState(0);
     const [activeDot, setActiveDot] = useState(0);
     const [activeVision, setActiveVision] = useState(0);
+    const [activeReview, setActiveReview] = useState(0);
+    const [ctaInView, setCtaInView] = useState(false);
+    const [ctaCounters, setCtaCounters] = useState({ deals: 0, exp: 0, sat: 0, rating: 0 });
+    const ctaRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
         const t = setTimeout(() => heroRef.current?.classList.add('animate'), 80);
 
-        // ─── CEO observer (unchanged) ───
         const ceoObs = new IntersectionObserver(([e]) => {
             if (e.isIntersecting) ceoRef.current?.classList.add('in-view');
             else ceoRef.current?.classList.remove('in-view');
         }, { threshold: 0.3 });
         if (ceoRef.current) ceoObs.observe(ceoRef.current);
 
-        // ─── Block 1: hero blur + CEO slides up ───
         const onScroll1 = () => {
             const wrap = heroWrapRef.current;
             const hero = heroRef.current;
-            const ceo  = ceoRef.current;
+            const ceo = ceoRef.current;
             if (!wrap || !hero || !ceo) return;
             const scrolled = Math.max(0, -wrap.getBoundingClientRect().top);
             const p = Math.min(1, scrolled / window.innerHeight);
-            ceo.style.transform  = `translateY(${((1 - p) * 100).toFixed(2)}%)`;
-            hero.style.filter    = `blur(${(p * 5).toFixed(2)}px)`;
+            ceo.style.transform = `translateY(${((1 - p) * 100).toFixed(2)}%)`;
+            hero.style.filter = `blur(${(p * 5).toFixed(2)}px)`;
         };
 
-        // ─── Block 2: who blur + serv slides up (first half) + team slides up (second half) ───
         const onScroll2 = () => {
-            const wrap   = whoWrapRef.current;
-            const who    = whoRef.current;
-            const serv   = servRef.current;
-            const team   = teamRef.current;
+            const wrap = whoWrapRef.current;
+            const who = whoRef.current;
+            const serv = servRef.current;
+            const team = teamRef.current;
             const vision = visionRef.current;
             const testimonials = testimonialsRef.current;
             if (!wrap || !who || !serv || !team || !vision || !testimonials) return;
 
             const scrolled = Math.max(0, -wrap.getBoundingClientRect().top);
 
-            // Services slides in: 0→1 vh
             const pServ = Math.min(1, scrolled / window.innerHeight);
             serv.style.transform = `translateY(${((1 - pServ) * 100).toFixed(2)}%)`;
-            who.style.filter     = `blur(${(pServ * 4).toFixed(2)}px)`;
+            who.style.filter = `blur(${(pServ * 4).toFixed(2)}px)`;
 
-            // Team slides in: 1→2 vh
             const pTeam = Math.min(1, Math.max(0, (scrolled - window.innerHeight) / window.innerHeight));
             team.style.transform = `translateY(${((1 - pTeam) * 100).toFixed(2)}%)`;
 
-            // Vision slides in: 2→3 vh
             const pVision = Math.min(1, Math.max(0, (scrolled - window.innerHeight * 2) / window.innerHeight));
             vision.style.transform = `translateY(${((1 - pVision) * 100).toFixed(2)}%)`;
 
-            // Testimonials slides in: 3→4 vh
             const pTest = Math.min(1, Math.max(0, (scrolled - window.innerHeight * 3) / window.innerHeight));
             testimonials.style.transform = `translateY(${((1 - pTest) * 100).toFixed(2)}%)`;
 
-            // Team card entrance
             if (pTeam > 0.18 && !team.classList.contains('in-view')) {
                 team.classList.add('in-view');
                 teamCardRefs.current.forEach((el, i) => {
@@ -83,28 +79,17 @@ const AboutUs = () => {
                 teamCardRefs.current.forEach(el => el?.classList.remove('card-in'));
             }
 
-            // Vision entrance
-            if (pVision > 0.18 && !vision.classList.contains('in-view')) {
-                vision.classList.add('in-view');
-            }
-            if (pVision <= 0.02) {
-                vision.classList.remove('in-view');
-            }
+            if (pVision > 0.18 && !vision.classList.contains('in-view')) vision.classList.add('in-view');
+            if (pVision <= 0.02) vision.classList.remove('in-view');
 
-            // Testimonials entrance
-            if (pTest > 0.18 && !testimonials.classList.contains('in-view')) {
-                testimonials.classList.add('in-view');
-            }
-            if (pTest <= 0.02) {
-                testimonials.classList.remove('in-view');
-            }
+            if (pTest > 0.18 && !testimonials.classList.contains('in-view')) testimonials.classList.add('in-view');
+            if (pTest <= 0.02) testimonials.classList.remove('in-view');
         };
 
         window.addEventListener('scroll', onScroll1, { passive: true });
         window.addEventListener('scroll', onScroll2, { passive: true });
         onScroll1(); onScroll2();
 
-        // ─── Stat count-up ───
         const countUp = (el: HTMLElement, target: number, suffix: string) => {
             let start: number | null = null;
             const step = (ts: number) => {
@@ -139,16 +124,41 @@ const AboutUs = () => {
         }, { threshold: 0.05 });
         if (whoRef.current) whoObs.observe(whoRef.current);
 
+        const ctaObs = new IntersectionObserver(([e]) => {
+            if (e.isIntersecting) {
+                setCtaInView(true);
+                const duration = 1800;
+                const ease = (t: number) => 1 - Math.pow(1 - t, 3);
+                const targets = { deals: 850, exp: 12, sat: 98, rating: 49 };
+                let start: number | null = null;
+                const animate = (ts: number) => {
+                    if (!start) start = ts;
+                    const p = ease(Math.min((ts - start) / duration, 1));
+                    setCtaCounters({
+                        deals: Math.floor(targets.deals * p),
+                        exp: Math.floor(targets.exp * p),
+                        sat: Math.floor(targets.sat * p),
+                        rating: Math.floor(targets.rating * p),
+                    });
+                    if (p < 1) requestAnimationFrame(animate);
+                    else setCtaCounters(targets);
+                };
+                requestAnimationFrame(animate);
+                ctaObs.disconnect();
+            }
+        }, { threshold: 0.25 });
+        if (ctaRef.current) ctaObs.observe(ctaRef.current);
+
         return () => {
             clearTimeout(t);
             ceoObs.disconnect();
             whoObs.disconnect();
+            ctaObs.disconnect();
             window.removeEventListener('scroll', onScroll1);
             window.removeEventListener('scroll', onScroll2);
         };
     }, []);
 
-    // Carousel dot tracking
     useEffect(() => {
         const grid = teamGridRef.current;
         if (!grid) return;
@@ -162,9 +172,9 @@ const AboutUs = () => {
     }, []);
 
     const stats = [
-        { target: 500, suffix: '+', label: 'Properties Sold',  desc: 'Across Dubai & the UAE' },
-        { target: 12,  suffix: '+', label: 'Years Experience', desc: 'Licensed since 2012' },
-        { target: 1000,suffix: '+', label: 'Happy Clients',    desc: 'Families & investors' },
+        { target: 500, suffix: '+', label: 'Properties Sold', desc: 'Across Dubai & the UAE' },
+        { target: 12, suffix: '+', label: 'Years Experience', desc: 'Licensed since 2012' },
+        { target: 1000, suffix: '+', label: 'Happy Clients', desc: 'Families & investors' },
     ];
 
     const serviceCategories = [
@@ -190,8 +200,8 @@ const AboutUs = () => {
             headline: 'Fast fixes. Zero hassle.',
             body: 'Our vetted team responds the same day and gets it right the first time — 7 days a week.',
             groups: [
-                { label: 'Common',  items: ['Plumbing & electrical', 'Carpentry & flooring'] },
-                { label: 'Finishes',items: ['Painting & patching',  'Fixture replacement'] },
+                { label: 'Common', items: ['Plumbing & electrical', 'Carpentry & flooring'] },
+                { label: 'Finishes', items: ['Painting & patching', 'Fixture replacement'] },
             ],
             cta1: { label: 'Request a Repair', href: '/contact' },
             cta2: { label: 'See All Repair Jobs', href: '/services/repairs' },
@@ -202,8 +212,8 @@ const AboutUs = () => {
             headline: 'Reimagine your space.',
             body: 'From a single room to a full fit-out — on budget, on schedule, beautifully finished.',
             groups: [
-                { label: 'Spaces',  items: ['Kitchen & bathroom',  'Full interior fit-out'] },
-                { label: 'Finishes',items: ['Flooring & tiling',   'Painting & joinery'] },
+                { label: 'Spaces', items: ['Kitchen & bathroom', 'Full interior fit-out'] },
+                { label: 'Finishes', items: ['Flooring & tiling', 'Painting & joinery'] },
             ],
             cta1: { label: 'Start Your Renovation', href: '/contact' },
             cta2: { label: 'View Past Projects', href: '/services/renovation' },
@@ -249,6 +259,32 @@ const AboutUs = () => {
 
     const svc = serviceDetails[activeService];
 
+    // Photo data for infinite scroll columns
+    // Left column scrolls UP, Right column scrolls DOWN
+    const leftPhotos = [
+        { src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=85', h: 180 },
+        { src: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=85', h: 220 },
+        { src: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&q=85', h: 195 },
+        { src: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&q=85', h: 205 },
+        // duplicated for seamless loop
+        { src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=85', h: 180 },
+        { src: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=85', h: 220 },
+        { src: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&q=85', h: 195 },
+        { src: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&q=85', h: 205 },
+    ];
+
+    const rightPhotos = [
+        { src: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&q=85', h: 210 },
+        { src: 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=300&q=85', h: 175 },
+        { src: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=85', h: 225 },
+        { src: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&q=85', h: 190 },
+        // duplicated for seamless loop
+        { src: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&q=85', h: 210 },
+        { src: 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=300&q=85', h: 175 },
+        { src: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=85', h: 225 },
+        { src: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&q=85', h: 190 },
+    ];
+
     return (
         <>
             <style>{`
@@ -272,6 +308,18 @@ const AboutUs = () => {
         @keyframes stepIn   { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
         @keyframes lineDraw { from{transform:scaleX(0)} to{transform:scaleX(1)} }
         @keyframes numFlip  { from{opacity:0;transform:translateY(6px) scale(0.8)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+        /* ── Infinite scroll strip animations ── */
+        /* Left col scrolls continuously UPWARD */
+        @keyframes stripUp {
+          0%   { transform: translateY(0); }
+          100% { transform: translateY(-50%); }
+        }
+        /* Right col scrolls continuously DOWNWARD */
+        @keyframes stripDown {
+          0%   { transform: translateY(-50%); }
+          100% { transform: translateY(0); }
+        }
 
         /* ─── BLOCK 1: HERO ─── */
         .hero-wrap   { position:relative; height:200vh; }
@@ -335,14 +383,7 @@ const AboutUs = () => {
         .ceo-section.in-view .ceo-divider  { animation:fadeInUp .55s ease .52s forwards; }
         .ceo-section.in-view .ceo-identity { animation:fadeInUp .65s cubic-bezier(.16,1,.3,1) .66s forwards; }
 
-        /* ─── BLOCK 2: WHO + SERVICES + TEAM — all inside one 300vh sticky ─── */
-        /*
-          who-wrap  = 300vh  (100vh for who, 100vh for serv, 100vh for team)
-          who-sticky = sticky 100vh container
-          who-section = base layer (always visible, gets blurred)
-          serv-section = overlay #1 (slides up over who)
-          team-section = overlay #2 (slides up over serv)
-        */
+        /* ─── BLOCK 2 ─── */
         .who-wrap   { position:relative; height:500vh; }
         .who-sticky { position:sticky; top:0; height:100vh; overflow:hidden; background:#f8f7f4; }
 
@@ -388,7 +429,7 @@ const AboutUs = () => {
         .stat-label { font-size:.82rem; font-weight:700; color:#18181b; margin-top:4px; }
         .stat-desc  { font-size:.78rem; color:#a1a1aa; }
 
-        /* SERVICES — overlay z:10 */
+        /* SERVICES */
         .serv-section { position:absolute; inset:0; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; transform:translateY(100%); will-change:transform; z-index:10; }
         .serv-section::before { content:''; position:absolute; inset:0; pointer-events:none; background-image:radial-gradient(circle,rgba(0,0,0,.033) 1px,transparent 1px); background-size:28px 28px; }
         .serv-inner { position:relative; z-index:1; max-width:960px; width:100%; padding:0 40px; }
@@ -434,70 +475,26 @@ const AboutUs = () => {
         .serv-step:hover .serv-step-num { background:rgba(255,255,255,.2); transform:scale(1.12); }
         .serv-step-title { font-size:.84rem; font-weight:600; color:rgba(255,255,255,.85); line-height:1.4; }
 
-        /* TEAM — overlay z:20, white bg */
-        .team-section {
-          position:absolute; inset:0;
-          background:#fff;
-          display:flex; align-items:center; justify-content:center;
-          overflow:hidden;
-          transform:translateY(100%);
-          will-change:transform;
-          z-index:20;
-        }
-        .team-section::before {
-          content:''; position:absolute; inset:0;
-          background-image:radial-gradient(circle,rgba(0,0,0,.033) 1px,transparent 1px);
-          background-size:28px 28px; pointer-events:none;
-        }
+        /* TEAM */
+        .team-section { position:absolute; inset:0; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; transform:translateY(100%); will-change:transform; z-index:20; }
+        .team-section::before { content:''; position:absolute; inset:0; background-image:radial-gradient(circle,rgba(0,0,0,.033) 1px,transparent 1px); background-size:28px 28px; pointer-events:none; }
         .team-inner { position:relative; z-index:1; max-width:1040px; width:100%; padding:0 40px; }
-        .team-header {
-          margin-bottom:44px;
-          opacity:0; transform:translateY(20px);
-          transition:opacity .7s cubic-bezier(.16,1,.3,1) .1s, transform .7s cubic-bezier(.16,1,.3,1) .1s;
-        }
+        .team-header { margin-bottom:44px; opacity:0; transform:translateY(20px); transition:opacity .7s cubic-bezier(.16,1,.3,1) .1s, transform .7s cubic-bezier(.16,1,.3,1) .1s; }
         .team-section.in-view .team-header { opacity:1; transform:translateY(0); }
-        .team-eyebrow {
-          display:inline-flex; align-items:center; gap:8px; margin-bottom:12px;
-          font-size:.67rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase;
-          color:#a1a1aa;
-        }
+        .team-eyebrow { display:inline-flex; align-items:center; gap:8px; margin-bottom:12px; font-size:.67rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:#a1a1aa; }
         .team-eyebrow-line { width:0; height:1.5px; background:#d4d4d8; transition:width .6s cubic-bezier(.16,1,.3,1) .4s; }
         .team-section.in-view .team-eyebrow-line { width:20px; }
-        .team-title {
-          font-family:'Outfit',sans-serif;
-          font-size:clamp(1.9rem,3vw,2.6rem); font-weight:900; line-height:1.08; letter-spacing:-.04em;
-          color:#18181b;
-        }
+        .team-title { font-family:'Outfit',sans-serif; font-size:clamp(1.9rem,3vw,2.6rem); font-weight:900; line-height:1.08; letter-spacing:-.04em; color:#18181b; }
         .team-subtitle { font-size:.93rem; color:#71717a; line-height:1.7; margin-top:10px; max-width:420px; }
         .team-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
-        .team-card {
-          background:#fafafa; border:1.5px solid #ebebeb; border-radius:20px;
-          padding:24px 20px 20px; display:flex; flex-direction:column;
-          position:relative; overflow:hidden;
-          opacity:0; transform:translateY(36px);
-          transition:opacity .6s cubic-bezier(.16,1,.3,1),
-                      transform .6s cubic-bezier(.16,1,.3,1),
-                      border-color .25s, background .25s, box-shadow .25s;
-        }
+        .team-card { background:#fafafa; border:1.5px solid #ebebeb; border-radius:20px; padding:24px 20px 20px; display:flex; flex-direction:column; position:relative; overflow:hidden; opacity:0; transform:translateY(36px); transition:opacity .6s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1), border-color .25s, background .25s, box-shadow .25s; }
         .team-card.card-in { opacity:1; transform:translateY(0); }
-        .team-card::before {
-          content:''; position:absolute; top:0; left:0; right:0; height:3px;
-          background:#18181b; transform:scaleX(0); transform-origin:left;
-          transition:transform .4s cubic-bezier(.16,1,.3,1);
-        }
-        .team-card::after {
-          content:''; position:absolute; inset:0;
-          background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.6) 50%,transparent 60%);
-          transform:translateX(-100%); transition:transform .5s ease; pointer-events:none;
-        }
+        .team-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:#18181b; transform:scaleX(0); transform-origin:left; transition:transform .4s cubic-bezier(.16,1,.3,1); }
+        .team-card::after { content:''; position:absolute; inset:0; background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.6) 50%,transparent 60%); transform:translateX(-100%); transition:transform .5s ease; pointer-events:none; }
         .team-card:hover { box-shadow:0 16px 44px rgba(0,0,0,.1); border-color:#d4d4d8; transform:translateY(-6px) !important; }
         .team-card:hover::before { transform:scaleX(1); }
         .team-card:hover::after  { transform:translateX(100%); }
-        .team-photo-wrap {
-          width:76px; height:76px; border-radius:50%; overflow:hidden;
-          margin-bottom:16px; border:2px solid #e8e8e8;
-          transition:border-color .25s, transform .35s cubic-bezier(.34,1.4,.64,1);
-        }
+        .team-photo-wrap { width:76px; height:76px; border-radius:50%; overflow:hidden; margin-bottom:16px; border:2px solid #e8e8e8; transition:border-color .25s, transform .35s cubic-bezier(.34,1.4,.64,1); }
         .team-card:hover .team-photo-wrap { border-color:#d4d4d8; transform:scale(1.05); }
         .team-photo-wrap img { width:100%; height:100%; object-fit:cover; object-position:center top; display:block; }
         .team-card-name { font-family:'Outfit',sans-serif; font-size:.97rem; font-weight:800; letter-spacing:-.02em; color:#18181b; margin-bottom:2px; }
@@ -510,169 +507,376 @@ const AboutUs = () => {
         .team-card-deals-num { font-family:'Outfit',sans-serif; font-size:1.2rem; font-weight:900; letter-spacing:-.03em; color:#18181b; line-height:1; }
         .team-card-deals-label { font-size:.63rem; font-weight:600; color:#a1a1aa; letter-spacing:.05em; text-transform:uppercase; }
         .team-card-langs { display:flex; flex-wrap:wrap; gap:4px; justify-content:flex-end; max-width:90px; }
-        .team-card-lang {
-          font-size:.59rem; font-weight:700; letter-spacing:.03em;
-          padding:3px 7px; border-radius:99px;
-          background:#f0f0f0; border:1px solid #e4e4e7; color:#71717a;
-          transition:background .2s, color .2s;
-        }
+        .team-card-lang { font-size:.59rem; font-weight:700; letter-spacing:.03em; padding:3px 7px; border-radius:99px; background:#f0f0f0; border:1px solid #e4e4e7; color:#71717a; transition:background .2s, color .2s; }
         .team-card:hover .team-card-lang { background:#e8e8e8; color:#3f3f46; }
         .team-dots { display:none; }
         .team-swipe-hint { display:none; }
 
-        /* ─── VISION & MISSION — overlay z:30 ─── */
-        .vision-section {
-          position:absolute; inset:0;
-          background:#f8f7f4;
-          display:flex; align-items:center; justify-content:center;
-          overflow:hidden;
-          transform:translateY(100%);
-          will-change:transform;
-          z-index:30;
-        }
-        .vision-section::before {
-          content:''; position:absolute; inset:0;
-          background-image:radial-gradient(circle,rgba(0,0,0,.035) 1px,transparent 1px);
-          background-size:28px 28px; pointer-events:none;
-        }
-        .vision-inner {
-          position:relative; z-index:1;
-          max-width:700px; width:100%;
-          padding:0 40px;
-          display:flex; flex-direction:column; align-items:center;
-        }
-        /* Header */
-        .vision-header {
-          text-align:center; margin-bottom:44px; width:100%;
-          opacity:0; transform:translateY(18px);
-          transition:opacity .65s cubic-bezier(.16,1,.3,1) .05s, transform .65s cubic-bezier(.16,1,.3,1) .05s;
-        }
+        /* VISION */
+        .vision-section { position:absolute; inset:0; background:#f8f7f4; display:flex; align-items:center; justify-content:center; overflow:hidden; transform:translateY(100%); will-change:transform; z-index:30; }
+        .vision-section::before { content:''; position:absolute; inset:0; background-image:radial-gradient(circle,rgba(0,0,0,.035) 1px,transparent 1px); background-size:28px 28px; pointer-events:none; }
+        .vision-inner { position:relative; z-index:1; max-width:700px; width:100%; padding:0 40px; display:flex; flex-direction:column; align-items:center; }
+        .vision-header { text-align:center; margin-bottom:44px; width:100%; opacity:0; transform:translateY(18px); transition:opacity .65s cubic-bezier(.16,1,.3,1) .05s, transform .65s cubic-bezier(.16,1,.3,1) .05s; }
         .vision-section.in-view .vision-header { opacity:1; transform:translateY(0); }
-        .vision-eyebrow {
-          display:inline-flex; align-items:center; gap:8px; margin-bottom:12px;
-          font-size:.65rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:#a1a1aa;
-        }
+        .vision-eyebrow { display:inline-flex; align-items:center; gap:8px; margin-bottom:12px; font-size:.65rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:#a1a1aa; }
         .vision-eyebrow-line { width:20px; height:1.5px; background:#d4d4d8; }
-        .vision-heading {
-          font-family:'Outfit',sans-serif; font-size:clamp(2rem,3.2vw,2.6rem);
-          font-weight:900; line-height:1.08; letter-spacing:-.04em; color:#18181b;
-        }
-        .vision-heading em {
-          font-style:normal;
-          background:linear-gradient(120deg,#18181b 0%,#52525b 100%);
-          -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
-        }
-        .vision-sub {
-          font-size:.92rem; color:#71717a; line-height:1.75; margin-top:10px;
-        }
-
-        /* Carousel wrapper */
-        .vision-carousel {
-          width:100%; position:relative;
-          opacity:0; transform:translateY(24px);
-          transition:opacity .65s cubic-bezier(.16,1,.3,1) .2s, transform .65s cubic-bezier(.16,1,.3,1) .2s;
-        }
+        .vision-heading { font-family:'Outfit',sans-serif; font-size:clamp(2rem,3.2vw,2.6rem); font-weight:900; line-height:1.08; letter-spacing:-.04em; color:#18181b; }
+        .vision-heading em { font-style:normal; background:linear-gradient(120deg,#18181b 0%,#52525b 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+        .vision-sub { font-size:.92rem; color:#71717a; line-height:1.75; margin-top:10px; }
+        .vision-carousel { width:100%; position:relative; opacity:0; transform:translateY(24px); transition:opacity .65s cubic-bezier(.16,1,.3,1) .2s, transform .65s cubic-bezier(.16,1,.3,1) .2s; }
         .vision-section.in-view .vision-carousel { opacity:1; transform:translateY(0); }
-
-        /* Track: clips to one card */
-        .vision-track-wrap {
-          width:100%; overflow:hidden; border-radius:24px;
-        }
-        .vision-track {
-          display:flex;
-          transition:transform .52s cubic-bezier(.77,0,.18,1);
-          will-change:transform;
-        }
-
-        /* Each card fills full width */
-        .vision-card {
-          flex:0 0 100%; width:100%;
-          background:#fff; border:1.5px solid #ebebeb;
-          border-radius:24px; padding:44px 44px 40px;
-          position:relative; overflow:hidden;
-          box-sizing:border-box;
-          transition:box-shadow .3s;
-        }
-        .vision-card::before {
-          content:''; position:absolute; top:0; left:0; right:0; height:3px;
-          background:#18181b; transform:scaleX(0); transform-origin:left;
-          transition:transform .5s cubic-bezier(.16,1,.3,1);
-        }
+        .vision-track-wrap { width:100%; overflow:hidden; border-radius:24px; }
+        .vision-track { display:flex; transition:transform .52s cubic-bezier(.77,0,.18,1); will-change:transform; }
+        .vision-card { flex:0 0 100%; width:100%; background:#fff; border:1.5px solid #ebebeb; border-radius:24px; padding:44px 44px 40px; position:relative; overflow:hidden; box-sizing:border-box; transition:box-shadow .3s; }
+        .vision-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:#18181b; transform:scaleX(0); transform-origin:left; transition:transform .5s cubic-bezier(.16,1,.3,1); }
         .vision-section.in-view .vision-card::before { transform:scaleX(1); transition-delay:.55s; }
-        .vision-card.vision-card--dark {
-          background:#18181b; border-color:#18181b;
-        }
+        .vision-card.vision-card--dark { background:#18181b; border-color:#18181b; }
         .vision-card--dark::before { background:rgba(255,255,255,.15); }
-
-        .vision-card-icon {
-          width:50px; height:50px; border-radius:14px;
-          background:#f4f4f5; display:flex; align-items:center; justify-content:center;
-          color:#18181b; margin-bottom:26px;
-        }
+        .vision-card-icon { width:50px; height:50px; border-radius:14px; background:#f4f4f5; display:flex; align-items:center; justify-content:center; color:#18181b; margin-bottom:26px; }
         .vision-card--dark .vision-card-icon { background:rgba(255,255,255,.1); color:#fff; }
-
-        .vision-card-tag {
-          display:inline-flex; align-items:center; gap:5px;
-          font-size:.6rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
-          color:#a1a1aa; background:#f4f4f5; border:1px solid #ebebeb;
-          padding:4px 11px; border-radius:99px; margin-bottom:18px;
-        }
-        .vision-card--dark .vision-card-tag {
-          color:rgba(255,255,255,.4); background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.12);
-        }
+        .vision-card-tag { display:inline-flex; align-items:center; gap:5px; font-size:.6rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#a1a1aa; background:#f4f4f5; border:1px solid #ebebeb; padding:4px 11px; border-radius:99px; margin-bottom:18px; }
+        .vision-card--dark .vision-card-tag { color:rgba(255,255,255,.4); background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.12); }
         .vision-card-tag-dot { width:5px; height:5px; border-radius:50%; background:#18181b; flex-shrink:0; }
         .vision-card--dark .vision-card-tag-dot { background:rgba(255,255,255,.5); }
-
-        .vision-card-title {
-          font-family:'Outfit',sans-serif; font-size:1.55rem; font-weight:900;
-          letter-spacing:-.035em; color:#18181b; margin-bottom:14px; line-height:1.15;
-        }
+        .vision-card-title { font-family:'Outfit',sans-serif; font-size:1.55rem; font-weight:900; letter-spacing:-.035em; color:#18181b; margin-bottom:14px; line-height:1.15; }
         .vision-card--dark .vision-card-title { color:#fff; }
-
-        .vision-card-body {
-          font-size:.94rem; color:#52525b; line-height:1.82; margin-bottom:30px;
-        }
+        .vision-card-body { font-size:.94rem; color:#52525b; line-height:1.82; margin-bottom:30px; }
         .vision-card--dark .vision-card-body { color:rgba(255,255,255,.5); }
-
         .vision-card-pills { display:flex; flex-wrap:wrap; gap:8px; }
-        .vision-pill {
-          font-size:.72rem; font-weight:600; color:#3f3f46;
-          background:#f4f4f5; border:1px solid #e4e4e7;
-          padding:5px 13px; border-radius:99px;
-        }
-        .vision-card--dark .vision-pill {
-          color:rgba(255,255,255,.6); background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.1);
-        }
-
-        /* Arrow nav row */
-        .vision-nav {
-          display:flex; align-items:center; justify-content:space-between;
-          width:100%; margin-top:28px;
-        }
+        .vision-pill { font-size:.72rem; font-weight:600; color:#3f3f46; background:#f4f4f5; border:1px solid #e4e4e7; padding:5px 13px; border-radius:99px; }
+        .vision-card--dark .vision-pill { color:rgba(255,255,255,.6); background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.1); }
+        .vision-nav { display:flex; align-items:center; justify-content:space-between; width:100%; margin-top:28px; }
         .vision-nav-dots { display:flex; gap:7px; }
-        .vision-nav-dot {
-          width:7px; height:7px; border-radius:50%;
-          background:#d4d4d8; border:none; padding:0; cursor:pointer;
-          transition:background .25s, transform .25s;
-        }
+        .vision-nav-dot { width:7px; height:7px; border-radius:50%; background:#d4d4d8; border:none; padding:0; cursor:pointer; transition:background .25s, transform .25s; }
         .vision-nav-dot.active { background:#18181b; transform:scale(1.25); }
         .vision-nav-arrows { display:flex; gap:10px; }
-        .vision-arrow {
-          width:42px; height:42px; border-radius:50%;
-          background:#fff; border:1.5px solid #e4e4e7;
-          display:flex; align-items:center; justify-content:center;
-          cursor:pointer; color:#18181b;
-          transition:background .22s, border-color .22s, transform .22s cubic-bezier(.34,1.4,.64,1), box-shadow .22s;
-          box-shadow:0 2px 8px rgba(0,0,0,.06);
-        }
+        .vision-arrow { width:42px; height:42px; border-radius:50%; background:#fff; border:1.5px solid #e4e4e7; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#18181b; transition:background .22s, border-color .22s, transform .22s cubic-bezier(.34,1.4,.64,1), box-shadow .22s; box-shadow:0 2px 8px rgba(0,0,0,.06); }
         .vision-arrow:hover { background:#18181b; color:#fff; border-color:#18181b; transform:scale(1.08); box-shadow:0 6px 20px rgba(0,0,0,.18); }
-        .vision-arrow:disabled { opacity:.3; cursor:default; transform:none; box-shadow:none; }
-        .vision-arrow:disabled:hover { background:#fff; color:#18181b; border-color:#e4e4e7; }
+        .vision-arrow:disabled { opacity:.3; cursor:default; pointer-events:none; }
+        .vision-nav-label { font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#a1a1aa; }
 
-        /* Label beside dots */
-        .vision-nav-label {
-          font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
-          color:#a1a1aa; transition:color .3s;
+        /* ══════════════════════════════════════════════════════
+           TESTIMONIALS — infinite scroll columns + big card slider
+        ══════════════════════════════════════════════════════ */
+        .test-section {
+          position: absolute; inset: 0;
+          background: #fafafa;
+          display: flex;
+          flex-direction: row;
+          align-items: stretch;
+          overflow: hidden;
+          transform: translateY(100%);
+          will-change: transform;
+          z-index: 40;
+        }
+        .test-section::before {
+          content: '';
+          position: absolute; inset: 0;
+          background-image: radial-gradient(circle, rgba(0,0,0,.028) 1px, transparent 1px);
+          background-size: 28px 28px;
+          pointer-events: none; z-index: 0;
+        }
+
+        /* ── Infinite scroll photo columns ── */
+        .test-col {
+          width: 160px; flex-shrink: 0; overflow: hidden; position: relative;
+          -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+          mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+          opacity: 0; transition: opacity .9s cubic-bezier(.16,1,.3,1);
+        }
+        .test-section.in-view .test-col { opacity: 1; }
+        .test-col--left  { transition-delay: .1s; }
+        .test-col--right { transition-delay: .28s; }
+        .test-strip { display: flex; flex-direction: column; gap: 10px; padding: 0 10px 0 0; will-change: transform; }
+        .test-col--right .test-strip { padding: 0 0 0 10px; }
+        .test-strip--up   { animation: stripUp   30s linear infinite; }
+        .test-strip--down { animation: stripDown 26s linear infinite; }
+        .test-col:hover .test-strip { animation-play-state: paused; }
+        .test-strip-photo { width: 100%; border-radius: 14px; overflow: hidden; flex-shrink: 0; box-shadow: 0 4px 16px rgba(0,0,0,.09); border: 1.5px solid #ebebeb; background: #f0f0f0; }
+        .test-strip-photo img { width: 100%; display: block; object-fit: cover; object-position: center top; }
+
+        /* ── Center panel ── */
+        .test-center {
+          flex: 1; position: relative; z-index: 2;
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          padding: 40px 36px; min-width: 0; overflow: hidden;
+        }
+
+        /* Header */
+        .test-badge {
+          display: inline-flex; align-items: center; gap: 7px;
+          background: #fff; border: 1.5px solid #e4e4e7;
+          padding: 5px 14px; border-radius: 99px; margin-bottom: 14px;
+          font-size: .62rem; font-weight: 700; letter-spacing: .12em;
+          text-transform: uppercase; color: #71717a;
+          opacity: 0; transform: translateY(14px);
+          transition: opacity .6s cubic-bezier(.16,1,.3,1) .12s, transform .6s cubic-bezier(.16,1,.3,1) .12s;
+        }
+        .test-section.in-view .test-badge { opacity: 1; transform: translateY(0); }
+        .test-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #18181b; flex-shrink: 0; }
+
+        .test-heading {
+          font-family: 'Outfit', sans-serif;
+          font-size: clamp(1.6rem, 2.6vw, 2.4rem);
+          font-weight: 900; line-height: 1.08; letter-spacing: -.04em; color: #18181b;
+          text-align: center; margin-bottom: 6px;
+          opacity: 0; transform: translateY(16px);
+          transition: opacity .65s cubic-bezier(.16,1,.3,1) .22s, transform .65s cubic-bezier(.16,1,.3,1) .22s;
+        }
+        .test-heading-muted { color: #a1a1aa; font-weight: 800; }
+        .test-section.in-view .test-heading { opacity: 1; transform: translateY(0); }
+
+        .test-sub {
+          font-size: .84rem; color: #71717a; line-height: 1.7; text-align: center;
+          margin-bottom: 28px; max-width: 360px;
+          opacity: 0; transform: translateY(12px);
+          transition: opacity .6s cubic-bezier(.16,1,.3,1) .3s, transform .6s cubic-bezier(.16,1,.3,1) .3s;
+        }
+        .test-section.in-view .test-sub { opacity: 1; transform: translateY(0); }
+
+        /* ── Big review slider ── */
+        .trev-slider {
+          width: 100%; max-width: 540px;
+          opacity: 0; transform: translateY(20px);
+          transition: opacity .7s cubic-bezier(.16,1,.3,1) .4s, transform .7s cubic-bezier(.16,1,.3,1) .4s;
+        }
+        .test-section.in-view .trev-slider { opacity: 1; transform: translateY(0); }
+
+        .trev-track-wrap { width: 100%; overflow: hidden; border-radius: 24px; }
+        .trev-track { display: flex; transition: transform .52s cubic-bezier(.77,0,.18,1); will-change: transform; }
+
+        .trev-card {
+          flex: 0 0 100%; width: 100%;
+          background: #fff;
+          border: 1.5px solid #ebebeb;
+          border-radius: 24px;
+          padding: 36px 36px 30px;
+          display: flex; flex-direction: column; gap: 20px;
+          position: relative; overflow: hidden;
+          box-sizing: border-box;
+        }
+        /* Top accent bar */
+        .trev-card::before {
+          content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+          background: #18181b; border-radius: 24px 24px 0 0;
+          transform: scaleX(0); transform-origin: left;
+          transition: transform .5s cubic-bezier(.16,1,.3,1);
+        }
+        .test-section.in-view .trev-card::before { transform: scaleX(1); transition-delay: .65s; }
+        /* Big decorative quote mark */
+        .trev-card::after {
+          content: '\u201C';
+          position: absolute; top: -10px; right: 24px;
+          font-family: 'Outfit', sans-serif; font-size: 8rem; font-weight: 900;
+          color: #f0f0f0; line-height: 1; pointer-events: none; user-select: none;
+        }
+
+        .trev-stars { display: flex; gap: 4px; }
+        .trev-star { width: 14px; height: 14px; fill: #18181b; flex-shrink: 0; }
+
+        .trev-quote {
+          font-size: 1.05rem; color: #27272a; line-height: 1.8;
+          font-style: italic; position: relative; z-index: 1; margin: 0; flex: 1;
+        }
+
+        .trev-author {
+          display: flex; align-items: center; gap: 14px;
+          border-top: 1px solid #f0f0f0; padding-top: 18px;
+          position: relative; z-index: 1;
+        }
+        .trev-avatar {
+          width: 52px; height: 52px; border-radius: 50%; overflow: hidden;
+          border: 2px solid #e4e4e7; flex-shrink: 0; background: #f0f0f0;
+        }
+        .trev-avatar img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
+        .trev-author-info { display: flex; flex-direction: column; gap: 3px; }
+        .trev-name { font-family: 'Outfit', sans-serif; font-size: .95rem; font-weight: 800; color: #18181b; letter-spacing: -.01em; }
+        .trev-loc { display: flex; align-items: center; gap: 4px; font-size: .74rem; color: #a1a1aa; font-weight: 500; }
+        .trev-loc svg { width: 10px; height: 10px; stroke: #a1a1aa; stroke-width: 2; fill: none; flex-shrink: 0; }
+
+        /* ── Slider navigation ── */
+        .trev-nav {
+          display: flex; align-items: center; justify-content: space-between;
+          width: 100%; max-width: 540px; margin-top: 18px;
+        }
+        .trev-nav-dots { display: flex; gap: 7px; }
+        .trev-nav-dot {
+          width: 7px; height: 7px; border-radius: 50%;
+          background: #d4d4d8; border: none; padding: 0; cursor: pointer;
+          transition: background .25s, transform .25s;
+        }
+        .trev-nav-dot.active { background: #18181b; transform: scale(1.3); }
+        .trev-nav-counter { font-family: 'Outfit', sans-serif; font-size: .78rem; font-weight: 700; color: #a1a1aa; letter-spacing: .04em; }
+        .trev-nav-arrows { display: flex; gap: 8px; }
+        .trev-arrow {
+          width: 40px; height: 40px; border-radius: 50%;
+          border: 1.5px solid #e4e4e7; background: #fff;
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer; color: #18181b;
+          transition: background .2s, border-color .2s, transform .22s cubic-bezier(.34,1.4,.64,1), box-shadow .2s;
+        }
+        .trev-arrow:hover:not(:disabled) { background: #18181b; border-color: #18181b; color: #fff; transform: scale(1.08); box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+        .trev-arrow:disabled { opacity: .3; cursor: not-allowed; }
+        .trev-arrow svg { stroke: currentColor; }
+
+        /* ══════════════════════════════════════════════════════
+           CTA SECTION
+        ══════════════════════════════════════════════════════ */
+        .cta-section {
+          background: #18181b;
+          min-height: 100vh;
+          display: flex; align-items: center; justify-content: center;
+          position: relative; overflow: hidden;
+          padding: 100px 40px 80px;
+        }
+        .cta-section::before {
+          content: '';
+          position: absolute; inset: 0;
+          background-image: radial-gradient(circle, rgba(255,255,255,.04) 1px, transparent 1px);
+          background-size: 32px 32px; pointer-events: none;
+        }
+        .cta-section::after {
+          content: 'AL AREEQ';
+          position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%);
+          font-family: 'Outfit', sans-serif; font-size: clamp(5rem, 14vw, 13rem);
+          font-weight: 900; letter-spacing: -.04em;
+          color: rgba(255,255,255,.03); white-space: nowrap; pointer-events: none;
+          user-select: none; line-height: 1;
+        }
+        .cta-inner {
+          position: relative; z-index: 1;
+          display: flex; flex-direction: column; align-items: center;
+          text-align: center; max-width: 720px; width: 100%;
+        }
+        .cta-eyebrow {
+          display: inline-flex; align-items: center; gap: 8px;
+          background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+          padding: 6px 16px; border-radius: 99px; margin-bottom: 28px;
+          font-size: .65rem; font-weight: 700; letter-spacing: .14em;
+          text-transform: uppercase; color: rgba(255,255,255,.45);
+        }
+        .cta-eyebrow-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,.4); }
+        .cta-heading {
+          font-family: 'Outfit', sans-serif;
+          font-size: clamp(2.4rem, 5.5vw, 4.5rem);
+          font-weight: 900; line-height: 1.04; letter-spacing: -.045em;
+          color: #fff; margin-bottom: 20px;
+        }
+        .cta-heading em { font-style: normal; color: rgba(255,255,255,.35); }
+        .cta-sub {
+          font-size: 1rem; color: rgba(255,255,255,.45); line-height: 1.75;
+          max-width: 420px; margin-bottom: 44px;
+        }
+        /* Buttons — always horizontal */
+        .cta-buttons {
+          display: flex; gap: 14px; flex-direction: row;
+          justify-content: center; flex-wrap: wrap; width: 100%;
+        }
+        .cta-btn-primary {
+          display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+          background: #fff; color: #18181b;
+          padding: 15px 32px; border-radius: 99px;
+          font-family: 'Outfit', sans-serif; font-size: .95rem; font-weight: 800;
+          text-decoration: none; border: none; cursor: pointer;
+          box-shadow: 0 4px 24px rgba(255,255,255,.15);
+          transition: transform .25s cubic-bezier(.34,1.4,.64,1), box-shadow .25s;
+          white-space: nowrap;
+        }
+        .cta-btn-primary:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 14px 40px rgba(255,255,255,.22); }
+        .cta-btn-primary svg { flex-shrink: 0; transition: transform .22s cubic-bezier(.34,1.4,.64,1); }
+        .cta-btn-primary:hover svg { transform: translateX(3px); }
+        .cta-btn-secondary {
+          display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+          background: transparent; color: rgba(255,255,255,.8);
+          padding: 15px 32px; border-radius: 99px;
+          font-family: 'Outfit', sans-serif; font-size: .95rem; font-weight: 700;
+          text-decoration: none; border: 1.5px solid rgba(255,255,255,.2); cursor: pointer;
+          transition: all .25s cubic-bezier(.34,1.2,.64,1);
+          white-space: nowrap;
+        }
+        .cta-btn-secondary:hover { border-color: rgba(255,255,255,.6); color: #fff; transform: translateY(-3px); background: rgba(255,255,255,.06); }
+        .cta-btn-secondary svg { flex-shrink: 0; transition: transform .22s cubic-bezier(.34,1.4,.64,1); }
+        .cta-btn-secondary:hover svg { transform: translateX(3px); }
+
+        /* Stats row */
+        .cta-stats {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 0;
+          width: 100%;
+          margin-top: 64px;
+          padding-top: 40px;
+          border-top: 1px solid rgba(255,255,255,.1);
+        }
+        .cta-stat {
+          display: flex; flex-direction: column; align-items: center; gap: 6px;
+          padding: 0 16px;
+          border-right: 1px solid rgba(255,255,255,.08);
+        }
+        .cta-stat:last-child { border-right: none; }
+        .cta-stat-num {
+          font-family: 'Outfit', sans-serif; font-size: 2.4rem; font-weight: 900;
+          letter-spacing: -.04em; color: #fff; line-height: 1;
+          transition: all .3s;
+        }
+        .cta-stat-label {
+          font-size: .68rem; font-weight: 600; color: rgba(255,255,255,.32);
+          letter-spacing: .09em; text-transform: uppercase; text-align: center;
+          line-height: 1.4;
+        }
+
+        /* Mobile CTA overrides */
+        @media (max-width: 640px) {
+          .cta-section { padding: 72px 22px 64px; }
+          .cta-heading { font-size: 2rem; }
+          .cta-sub { font-size: .88rem; margin-bottom: 32px; }
+          /* Buttons stay horizontal on mobile but may wrap */
+          .cta-buttons { gap: 10px; }
+          .cta-btn-primary, .cta-btn-secondary { padding: 13px 22px; font-size: .85rem; }
+          /* Stats: 2x2 grid on mobile */
+          .cta-stats { grid-template-columns: 1fr 1fr; gap: 28px 0; margin-top: 44px; padding-top: 32px; }
+          .cta-stat { border-right: none; padding: 0 8px; }
+          .cta-stat:nth-child(1), .cta-stat:nth-child(2) { border-bottom: 1px solid rgba(255,255,255,.08); padding-bottom: 24px; }
+          .cta-stat:nth-child(3), .cta-stat:nth-child(4) { padding-top: 24px; }
+          .cta-stat-num { font-size: 1.8rem; }
+          .cta-stat-label { font-size: .62rem; }
+        }
+
+        /* ══════════════════════════════════════════════════════
+           FOOTER
+        ══════════════════════════════════════════════════════ */
+        .about-footer { background: #111; color: #fff; padding: 4rem 6% 2rem; }
+        .about-footer-cta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; padding-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,.08); flex-wrap: wrap; gap: 1.5rem; }
+        .about-footer-cta h2 { font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 700; letter-spacing: -.02em; }
+        .about-footer-cta-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .about-footer-btn-primary { background: #fff; color: #111; padding: .7rem 1.4rem; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: .9rem; font-family: 'Outfit', sans-serif; transition: opacity .2s; }
+        .about-footer-btn-primary:hover { opacity: .85; }
+        .about-footer-btn-outline { border: 1px solid rgba(255,255,255,.3); padding: .7rem 1.4rem; border-radius: 8px; color: #fff; text-decoration: none; font-size: .9rem; font-family: 'Outfit', sans-serif; transition: border-color .2s; }
+        .about-footer-btn-outline:hover { border-color: rgba(255,255,255,.7); }
+        .about-footer-main { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 2.5rem; }
+        .about-footer-brand h3 { font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -.02em; }
+        .about-footer-brand p { color: rgba(255,255,255,.45); font-size: .88rem; line-height: 1.65; max-width: 300px; }
+        .about-footer-main h4 { font-size: .75rem; margin-bottom: 1rem; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .1em; font-weight: 700; }
+        .about-footer-main ul { list-style: none; padding: 0; }
+        .about-footer-main ul li { margin-bottom: .55rem; }
+        .about-footer-main ul li a { color: rgba(255,255,255,.5); text-decoration: none; font-size: .88rem; transition: color .2s; }
+        .about-footer-main ul li a:hover { color: #fff; }
+        .about-footer-bottom { border-top: 1px solid rgba(255,255,255,.08); padding-top: 1.5rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+        .about-footer-bottom p, .about-footer-legal a { font-size: .78rem; color: rgba(255,255,255,.35); text-decoration: none; }
+        .about-footer-legal { display: flex; gap: 1.5rem; }
+        .about-footer-legal a:hover { color: rgba(255,255,255,.7); }
+
+        @media (max-width: 860px) {
+          .about-footer-main { grid-template-columns: 1fr 1fr; gap: 2rem; }
+        }
+        @media (max-width: 560px) {
+          .about-footer { padding: 3rem 5% 2rem; text-align: center; }
+          .about-footer-cta { flex-direction: column; align-items: center; text-align: center; }
+          .about-footer-cta h2 { font-size: 1.3rem; }
+          .about-footer-main { grid-template-columns: 1fr; gap: 1.75rem; text-align: center; }
+          .about-footer-brand p { max-width: 100%; margin: 0 auto; }
+          .about-footer-bottom { flex-direction: column; align-items: center; }
+          .about-footer-legal { justify-content: center; }
         }
 
         /* ─── MOBILE ─── */
@@ -720,8 +924,6 @@ const AboutUs = () => {
           .stat-num { font-size:1.35rem; }
           .stat-label { font-size:.6rem; }
           .stat-desc { display:none; }
-
-          /* Services mobile */
           .serv-section { overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; align-items:flex-start; }
           .serv-inner { padding:28px 20px 48px; width:100%; display:flex; flex-direction:column; align-items:center; text-align:center; }
           .serv-header { margin-bottom:18px; width:100%; }
@@ -749,231 +951,41 @@ const AboutUs = () => {
           .serv-step { padding:11px 0; gap:13px; }
           .serv-step-num { width:26px; height:26px; font-size:.7rem; }
           .serv-step-title { font-size:.84rem; line-height:1.4; }
+          .team-section { overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; align-items:flex-start; }
+          .team-inner { padding:56px 0 48px; display:flex; flex-direction:column; align-items:center; }
+          .team-header { margin-bottom:28px; padding:0 24px; text-align:center; width:100%; }
+          .team-eyebrow { justify-content:center; }
+          .team-title { font-size:1.6rem; text-align:center; }
+          .team-subtitle { font-size:.82rem; max-width:280px; text-align:center; margin:8px auto 0; }
+          .team-grid { display:flex; flex-direction:row; grid-template-columns:unset; gap:0; width:100%; overflow-x:scroll; overflow-y:visible; -webkit-overflow-scrolling:touch; scroll-snap-type:x mandatory; scroll-behavior:smooth; padding:8px 24px 16px; scrollbar-width:none; -ms-overflow-style:none; }
+          .team-grid::-webkit-scrollbar { display:none; }
+          .team-card { flex:0 0 72vw; max-width:300px; min-width:220px; scroll-snap-align:center; margin-right:14px; padding:24px 20px 20px; border-radius:20px; display:flex; flex-direction:column; align-items:center; text-align:center; }
+          .team-card:last-child { margin-right:24px; }
+          .team-photo-wrap { width:80px; height:80px; margin:0 auto 16px; }
+          .team-card-name { font-size:.97rem; text-align:center; }
+          .team-card-role { font-size:.74rem; text-align:center; margin-bottom:14px; }
+          .team-card-divider { width:100%; }
+          .team-card-specialty-label { text-align:center; }
+          .team-card-specialty { font-size:.82rem; text-align:center; margin-bottom:16px; }
+          .team-card-meta { flex-direction:column; align-items:center; gap:10px; width:100%; }
+          .team-card-deals { align-items:center; }
+          .team-card-langs { max-width:100%; justify-content:center; }
+          .team-dots { display:flex; gap:6px; justify-content:center; margin-top:4px; }
+          .team-dot { width:6px; height:6px; border-radius:50%; background:#d4d4d8; transition:background .2s, transform .2s; flex-shrink:0; }
+          .team-dot.active { background:#18181b; transform:scale(1.3); }
+          .team-swipe-hint { display:flex; align-items:center; gap:6px; font-size:.68rem; font-weight:600; color:#a1a1aa; letter-spacing:.06em; text-transform:uppercase; margin-bottom:16px; }
+          .team-swipe-hint svg { opacity:.5; }
 
-          /* Team mobile — horizontal swipe carousel */
-          .team-section {
-            overflow-y: auto;
-            overflow-x: hidden;
-            -webkit-overflow-scrolling: touch;
-            align-items: flex-start;
-          }
-          .team-inner {
-            padding: 56px 0 48px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-          }
-          .team-header {
-            margin-bottom: 28px;
-            padding: 0 24px;
-            text-align: center;
-            width: 100%;
-          }
-          .team-eyebrow { justify-content: center; }
-          .team-title { font-size: 1.6rem; text-align: center; }
-          .team-subtitle {
-            font-size: .82rem;
-            max-width: 280px;
-            text-align: center;
-            margin: 8px auto 0;
-          }
-
-          /* Carousel track */
-          .team-grid {
-            display: flex;
-            flex-direction: row;
-            grid-template-columns: unset;
-            gap: 0;
-            width: 100%;
-            overflow-x: scroll;
-            overflow-y: visible;
-            -webkit-overflow-scrolling: touch;
-            scroll-snap-type: x mandatory;
-            scroll-behavior: smooth;
-            padding: 8px 24px 16px;
-            /* Hide scrollbar */
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-          }
-          .team-grid::-webkit-scrollbar { display: none; }
-
-          /* Each card snaps and is centered */
-          .team-card {
-            flex: 0 0 72vw;
-            max-width: 300px;
-            min-width: 220px;
-            scroll-snap-align: center;
-            margin-right: 14px;
-            padding: 24px 20px 20px;
-            border-radius: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-          }
-          .team-card:last-child { margin-right: 24px; }
-
-          /* Center photo and text */
-          .team-photo-wrap {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 16px;
-          }
-          .team-card-name { font-size: .97rem; text-align: center; }
-          .team-card-role { font-size: .74rem; text-align: center; margin-bottom: 14px; }
-          .team-card-divider { width: 100%; }
-          .team-card-specialty-label { text-align: center; }
-          .team-card-specialty { font-size: .82rem; text-align: center; margin-bottom: 16px; }
-          .team-card-meta { flex-direction: column; align-items: center; gap: 10px; width: 100%; }
-          .team-card-deals { align-items: center; }
-          .team-card-langs { max-width: 100%; justify-content: center; }
-
-          /* Swipe hint dots */
-          .team-dots {
-            display: flex;
-            gap: 6px;
-            justify-content: center;
-            margin-top: 4px;
-          }
-          .team-dot {
-            width: 6px; height: 6px; border-radius: 50%;
-            background: #d4d4d8;
-            transition: background .2s, transform .2s;
-            flex-shrink: 0;
-          }
-          .team-dot.active { background: #18181b; transform: scale(1.3); }
-
-          /* Swipe hint label */
-          .team-swipe-hint {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: .68rem;
-            font-weight: 600;
-            color: #a1a1aa;
-            letter-spacing: .06em;
-            text-transform: uppercase;
-            margin-bottom: 16px;
-          }
-          .team-swipe-hint svg { opacity: .5; }
-        }
-
-        /* ─── TESTIMONIALS — overlay z:40 ─── */
-        .test-section {
-          position:absolute; inset:0;
-          background:#fff;
-          display:flex; align-items:center; justify-content:center;
-          overflow:hidden;
-          transform:translateY(100%);
-          will-change:transform;
-          z-index:40;
-        }
-
-        /* Floating photo columns */
-        .test-photos-left, .test-photos-right {
-          position:absolute; top:0; bottom:0;
-          display:flex; flex-direction:column; gap:16px;
-          padding:20px 0; pointer-events:none;
-        }
-        .test-photos-left  { left:0;  width:200px; align-items:flex-end; }
-        .test-photos-right { right:0; width:200px; align-items:flex-start; }
-
-        .test-photo {
-          border-radius:16px; overflow:hidden;
-          box-shadow:0 8px 32px rgba(0,0,0,.10);
-          opacity:0; transform:translateY(30px);
-          transition:opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1);
-          background:#f4f4f5;
-          flex-shrink:0;
-        }
-        .test-photo img { width:100%; height:100%; object-fit:cover; display:block; }
-
-        /* staggered entrance */
-        .test-section.in-view .test-photo { opacity:1; transform:translateY(0); }
-        .test-photo:nth-child(1) { transition-delay:.10s; }
-        .test-photo:nth-child(2) { transition-delay:.20s; }
-        .test-photo:nth-child(3) { transition-delay:.32s; }
-        .test-photo:nth-child(4) { transition-delay:.44s; }
-
-        /* subtle float animations */
-        .test-photo:nth-child(1) { animation:none; }
-        .test-section.in-view .test-photo:nth-child(1) { animation:float1 5.5s ease-in-out 1s infinite; }
-        .test-section.in-view .test-photo:nth-child(2) { animation:float2 6.2s ease-in-out 1.3s infinite; }
-        .test-section.in-view .test-photo:nth-child(3) { animation:float3 5.8s ease-in-out 1.1s infinite; }
-        .test-section.in-view .test-photo:nth-child(4) { animation:float4 6.5s ease-in-out 1.5s infinite; }
-
-        /* left col sizing */
-        .test-photos-left .test-photo:nth-child(1)  { width:140px; height:170px; }
-        .test-photos-left .test-photo:nth-child(2)  { width:110px; height:136px; }
-        .test-photos-left .test-photo:nth-child(3)  { width:130px; height:158px; }
-        .test-photos-left .test-photo:nth-child(4)  { width:105px; height:128px; }
-        /* right col sizing */
-        .test-photos-right .test-photo:nth-child(1) { width:115px; height:140px; }
-        .test-photos-right .test-photo:nth-child(2) { width:140px; height:170px; }
-        .test-photos-right .test-photo:nth-child(3) { width:108px; height:132px; }
-        .test-photos-right .test-photo:nth-child(4) { width:132px; height:160px; }
-
-        /* Center content */
-        .test-center {
-          position:relative; z-index:2;
-          max-width:480px; width:100%;
-          display:flex; flex-direction:column; align-items:center;
-          text-align:center; padding:0 20px;
-        }
-        .test-badge {
-          display:inline-flex; align-items:center; gap:7px;
-          background:#f4f4f5; border:1px solid #e4e4e7;
-          padding:6px 14px; border-radius:99px; margin-bottom:22px;
-          font-size:.65rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#71717a;
-          opacity:0; transform:translateY(14px);
-          transition:opacity .6s cubic-bezier(.16,1,.3,1) .12s, transform .6s cubic-bezier(.16,1,.3,1) .12s;
-        }
-        .test-section.in-view .test-badge { opacity:1; transform:translateY(0); }
-        .test-badge-dot { width:6px; height:6px; border-radius:50%; background:#18181b; }
-
-        .test-heading {
-          font-family:'Outfit',sans-serif;
-          font-size:clamp(2rem,3.8vw,3rem); font-weight:900;
-          line-height:1.08; letter-spacing:-.04em; color:#18181b;
-          margin-bottom:0;
-          opacity:0; transform:translateY(18px);
-          transition:opacity .65s cubic-bezier(.16,1,.3,1) .22s, transform .65s cubic-bezier(.16,1,.3,1) .22s;
-        }
-        .test-heading-muted { color:#a1a1aa; display:block; font-weight:800; }
-        .test-section.in-view .test-heading { opacity:1; transform:translateY(0); }
-
-        .test-sub {
-          font-size:.9rem; color:#71717a; line-height:1.75; margin-top:16px; max-width:360px;
-          opacity:0; transform:translateY(14px);
-          transition:opacity .6s cubic-bezier(.16,1,.3,1) .34s, transform .6s cubic-bezier(.16,1,.3,1) .34s;
-        }
-        .test-section.in-view .test-sub { opacity:1; transform:translateY(0); }
-
-        .test-cta {
-          display:inline-flex; align-items:center; gap:9px;
-          background:#18181b; color:#fff;
-          padding:14px 26px; border-radius:99px;
-          font-family:'DM Sans',sans-serif; font-size:.88rem; font-weight:700;
-          text-decoration:none; border:none; cursor:pointer; margin-top:28px;
-          box-shadow:0 4px 20px rgba(0,0,0,.18);
-          opacity:0; transform:translateY(14px);
-          transition:opacity .6s cubic-bezier(.16,1,.3,1) .44s, transform .6s cubic-bezier(.16,1,.3,1) .44s,
-                      box-shadow .25s, background .25s, scale .22s cubic-bezier(.34,1.4,.64,1);
-        }
-        .test-section.in-view .test-cta { opacity:1; transform:translateY(0); }
-        .test-cta:hover { background:#27272a; box-shadow:0 10px 32px rgba(0,0,0,.28); scale:1.04; }
-        .test-cta svg { transition:transform .22s cubic-bezier(.34,1.4,.64,1); }
-        .test-cta:hover svg { transform:translateX(3px); }
-
-        /* ── mobile: hide photo columns, center everything ── */
-        @media (max-width:640px) {
-          .test-section { align-items:center; }
-          .test-photos-left, .test-photos-right { display:none; }
-          .test-center { max-width:100%; padding:0 28px; }
-          .test-heading { font-size:1.8rem; }
-          .test-sub { font-size:.82rem; margin-top:12px; }
-          .test-cta { padding:13px 22px; font-size:.83rem; margin-top:22px; }
-          .test-badge { margin-bottom:18px; }
+          /* ── Testimonials mobile ── */
+          .test-col { display: none; }
+          .test-center { padding: 32px 18px 40px; justify-content: center; }
+          .test-heading { font-size: 1.6rem; }
+          .trev-card { padding: 24px 22px 20px; }
+          .trev-card::after { font-size: 5.5rem; }
+          .trev-quote { font-size: .9rem; }
+          .trev-avatar { width: 42px; height: 42px; }
+          .trev-name { font-size: .85rem; }
+          .trev-nav { max-width: 100%; }
         }
 
         @media (max-width:640px) {
@@ -1000,12 +1012,15 @@ const AboutUs = () => {
           .who-top { gap:40px; }
           .serv-panel { gap:36px; }
           .team-grid { grid-template-columns:repeat(2,1fr); gap:16px; }
+          /* Testimonials tablet: narrower columns */
+          .test-col { width: 120px; }
+          .trev-slider { max-width: 420px; }
         }
       `}</style>
 
             <Navbar />
 
-            {/* BLOCK 1: Hero + CEO overlay */}
+            {/* BLOCK 1 */}
             <div className="hero-wrap" ref={heroWrapRef}>
                 <div className="hero-sticky">
                     <section className="hero" ref={heroRef}>
@@ -1061,11 +1076,11 @@ const AboutUs = () => {
                 </div>
             </div>
 
-            {/* BLOCK 2: Who + Services + Team — all 3 layers in ONE 300vh sticky container */}
+            {/* BLOCK 2 */}
             <div className="who-wrap" ref={whoWrapRef} id="team">
                 <div className="who-sticky">
 
-                    {/* Layer 0 — base: Who We Are */}
+                    {/* Layer 0 — Who We Are */}
                     <section className="who-section" ref={whoRef}>
                         <div className="who-inner">
                             <div className="who-top">
@@ -1097,7 +1112,7 @@ const AboutUs = () => {
                         </div>
                     </section>
 
-                    {/* Layer 1 — overlay: Services */}
+                    {/* Layer 1 — Services */}
                     <section className="serv-section" ref={servRef}>
                         <div className="serv-inner">
                             <div className="serv-header">
@@ -1158,7 +1173,7 @@ const AboutUs = () => {
                         </div>
                     </section>
 
-                    {/* Layer 2 — overlay: Team (white, slides over services) */}
+                    {/* Layer 2 — Team */}
                     <section className="team-section" ref={teamRef}>
                         <div className="team-inner">
                             <div className="team-header">
@@ -1171,16 +1186,14 @@ const AboutUs = () => {
                                 <p className="team-subtitle">Specialists across every segment of Dubai real estate — residential, commercial, and beyond.</p>
                             </div>
                             <div className="team-swipe-hint">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
                                 swipe
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                             </div>
                             <div className="team-grid" ref={teamGridRef}>
                                 {team.map((member, i) => (
                                     <div key={i} className="team-card" ref={el => { if (el) teamCardRefs.current[i] = el; }}>
-                                        <div className="team-photo-wrap">
-                                            <img src={member.image} alt={member.name} />
-                                        </div>
+                                        <div className="team-photo-wrap"><img src={member.image} alt={member.name} /></div>
                                         <div className="team-card-name">{member.name}</div>
                                         <div className="team-card-role">{member.role}</div>
                                         <div className="team-card-divider" />
@@ -1208,7 +1221,7 @@ const AboutUs = () => {
                         </div>
                     </section>
 
-                    {/* Layer 3 — overlay: Vision & Mission */}
+                    {/* Layer 3 — Vision & Mission */}
                     <section className="vision-section" ref={visionRef}>
                         <div className="vision-inner">
                             <div className="vision-header">
@@ -1220,16 +1233,14 @@ const AboutUs = () => {
                                 <h2 className="vision-heading">Vision &amp; <em>Mission.</em></h2>
                                 <p className="vision-sub">Two sides of the same promise — where we stand today, and where we&#39;re taking our clients tomorrow.</p>
                             </div>
-
                             <div className="vision-carousel">
                                 <div className="vision-track-wrap">
                                     <div className="vision-track" style={{ transform: `translateX(-${activeVision * 100}%)` }}>
-                                        {/* Slide 0 — Mission */}
                                         <div className="vision-card">
                                             <div className="vision-card-icon">
-                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" /></svg>
                                             </div>
-                                            <div className="vision-card-tag"><div className="vision-card-tag-dot"/>Mission</div>
+                                            <div className="vision-card-tag"><div className="vision-card-tag-dot" />Mission</div>
                                             <div className="vision-card-title">What we do, every single day.</div>
                                             <p className="vision-card-body">We deliver honest, expert guidance to every client — buyers, sellers, and investors alike. No pressure, no gimmicks. Just 12 years of doing the right thing, one deal at a time.</p>
                                             <div className="vision-card-pills">
@@ -1238,12 +1249,11 @@ const AboutUs = () => {
                                                 <span className="vision-pill">RERA Licensed</span>
                                             </div>
                                         </div>
-                                        {/* Slide 1 — Vision */}
                                         <div className="vision-card vision-card--dark">
                                             <div className="vision-card-icon">
-                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
                                             </div>
-                                            <div className="vision-card-tag"><div className="vision-card-tag-dot"/>Vision</div>
+                                            <div className="vision-card-tag"><div className="vision-card-tag-dot" />Vision</div>
                                             <div className="vision-card-title">Where we&#39;re heading.</div>
                                             <p className="vision-card-body">To become Dubai&#39;s most trusted real estate name — not the largest, but the most referred. A firm where every client becomes a lifelong advocate because we never stopped earning their trust.</p>
                                             <div className="vision-card-pills">
@@ -1254,8 +1264,6 @@ const AboutUs = () => {
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Arrow navigation */}
                                 <div className="vision-nav">
                                     <div className="vision-nav-dots">
                                         <button className={`vision-nav-dot${activeVision === 0 ? ' active' : ''}`} onClick={() => setActiveVision(0)} aria-label="Mission" />
@@ -1264,10 +1272,10 @@ const AboutUs = () => {
                                     <div className="vision-nav-label">{activeVision === 0 ? 'Mission' : 'Vision'}</div>
                                     <div className="vision-nav-arrows">
                                         <button className="vision-arrow" onClick={() => setActiveVision(0)} disabled={activeVision === 0} aria-label="Previous">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
                                         </button>
                                         <button className="vision-arrow" onClick={() => setActiveVision(1)} disabled={activeVision === 1} aria-label="Next">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                                         </button>
                                     </div>
                                 </div>
@@ -1275,43 +1283,220 @@ const AboutUs = () => {
                         </div>
                     </section>
 
-                    {/* Layer 4 — overlay: Testimonials */}
+                    {/* ═══════════════════════════════════════════════════
+                        Layer 4 — Testimonials: big slider + arrow nav
+                    ═══════════════════════════════════════════════════ */}
                     <section className="test-section" ref={testimonialsRef}>
 
-                        {/* Left floating photos */}
-                        <div className="test-photos-left">
-                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=85" alt="" /></div>
-                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=85" alt="" /></div>
-                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&q=85" alt="" /></div>
-                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&q=85" alt="" /></div>
+                        {/* LEFT COLUMN — scrolls upward */}
+                        <div className="test-col test-col--left">
+                            <div className="test-strip test-strip--up">
+                                {leftPhotos.map((p, i) => (
+                                    <div key={i} className="test-strip-photo" style={{ height: p.h }}>
+                                        <img src={p.src} alt="" style={{ height: p.h }} />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
 
-                        {/* Center headline */}
+                        {/* CENTER */}
                         <div className="test-center">
-                            <div className="test-badge"><div className="test-badge-dot"/>Testimonials</div>
-                            <h2 className="test-heading">
-                                Trusted by clients
-                                <span className="test-heading-muted">across Dubai.</span>
-                            </h2>
-                            <p className="test-sub">Every client we&#39;ve ever had came through a referral. Here&#39;s what they say about working with us.</p>
-                            <a href="#contact" className="test-cta">
-                                Read Success Stories
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                            </a>
+                            <div className="test-badge"><div className="test-badge-dot" />Client Reviews</div>
+                            <h2 className="test-heading">Trusted by clients<br /><span className="test-heading-muted">across Dubai.</span></h2>
+                            <p className="test-sub">Every client we&#39;ve worked with came through a referral. Here&#39;s what they say.</p>
+
+                            {/* Big slider */}
+                            <div className="trev-slider">
+                                <div className="trev-track-wrap">
+                                    <div className="trev-track" style={{ transform: `translateX(-${activeReview * 100}%)` }}>
+
+                                        {/* Review 1 */}
+                                        <div className="trev-card">
+                                            <div className="trev-stars">{[0, 1, 2, 3, 4].map(s => <svg key={s} className="trev-star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>)}</div>
+                                            <p className="trev-quote">"Al Areeq found us our dream villa in under two weeks. Mohammed was honest, never pushy, and negotiated an incredible deal on our behalf. From first call to keys in hand, every step felt effortless. We felt like family, not just clients."</p>
+                                            <div className="trev-author">
+                                                <div className="trev-avatar"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=85" alt="Sarah" /></div>
+                                                <div className="trev-author-info">
+                                                    <div className="trev-name">Sarah &amp; James Mitchell</div>
+                                                    <div className="trev-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>Dubai Hills, UAE</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Review 2 */}
+                                        <div className="trev-card">
+                                            <div className="trev-stars">{[0, 1, 2, 3, 4].map(s => <svg key={s} className="trev-star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>)}</div>
+                                            <p className="trev-quote">"As a first-time investor I was nervous about every decision. Sara guided me through every step — market data, contract terms, risk, everything. Transparent, patient, and deeply results-driven. The best financial decision I've made in Dubai."</p>
+                                            <div className="trev-author">
+                                                <div className="trev-avatar"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=85" alt="Carlos" /></div>
+                                                <div className="trev-author-info">
+                                                    <div className="trev-name">Carlos Reyes</div>
+                                                    <div className="trev-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>Downtown Dubai, UAE</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Review 3 */}
+                                        <div className="trev-card">
+                                            <div className="trev-stars">{[0, 1, 2, 3, 4].map(s => <svg key={s} className="trev-star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>)}</div>
+                                            <p className="trev-quote">"We relocated from London with two kids and zero knowledge of Dubai. Al Areeq handled everything — school district advice, contract review, neighbourhood walkthroughs, the lot. They went far beyond what any agency would do. Genuinely the best service experience we've ever had."</p>
+                                            <div className="trev-author">
+                                                <div className="trev-avatar"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&q=85" alt="Priya" /></div>
+                                                <div className="trev-author-info">
+                                                    <div className="trev-name">Priya &amp; Arjun Shah</div>
+                                                    <div className="trev-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>Palm Jumeirah, UAE</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Review 4 */}
+                                        <div className="trev-card">
+                                            <div className="trev-stars">{[0, 1, 2, 3, 4].map(s => <svg key={s} className="trev-star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>)}</div>
+                                            <p className="trev-quote">"I've dealt with agencies across three countries. Al Areeq stands alone. No hard selling, no hidden agendas — just honest professionals who know their market cold. Closed my penthouse in Business Bay in 9 days. Extraordinary."</p>
+                                            <div className="trev-author">
+                                                <div className="trev-avatar"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&q=85" alt="David" /></div>
+                                                <div className="trev-author-info">
+                                                    <div className="trev-name">David Okonkwo</div>
+                                                    <div className="trev-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>Business Bay, UAE</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                {/* Arrow navigation */}
+                                <div className="trev-nav">
+                                    <div className="trev-nav-dots">
+                                        {[0, 1, 2, 3].map(i => (
+                                            <button key={i} className={`trev-nav-dot${activeReview === i ? ' active' : ''}`} onClick={() => setActiveReview(i)} aria-label={`Review ${i + 1}`} />
+                                        ))}
+                                    </div>
+                                    <div className="trev-nav-counter">{activeReview + 1} / 4</div>
+                                    <div className="trev-nav-arrows">
+                                        <button className="trev-arrow" onClick={() => setActiveReview(r => Math.max(0, r - 1))} disabled={activeReview === 0} aria-label="Previous review">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                                        </button>
+                                        <button className="trev-arrow" onClick={() => setActiveReview(r => Math.min(3, r + 1))} disabled={activeReview === 3} aria-label="Next review">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Right floating photos */}
-                        <div className="test-photos-right">
-                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&q=85" alt="" /></div>
-                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=300&q=85" alt="" /></div>
-                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=85" alt="" /></div>
-                            <div className="test-photo"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&q=85" alt="" /></div>
+                        {/* RIGHT COLUMN — scrolls downward */}
+                        <div className="test-col test-col--right">
+                            <div className="test-strip test-strip--down">
+                                {rightPhotos.map((p, i) => (
+                                    <div key={i} className="test-strip-photo" style={{ height: p.h }}>
+                                        <img src={p.src} alt="" style={{ height: p.h }} />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
 
                     </section>
 
+                </div>{/* end who-wrap */}
+            </div>{/* end outer wrapper */}
+
+            {/* ═══════════════════════════════════════════════════════════
+                SECTION 8 — Call To Action
+            ═══════════════════════════════════════════════════════════ */}
+            <section className="cta-section" ref={ctaRef}>
+                <div className="cta-inner">
+                    <div className="cta-eyebrow"><div className="cta-eyebrow-dot" />Let&#39;s Get Started</div>
+                    <h2 className="cta-heading">
+                        Ready to Find Your<br /><em>Dream Property?</em>
+                    </h2>
+                    <p className="cta-sub">
+                        Whether you&#39;re buying, selling, or investing — our team is ready to guide you every step of the way.
+                    </p>
+                    <div className="cta-buttons">
+                        <a href="#contact" className="cta-btn-primary">
+                            Contact Us
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                        </a>
+                        <a href="#listings" className="cta-btn-secondary">
+                            View Listings
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                        </a>
+                    </div>
+                    <div className="cta-stats">
+                        <div className="cta-stat">
+                            <div className="cta-stat-num">{ctaInView ? ctaCounters.deals : 0}+</div>
+                            <div className="cta-stat-label">Deals Closed</div>
+                        </div>
+                        <div className="cta-stat">
+                            <div className="cta-stat-num">{ctaInView ? ctaCounters.exp : 0}yr</div>
+                            <div className="cta-stat-label">Experience</div>
+                        </div>
+                        <div className="cta-stat">
+                            <div className="cta-stat-num">{ctaInView ? ctaCounters.sat : 0}%</div>
+                            <div className="cta-stat-label">Client Satisfaction</div>
+                        </div>
+                        <div className="cta-stat">
+                            <div className="cta-stat-num">{ctaInView ? (ctaCounters.rating / 10).toFixed(1) : '0.0'}★</div>
+                            <div className="cta-stat-label">Average Rating</div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </section>
+
+            {/* ═══════════════════════════════════════════════════════════
+                FOOTER
+            ═══════════════════════════════════════════════════════════ */}
+            <footer className="about-footer">
+                <div className="about-footer-cta">
+                    <h2>Find your dream home today.</h2>
+                    <div className="about-footer-cta-buttons">
+                        <a href="/listings" className="about-footer-btn-primary">Browse Listings</a>
+                        <a href="/contact" className="about-footer-btn-outline">Contact Agent</a>
+                    </div>
+                </div>
+                <div className="about-footer-main">
+                    <div className="about-footer-brand">
+                        <h3>Al Areeq</h3>
+                        <p>Trusted real estate partner helping families buy, rent and invest in premium Dubai properties since 2012.</p>
+                    </div>
+                    <div>
+                        <h4>Properties</h4>
+                        <ul>
+                            <li><a href="#">Buy</a></li>
+                            <li><a href="#">Rent</a></li>
+                            <li><a href="#">Luxury</a></li>
+                            <li><a href="#">Off-Plan</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Company</h4>
+                        <ul>
+                            <li><a href="#">About</a></li>
+                            <li><a href="#">Agents</a></li>
+                            <li><a href="#">Careers</a></li>
+                            <li><a href="#">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Resources</h4>
+                        <ul>
+                            <li><a href="#">Mortgage Calculator</a></li>
+                            <li><a href="#">Market Reports</a></li>
+                            <li><a href="#">Area Guides</a></li>
+                            <li><a href="#">Blog</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div className="about-footer-bottom">
+                    <p>© {new Date().getFullYear()} Al Areeq Real Estate. All rights reserved.</p>
+                    <div className="about-footer-legal">
+                        <a href="#">Privacy</a>
+                        <a href="#">Terms</a>
+                        <a href="#">RERA Licensed</a>
+                    </div>
+                </div>
+            </footer>
         </>
     );
 };
