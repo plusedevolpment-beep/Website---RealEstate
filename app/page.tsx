@@ -241,7 +241,7 @@ const DreamHomes = () => {
         .search-field:hover { background:var(--gray-100); }
         .search-field-label { font-size:0.6875rem; color:var(--gray-500); text-transform:uppercase; letter-spacing:0.08em; font-weight:600; }
         .search-field select { border:none; background:transparent; font-size:0.875rem; color:var(--gray-900); font-weight:500; outline:none; font-family:'Inter',sans-serif; -webkit-appearance:none; width:100%; }
-        .search-button { background:linear-gradient(135deg,#18181b,#27272a); border:none; border-radius:10px; padding:0 2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; min-width:72px; height:100%; min-height:52px; transition:transform 0.2s; }
+        .search-button { background:linear-gradient(135deg,#18181b,#27272a); border:none; border-radius:10px; padding:0 2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; min-width:72px; height:100%; transition:transform 0.2s; }
         .search-button:hover { transform:scale(1.03); }
         .search-icon { width:22px; height:22px; stroke:#fff; stroke-width:2.5; fill:none; }
 
@@ -438,7 +438,6 @@ const DreamHomes = () => {
           .hero-buttons { flex-direction:column; gap:0.75rem; margin-bottom:1.5rem; width:100%; }
           .btn-primary { width:100%; justify-content:center; }
           .search-bar { grid-template-columns:1fr; max-width:100%; width:100%; }
-          .search-button { min-height:52px; padding:0.875rem 2rem; height:52px; }
           .hero-right { display:none !important; }
           .listings-heading { font-size:2rem; }
           .floating-whatsapp { width:56px; height:56px; padding:0; bottom:1.5rem; right:1.5rem; border-radius:50%; justify-content:center; }
@@ -493,7 +492,7 @@ const DreamHomes = () => {
             <span className="desktop-description">Verified properties, transparent pricing, trusted by thousands.</span>
             <span className="mobile-description">Find your perfect home with verified listings.</span>
           </p>
-          <div className="hero-buttons"><button className="btn-primary">Get </button></div>
+          <div className="hero-buttons"><button className="btn-primary">Get Started</button></div>
           <div className="search-toggle">
             <button className={`toggle-option ${searchMode === 'rent' ? 'active' : ''}`} onClick={() => setSearchMode('rent')}>For Rent</button>
             <button className={`toggle-option ${searchMode === 'buy' ? 'active' : ''}`} onClick={() => setSearchMode('buy')}>For Sale</button>
@@ -593,7 +592,7 @@ const DreamHomes = () => {
             <div className="bento-svc-card bento-cell" style={{ gridColumn: 3, gridRow: 1 }}><div className="bento-svc-icon">{services[0].icon}</div><div className="bento-svc-title">{services[0].title}</div><div className="bento-svc-desc">{services[0].description}</div></div>
             <div className="bento-svc-card bento-cell" style={{ gridColumn: 1, gridRow: 2 }}><div className="bento-svc-icon">{services[1].icon}</div><div className="bento-svc-title">{services[1].title}</div><div className="bento-svc-desc">{services[1].description}</div></div>
             <div className="bento-svc-card bento-cell" style={{ gridColumn: 2, gridRow: 2 }}><div className="bento-svc-icon">{services[2].icon}</div><div className="bento-svc-title">{services[2].title}</div><div className="bento-svc-desc">{services[2].description}</div></div>
-            <div className="bento-cta-card bento-cell"><div><div className="bento-cta-card-label">Ready to start?</div><div className="bento-cta-card-title">Let's find your perfect home today.</div></div><a href="/contact" className="bento-cta-card-btn">Get<svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a></div>
+            <div className="bento-cta-card bento-cell"><div><div className="bento-cta-card-label">Ready to start?</div><div className="bento-cta-card-title">Let's find your perfect home today.</div></div><a href="/contact" className="bento-cta-card-btn">Get Started <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a></div>
           </div>
           <div className="about-learn-more"><a href="/about" className="about-learn-btn">Learn More <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a></div>
         </div>

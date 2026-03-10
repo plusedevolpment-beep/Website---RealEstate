@@ -47,12 +47,9 @@ const NAV_ITEMS = [
     { label: 'Projects', dropdown: [{ label: 'New Launches', href: '#' }, { label: 'Upcoming Projects', href: '#' }, { label: 'Investment Opportunities', href: '#' }] },
     { label: 'Agents', dropdown: [{ label: 'Meet the Team', href: '#' }, { label: 'Agent Profiles', href: '#' }, { label: 'Become an Agent', href: '#' }] },
     { label: 'About', href: '/about', dropdown: [{ label: 'Company Overview', href: '/about#au-intro' }, { label: 'Mission & Vision', href: '/about#au-values' }, { label: 'Meet the Team', href: '/about#au-team' }, { label: 'Testimonials', href: '/about#au-testimonials' }] },
-    { label: 'Blog', href: '/Blog', dropdown: [{ label: 'Market Trends', href: '/Blog' }, { label: 'Investment Tips', href: '/Blog' }, { label: 'News & Updates', href: '/Blog' }] },
-    { label: 'Contact', href: '/contact' },
+    { label: 'Blog', dropdown: [{ label: 'Market Trends', href: '#' }, { label: 'Investment Tips', href: '#' }, { label: 'News & Updates', href: '#' }] },
+    { label: 'Contact', href: '#contact' },
 ];
-
-export const NAVBAR_HEIGHT_DESKTOP = 102;
-export const NAVBAR_HEIGHT_MOBILE = 64;
 
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -85,24 +82,17 @@ const Navbar = () => {
         <>
             <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
-        :root {
-          --g50:#fafafa; --g100:#f4f4f5; --g200:#e4e4e7; --g300:#d4d4d8; --g400:#a1a1aa;
-          --g500:#71717a; --g600:#52525b; --g700:#3f3f46; --g800:#27272a; --g900:#18181b;
-          --nv-utility-h: 32px;
-          --nv-main-h: 70px;
-          --nv-total-h: 102px;
-          --nv-mobile-h: 64px;
-        }
+        :root { --g50:#fafafa; --g100:#f4f4f5; --g200:#e4e4e7; --g300:#d4d4d8; --g400:#a1a1aa; --g500:#71717a; --g600:#52525b; --g700:#3f3f46; --g800:#27272a; --g900:#18181b; }
         .nv { position:fixed; top:0; left:0; right:0; z-index:1000; font-family:'Inter',sans-serif; }
         .nv.scrolled .nv-utility { display:none; }
         .nv.scrolled .nv-main { background:rgba(255,255,255,0.98); backdrop-filter:blur(16px); box-shadow:0 1px 0 var(--g200),0 4px 24px rgba(0,0,0,0.05); height:60px; }
-        .nv-utility { display:flex; justify-content:flex-end; align-items:center; gap:1.25rem; padding:0.4rem 6%; background:var(--g900); height:var(--nv-utility-h); }
+        .nv-utility { display:flex; justify-content:flex-end; align-items:center; gap:1.25rem; padding:0.4rem 6%; background:var(--g900); }
         .nv-util-link { display:inline-flex; align-items:center; gap:0.4rem; font-size:0.74rem; font-weight:500; color:rgba(255,255,255,0.55); text-decoration:none; transition:color 0.18s; }
         .nv-util-link:hover { color:#fff; }
         .nv-util-sep { width:1px; height:12px; background:rgba(255,255,255,0.14); }
         .nv-util-lang { display:inline-flex; align-items:center; gap:0.35rem; font-size:0.74rem; color:rgba(255,255,255,0.55); background:none; border:none; font-family:'Inter',sans-serif; cursor:pointer; transition:color 0.18s; padding:0; }
         .nv-util-lang:hover { color:#fff; }
-        .nv-main { display:flex; align-items:center; justify-content:space-between; padding:0 6%; height:var(--nv-main-h); background:#fff; transition:height 0.3s,background 0.3s,box-shadow 0.3s; gap:1rem; }
+        .nv-main { display:flex; align-items:center; justify-content:space-between; padding:0 6%; height:70px; background:#fff; transition:height 0.3s,background 0.3s,box-shadow 0.3s; gap:1rem; }
         .nv-logo { display:flex; flex-direction:column; text-decoration:none; flex-shrink:0; gap:6px; }
         .nv-logo-name { font-family:'Outfit',sans-serif; font-size:1.3rem; font-weight:800; color:var(--g900); letter-spacing:-0.03em; line-height:1; transition:color 0.18s; }
         .nv-logo-tag { font-size:0.59rem; font-weight:600; letter-spacing:0.14em; color:var(--g400); text-transform:uppercase; line-height:1; }
@@ -112,7 +102,6 @@ const Navbar = () => {
         .nv-item::after { content:''; position:absolute; bottom:-14px; left:-20px; right:-20px; height:14px; }
         .nv-btn { display:inline-flex; align-items:center; gap:0.25rem; padding:0.45rem 0.6rem; border:none; background:none; cursor:pointer; font-family:'Inter',sans-serif; font-size:0.8rem; font-weight:500; color:var(--g600); border-radius:8px; transition:color 0.15s,background 0.15s; white-space:nowrap; text-decoration:none; }
         .nv-btn:hover { color:var(--g900); background:var(--g100); }
-        .nv-btn.active { color:var(--g900); font-weight:700; }
         .nv-chev { transition:transform 0.22s ease; flex-shrink:0; display:flex; align-items:center; }
         .nv-item:hover .nv-chev { transform:rotate(180deg); }
         .nv-dd { position:absolute; top:calc(100% + 14px); left:50%; transform:translateX(-50%) translateY(4px); background:#fff; border:1px solid var(--g200); border-radius:14px; padding:0.4rem; box-shadow:0 16px 48px rgba(0,0,0,0.09),0 4px 14px rgba(0,0,0,0.04); min-width:210px; z-index:200; opacity:0; pointer-events:none; transition:opacity 0.15s,transform 0.15s; }
@@ -192,20 +181,8 @@ const Navbar = () => {
         .mob-cp:hover { background:var(--g700); }
         .mob-cs { width:100%; padding:0.8rem; background:none; border:1.5px solid var(--g200); border-radius:10px; font-family:'Inter',sans-serif; font-size:0.9rem; font-weight:600; color:var(--g700); cursor:pointer; transition:all 0.15s; }
         .mob-cs:hover { border-color:var(--g900); color:var(--g900); }
-        /* Blog active state */
-        .nv-btn[href="/Blog"] { position:relative; }
-        .nv-btn[href="/Blog"]::after { content:''; position:absolute; bottom:-2px; left:50%; transform:translateX(-50%); width:18px; height:2px; background:var(--g900); border-radius:2px; opacity:0; transition:opacity 0.2s; }
-        .nv-btn[href="/Blog"]:hover::after { opacity:1; }
         @media (max-width:1120px) { .nv-btn-out { display:none; } }
-        @media (max-width:980px) {
-          .nv-links { display:none; }
-          .nv-ham { display:flex; }
-          .nv-ov { display:block; }
-          .nv-sw { display:none; }
-          .nv-btn-prim { display:none; }
-          .nv-main { height:var(--nv-mobile-h); }
-          .nv-utility { display:none !important; }
-        }
+        @media (max-width:980px) { .nv-links { display:none; } .nv-ham { display:flex; } .nv-ov { display:block; } .nv-sw { display:none; } .nv-btn-prim { display:none; } }
         @media (max-width:480px) { .nv-main,.nv-utility { padding-left:4%; padding-right:4%; } }
       `}</style>
 
@@ -281,9 +258,9 @@ const Navbar = () => {
                         <div className="nv-sw">
                             <button className="nv-icon" onClick={() => setSearchOpen(o => !o)} aria-label="Search"><IcSearch /></button>
                             <div className={`nv-sp ${searchOpen ? 'open' : ''}`}>
-                                <div className="sf"><span className="sf-label">Location</span><input placeholder="City or area..." /></div>
+                                <div className="sf"><span className="sf-label">Location</span><input placeholder="City or area…" /></div>
                                 <div className="sf"><span className="sf-label">Type</span><select><option>Any Type</option><option>Apartment</option><option>Villa</option><option>Penthouse</option></select></div>
-                                <div className="sf"><span className="sf-label">Price</span><select><option>Any Price</option><option>Under $500K</option><option>$500K-$1M</option><option>$1M-$3M</option><option>$3M+</option></select></div>
+                                <div className="sf"><span className="sf-label">Price</span><select><option>Any Price</option><option>Under $500K</option><option>$500K–$1M</option><option>$1M–$3M</option><option>$3M+</option></select></div>
                                 <button className="sg"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>Go</button>
                             </div>
                         </div>
@@ -307,7 +284,7 @@ const Navbar = () => {
                     <span className="mob-hd-tag">Luxury Real Estate</span>
                     <button className="mob-cl" onClick={() => setMobileOpen(false)} aria-label="Close"><IcClose /></button>
                 </div>
-                <div className="mob-srch"><IcSearch /><input placeholder="Search properties..." /></div>
+                <div className="mob-srch"><IcSearch /><input placeholder="Search properties…" /></div>
                 <div className="mob-utils">
                     <a href="#" className="mob-ua">Log In</a>
                     <a href="#" className="mob-ua">Sign Up</a>
