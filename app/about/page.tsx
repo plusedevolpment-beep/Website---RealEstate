@@ -7,7 +7,7 @@ const AboutUs = () => {
     const heroWrapRef = useRef<HTMLDivElement>(null);
     const ceoRef = useRef<HTMLElement>(null);
     const whoWrapRef = useRef<HTMLDivElement>(null);
-    const whoRef = useRef<HTMLElement>(null); v
+    const whoRef = useRef<HTMLElement>(null);
     const servRef = useRef<HTMLElement>(null);
     const statRefs = useRef<HTMLDivElement[]>([]);
     const [activeService, setActiveService] = useState(0);
