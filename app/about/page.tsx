@@ -1,13 +1,13 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import Navbar fr    xom '../components/Navbar';
+import Navbar from '../components/Navbar';
 
 const AboutUs = () => {
     const heroRef = useRef<HTMLElement>(null);
     const heroWrapRef = useRef<HTMLDivElement>(null);
     const ceoRef = useRef<HTMLElement>(null);
     const whoWrapRef = useRef<HTMLDivElement>(null);
-    const whoRef = useRef<HTMLElement>(null);
+    const whoRef = useRef<HTMLElement>(null); v
     const servRef = useRef<HTMLElement>(null);
     const statRefs = useRef<HTMLDivElement[]>([]);
     const [activeService, setActiveService] = useState(0);
