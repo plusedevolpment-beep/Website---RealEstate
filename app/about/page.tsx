@@ -21,19 +21,27 @@ body { font-family: 'DM Sans', sans-serif; background: #18181b; -webkit-font-smo
 @keyframes shimmer  { 0%{background-position:-200% center} 100%{background-position:200% center} }
 @keyframes panelIn  { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
 @keyframes slideUp  { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
-@keyframes lineDraw { from{transform:scaleX(0)} to{transform:scaleX(1)} }
 @keyframes stripUp  { 0%{transform:translateY(0)} 100%{transform:translateY(-50%)} }
 @keyframes stripDown{ 0%{transform:translateY(-50%)} 100%{transform:translateY(0)} }
 
 /* ═══════════════════════════════════════════════════════
-   STACKED SCROLL SYSTEM
-   Each .stack-panel is position:sticky; top:0; height:100vh
-   Higher z-index panels naturally slide over lower ones.
-   The outer .stack-wrap height = number_of_panels * 100vh
+   TRUE STACKED OVERLAP SYSTEM
+   
+   How it works:
+   - stack-wrap is tall (N panels × 100vh)
+   - Every .stack-panel is position:sticky top:0 height:100vh
+   - Higher z-index panels sit ON TOP of lower ones
+   - As you scroll, the browser naturally slides each sticky panel
+     over the previous one — this IS the overlap effect
+   - JS only reads scroll position to apply a scale+blur "push back"
+     on the panel content that's being covered, making it feel like
+     the old panel recedes as the new one comes over it
+   - No transform on the panel element itself (breaks sticky!)
 ═══════════════════════════════════════════════════════ */
+
 .stack-wrap {
   position: relative;
-  /* 9 panels × 100vh — adjust if adding/removing panels */
+  /* 8 panels × 100vh */
   height: 800vh;
 }
 
@@ -46,10 +54,10 @@ body { font-family: 'DM Sans', sans-serif; background: #18181b; -webkit-font-smo
   display: flex;
   align-items: center;
   justify-content: center;
-  will-change: transform;
+  /* NO transform here — transform breaks position:sticky */
 }
 
-/* Z-index layering: each successive panel sits on top */
+/* Z-index: each panel higher than the previous so it covers it */
 .panel-hero        { z-index: 1;  background: #f8f7f4; }
 .panel-ceo         { z-index: 2;  background: #18181b; }
 .panel-who         { z-index: 3;  background: #fff; }
@@ -59,8 +67,20 @@ body { font-family: 'DM Sans', sans-serif; background: #18181b; -webkit-font-smo
 .panel-testimonials{ z-index: 7;  background: #fafafa; }
 .panel-cta         { z-index: 8;  background: #18181b; }
 
-/* Dot grid texture on light panels */
-.stack-panel::before {
+/* Top-edge shadow on every panel (except first) so it looks like
+   it's physically sliding over the panel beneath */
+.stack-panel + .stack-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 40px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.22) 0%, transparent 100%);
+  z-index: 100;
+  pointer-events: none;
+}
+
+/* Dot grid texture */
+.stack-panel::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -69,11 +89,22 @@ body { font-family: 'DM Sans', sans-serif; background: #18181b; -webkit-font-smo
   background-size: 28px 28px;
   z-index: 0;
 }
-.panel-ceo::before {
+.panel-ceo::after, .panel-cta::after {
   background-image: radial-gradient(circle, rgba(255,255,255,.03) 1px, transparent 1px);
 }
-.panel-cta::before {
-  background-image: radial-gradient(circle, rgba(255,255,255,.04) 1px, transparent 1px);
+
+/* The inner content wrapper — this gets the "recede" animation via JS */
+.panel-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center 35%;
+  /* smooth but fast so it tracks scroll well */
+  will-change: transform, filter, opacity;
 }
 
 /* ──────────────────────────────────────────
@@ -309,17 +340,8 @@ body { font-family: 'DM Sans', sans-serif; background: #18181b; -webkit-font-smo
 /* ──────────────────────────────────────────
    PANEL 7 — TESTIMONIALS
 ────────────────────────────────────────── */
-.panel-testimonials {
-  flex-direction: row !important;
-  align-items: stretch !important;
-}
-.test-col {
-  width: 160px; flex-shrink: 0; overflow: hidden; position: relative;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
-  opacity: 0; transition: opacity .9s cubic-bezier(.16,1,.3,1);
-  z-index: 1;
-}
+.panel-testimonials { flex-direction: row !important; align-items: stretch !important; }
+.test-col { width: 160px; flex-shrink: 0; overflow: hidden; position: relative; -webkit-mask-image: linear-gradient(to bottom,transparent 0%,black 8%,black 92%,transparent 100%); mask-image: linear-gradient(to bottom,transparent 0%,black 8%,black 92%,transparent 100%); opacity: 0; transition: opacity .9s cubic-bezier(.16,1,.3,1); z-index: 1; }
 .panel-testimonials.in-view .test-col { opacity: 1; }
 .test-col--left  { transition-delay: .1s; }
 .test-col--right { transition-delay: .28s; }
@@ -346,20 +368,7 @@ body { font-family: 'DM Sans', sans-serif; background: #18181b; -webkit-font-smo
 .trev-card { flex: 0 0 100%; width: 100%; background: #fff; border: 1.5px solid #ebebeb; border-radius: 24px; padding: 36px 36px 30px; display: flex; flex-direction: column; gap: 20px; position: relative; overflow: hidden; box-sizing: border-box; }
 .trev-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #18181b; border-radius: 24px 24px 0 0; transform: scaleX(0); transform-origin: left; transition: transform .5s cubic-bezier(.16,1,.3,1); }
 .panel-testimonials.in-view .trev-card::before { transform: scaleX(1); transition-delay: .65s; }
-.trev-card::after {
-  content: "“";
-  position: absolute;
-  top: -10px;
-  right: 24px;
-  font-family: 'Outfit', sans-serif;
-  font-size: 8rem;
-  font-weight: 900;
-  color: #f0f0f0;
-  line-height: 1;
-  pointer-events: none;
-  user-select: none;
-}
-1; pointer-events: none; user-select: none; }
+.trev-card::after { content: '"'; position: absolute; top: -10px; right: 24px; font-family: 'Outfit', sans-serif; font-size: 8rem; font-weight: 900; color: #f0f0f0; line-height: 1; pointer-events: none; user-select: none; }
 .trev-stars { display: flex; gap: 4px; }
 .trev-star { width: 14px; height: 14px; fill: #18181b; flex-shrink: 0; }
 .trev-quote { font-size: 1.05rem; color: #27272a; line-height: 1.8; font-style: italic; position: relative; z-index: 1; margin: 0; flex: 1; }
@@ -385,7 +394,7 @@ body { font-family: 'DM Sans', sans-serif; background: #18181b; -webkit-font-smo
    PANEL 8 — CTA
 ────────────────────────────────────────── */
 .cta-inner { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 720px; width: 100%; padding: 0 40px; }
-.panel-cta::after { content: 'AL AREEQ'; position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); font-family: 'Outfit', sans-serif; font-size: clamp(5rem,14vw,13rem); font-weight: 900; letter-spacing: -.04em; color: rgba(255,255,255,.03); white-space: nowrap; pointer-events: none; user-select: none; line-height: 1; z-index: 0; }
+.panel-cta .cta-bg-text { content: 'AL AREEQ'; position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); font-family: 'Outfit', sans-serif; font-size: clamp(5rem,14vw,13rem); font-weight: 900; letter-spacing: -.04em; color: rgba(255,255,255,.03); white-space: nowrap; pointer-events: none; user-select: none; line-height: 1; z-index: 0; }
 .cta-eyebrow { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); padding: 6px 16px; border-radius: 99px; margin-bottom: 28px; font-size: .65rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.45); }
 .cta-eyebrow-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,.4); }
 .cta-heading { font-family: 'Outfit', sans-serif; font-size: clamp(2.4rem,5.5vw,4.5rem); font-weight: 900; line-height: 1.04; letter-spacing: -.045em; color: #fff; margin-bottom: 20px; }
@@ -394,12 +403,8 @@ body { font-family: 'DM Sans', sans-serif; background: #18181b; -webkit-font-smo
 .cta-buttons { display: flex; gap: 14px; flex-direction: row; justify-content: center; flex-wrap: wrap; width: 100%; }
 .cta-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: #fff; color: #18181b; padding: 15px 32px; border-radius: 99px; font-family: 'Outfit', sans-serif; font-size: .95rem; font-weight: 800; text-decoration: none; border: none; cursor: pointer; box-shadow: 0 4px 24px rgba(255,255,255,.15); transition: transform .25s cubic-bezier(.34,1.4,.64,1), box-shadow .25s; white-space: nowrap; }
 .cta-btn-primary:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 14px 40px rgba(255,255,255,.22); }
-.cta-btn-primary svg { flex-shrink: 0; transition: transform .22s cubic-bezier(.34,1.4,.64,1); }
-.cta-btn-primary:hover svg { transform: translateX(3px); }
 .cta-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: transparent; color: rgba(255,255,255,.8); padding: 15px 32px; border-radius: 99px; font-family: 'Outfit', sans-serif; font-size: .95rem; font-weight: 700; text-decoration: none; border: 1.5px solid rgba(255,255,255,.2); cursor: pointer; transition: all .25s cubic-bezier(.34,1.2,.64,1); white-space: nowrap; }
 .cta-btn-secondary:hover { border-color: rgba(255,255,255,.6); color: #fff; transform: translateY(-3px); background: rgba(255,255,255,.06); }
-.cta-btn-secondary svg { flex-shrink: 0; transition: transform .22s; }
-.cta-btn-secondary:hover svg { transform: translateX(3px); }
 .cta-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 0; width: 100%; margin-top: 64px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,.1); }
 .cta-stat { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0 16px; border-right: 1px solid rgba(255,255,255,.08); }
 .cta-stat:last-child { border-right: none; }
@@ -430,17 +435,10 @@ body { font-family: 'DM Sans', sans-serif; background: #18181b; -webkit-font-smo
 .about-footer-legal { display: flex; gap: 1.5rem; }
 .about-footer-legal a:hover { color: rgba(255,255,255,.7); }
 
-/* ──────────────────────────────────────────
-   MOBILE HERO
-────────────────────────────────────────── */
 .mobile-layout { display: none; }
 
-/* ──────────────────────────────────────────
-   RESPONSIVE
-────────────────────────────────────────── */
 @media (max-width: 640px) {
   .stack-wrap { height: 1100vh; }
-
   .desktop-layout { display: none; }
   .panel-hero { align-items: flex-start; }
   .mobile-layout { display: flex; flex-direction: column; align-items: center; width: 100%; padding: 96px 24px 60px; position: relative; z-index: 1; }
@@ -463,11 +461,9 @@ body { font-family: 'DM Sans', sans-serif; background: #18181b; -webkit-font-smo
   .mob-buttons { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 280px; opacity: 0; }
   .panel-hero.animate .mob-buttons { animation: fadeUp .6s ease 1.1s forwards; }
   .mob-buttons .btn-dark, .mob-buttons .btn-ghost { justify-content: center; width: 100%; padding: 14px; }
-
   .ceo-inner { padding: 0 24px; }
   .ceo-bg-quote { font-size: 10rem; }
   .ceo-quote { font-size: 1.35rem; margin-bottom: 28px; }
-
   .who-inner { padding: 0 20px; }
   .who-top { grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
   .who-img-wrap { aspect-ratio: 3/4; border-radius: 14px; }
@@ -485,7 +481,6 @@ body { font-family: 'DM Sans', sans-serif; background: #18181b; -webkit-font-smo
   .stat-num { font-size: 1.35rem; }
   .stat-label { font-size: .6rem; }
   .stat-desc { display: none; }
-
   .panel-services { overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; align-items: flex-start; }
   .serv-inner { padding: 28px 20px 48px; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; }
   .serv-header { margin-bottom: 18px; width: 100%; }
@@ -507,7 +502,6 @@ body { font-family: 'DM Sans', sans-serif; background: #18181b; -webkit-font-smo
   .serv-ctas { display: none; }
   .serv-ctas-mobile { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 18px; }
   .serv-ctas-mobile .serv-btn-primary, .serv-ctas-mobile .serv-btn-secondary { width: 100%; justify-content: center; padding: 13px 16px; border-radius: 12px; }
-
   .panel-team { overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; align-items: flex-start; }
   .team-inner { padding: 56px 0 48px; display: flex; flex-direction: column; align-items: center; }
   .team-header { margin-bottom: 28px; padding: 0 24px; text-align: center; width: 100%; }
@@ -527,7 +521,6 @@ body { font-family: 'DM Sans', sans-serif; background: #18181b; -webkit-font-smo
   .team-dot.active { background: #18181b; transform: scale(1.3); }
   .team-swipe-hint { display: flex; align-items: center; gap: 6px; font-size: .68rem; font-weight: 600; color: #a1a1aa; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 16px; }
   .team-swipe-hint svg { opacity: .5; }
-
   .panel-vision { overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; align-items: flex-start; }
   .vision-inner { padding: 36px 20px 52px; }
   .vision-header { margin-bottom: 28px; }
@@ -535,14 +528,12 @@ body { font-family: 'DM Sans', sans-serif; background: #18181b; -webkit-font-smo
   .vision-sub { font-size: .82rem; }
   .vision-card { padding: 28px 22px 26px; border-radius: 18px; }
   .vision-track-wrap { border-radius: 18px; }
-
   .test-col { display: none; }
   .test-center { padding: 32px 18px 40px; }
   .test-heading { font-size: 1.6rem; }
   .trev-card { padding: 24px 22px 20px; }
   .trev-quote { font-size: .9rem; }
   .trev-nav { max-width: 100%; }
-
   .cta-inner { padding: 0 22px; }
   .cta-heading { font-size: 2rem; }
   .cta-sub { font-size: .88rem; margin-bottom: 32px; }
@@ -553,7 +544,6 @@ body { font-family: 'DM Sans', sans-serif; background: #18181b; -webkit-font-smo
   .cta-stat:nth-child(1), .cta-stat:nth-child(2) { border-bottom: 1px solid rgba(255,255,255,.08); padding-bottom: 24px; }
   .cta-stat:nth-child(3), .cta-stat:nth-child(4) { padding-top: 24px; }
   .cta-stat-num { font-size: 1.8rem; }
-
   .about-footer-main { grid-template-columns: 1fr 1fr; gap: 2rem; }
 }
 
@@ -595,6 +585,7 @@ const AboutUs = () => {
     const statRefs = useRef<(HTMLDivElement | null)[]>([]);
     const teamCardRefs = useRef<(HTMLDivElement | null)[]>([]);
     const statCountedRef = useRef(false);
+    const rafRef = useRef<number>(0);
 
     const [activeService, setActiveService] = useState(0);
     const [activeVision, setActiveVision] = useState(0);
@@ -603,8 +594,61 @@ const AboutUs = () => {
     const [ctaInView, setCtaInView] = useState(false);
     const [ctaCounters, setCtaCounters] = useState({ deals: 0, exp: 0, sat: 0, rating: 0 });
 
+    // ── Scroll-driven "recede" effect on the panel being covered ──────────────
+    // The actual overlap is 100% CSS (sticky + z-index).
+    // JS only adds a scale-down + blur to the *content* of the panel being covered.
     useEffect(() => {
-        // Hero animate-in
+        const panels = [heroRef, ceoRef, whoRef, servRef, teamRef, visionRef, testRef, ctaRef];
+
+        const tick = () => {
+            const sy = window.scrollY;
+            const vh = window.innerHeight;
+            const n = panels.length;
+
+            panels.forEach((ref, i) => {
+                const el = ref.current;
+                if (!el) return;
+
+                // Each panel occupies one "scroll slot" of vh pixels.
+                // Panel i becomes active when scrollY crosses i*vh.
+                // While panel i is active (i*vh ≤ scrollY < (i+1)*vh),
+                // the *next* panel (i+1) is sliding over it.
+                // progress = how much of panel i's slot has been scrolled past.
+                const slotStart = i * vh;
+                const rawProgress = (sy - slotStart) / vh; // 0 = just entered, 1 = fully scrolled past
+                const progress = Math.min(1, Math.max(0, rawProgress));
+
+                // Inner content element — scale + blur + fade as it recedes
+                const inner = el.querySelector<HTMLElement>('.panel-inner');
+                if (!inner) return;
+
+                if (i < n - 1 && progress > 0) {
+                    // Ease: slow start, fast end (panel above accelerates over it)
+                    const e = 1 - Math.pow(1 - progress, 2.5);
+                    const scale = 1 - 0.10 * e;       // 1 → 0.90
+                    const blur = 6 * e;               // 0 → 6px
+                    const opacity = 1 - 0.65 * e;        // 1 → 0.35
+                    const ty = -30 * e;             // 0 → -30px (drifts up slightly)
+                    inner.style.transform = `scale(${scale.toFixed(4)}) translateY(${ty.toFixed(2)}px)`;
+                    inner.style.filter = `blur(${blur.toFixed(2)}px)`;
+                    inner.style.opacity = opacity.toFixed(4);
+                } else {
+                    // Reset: either first panel not scrolled yet, or last panel
+                    inner.style.transform = '';
+                    inner.style.filter = '';
+                    inner.style.opacity = '';
+                }
+            });
+
+            rafRef.current = requestAnimationFrame(tick);
+        };
+
+        rafRef.current = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(rafRef.current);
+    }, []);
+
+    // ── Standard observers (hero animate-in, counters, etc.) ─────────────────
+    useEffect(() => {
         const t = setTimeout(() => heroRef.current?.classList.add('animate'), 80);
 
         const countUp = (el: HTMLElement, target: number, suffix: string) => {
@@ -618,14 +662,10 @@ const AboutUs = () => {
             requestAnimationFrame(step);
         };
 
-        // Generic observer helper: fires once on enter, re-fires on re-enter
         const obs = (el: HTMLElement | null, cls: string, onEnter?: () => void, threshold = 0.05) => {
             if (!el) return null;
             const o = new IntersectionObserver(([e]) => {
-                if (e.isIntersecting) {
-                    el.classList.add(cls);
-                    onEnter?.();
-                }
+                if (e.isIntersecting) { el.classList.add(cls); onEnter?.(); }
             }, { threshold });
             o.observe(el);
             return o;
@@ -654,7 +694,6 @@ const AboutUs = () => {
         const o5 = obs(visionRef.current, 'in-view', undefined, 0.05);
         const o6 = obs(testRef.current, 'in-view', undefined, 0);
 
-        // CTA counter
         const ctaObs = new IntersectionObserver(([e]) => {
             if (!e.isIntersecting) return;
             setCtaInView(true);
@@ -665,14 +704,8 @@ const AboutUs = () => {
             const anim = (ts: number) => {
                 if (!s) s = ts;
                 const p = ease(Math.min((ts - s) / duration, 1));
-                setCtaCounters({
-                    deals: Math.floor(targets.deals * p),
-                    exp: Math.floor(targets.exp * p),
-                    sat: Math.floor(targets.sat * p),
-                    rating: Math.floor(targets.rating * p),
-                });
-                if (p < 1) requestAnimationFrame(anim);
-                else setCtaCounters(targets);
+                setCtaCounters({ deals: Math.floor(targets.deals * p), exp: Math.floor(targets.exp * p), sat: Math.floor(targets.sat * p), rating: Math.floor(targets.rating * p) });
+                if (p < 1) requestAnimationFrame(anim); else setCtaCounters(targets);
             };
             requestAnimationFrame(anim);
             ctaObs.disconnect();
@@ -686,7 +719,6 @@ const AboutUs = () => {
         };
     }, []);
 
-    // Mobile team carousel dot tracker
     useEffect(() => {
         const grid = teamGridRef.current;
         if (!grid) return;
@@ -712,42 +744,9 @@ const AboutUs = () => {
     ];
 
     const serviceDetails = [
-        {
-            headline: 'Proactive care, year-round.',
-            body: 'We keep your property in peak condition so small issues never become expensive ones.',
-            groups: [
-                { label: 'Upkeep', items: ['AC servicing', 'Deep cleaning'] },
-                { label: 'Checks', items: ['Plumbing & electrical', 'Pest control'] },
-            ],
-            cta1: { label: 'Get a Maintenance Plan', href: '/contact' },
-            cta2: { label: 'View Packages', href: '/services/maintenance' },
-            image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=85',
-            steps: ['Contact us via call or WhatsApp', 'Free on-site assessment', 'We schedule & execute the work', 'Sign-off when you are satisfied'],
-        },
-        {
-            headline: 'Fast fixes. Zero hassle.',
-            body: 'Our vetted team responds the same day and gets it right the first time — 7 days a week.',
-            groups: [
-                { label: 'Common', items: ['Plumbing & electrical', 'Carpentry & flooring'] },
-                { label: 'Finishes', items: ['Painting & patching', 'Fixture replacement'] },
-            ],
-            cta1: { label: 'Request a Repair', href: '/contact' },
-            cta2: { label: 'See All Repair Jobs', href: '/services/repairs' },
-            image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&q=85',
-            steps: ['Describe the issue to our team', 'Technician arrives same day', 'Repair completed & tested', 'You approve before we leave'],
-        },
-        {
-            headline: 'Reimagine your space.',
-            body: 'From a single room to a full fit-out — on budget, on schedule, beautifully finished.',
-            groups: [
-                { label: 'Spaces', items: ['Kitchen & bathroom', 'Full interior fit-out'] },
-                { label: 'Finishes', items: ['Flooring & tiling', 'Painting & joinery'] },
-            ],
-            cta1: { label: 'Start Your Renovation', href: '/contact' },
-            cta2: { label: 'View Past Projects', href: '/services/renovation' },
-            image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&q=85',
-            steps: ['Share your vision & budget', 'We present a design proposal', 'Construction begins on schedule', 'Final walkthrough & handover'],
-        },
+        { headline: 'Proactive care, year-round.', body: 'We keep your property in peak condition so small issues never become expensive ones.', groups: [{ label: 'Upkeep', items: ['AC servicing', 'Deep cleaning'] }, { label: 'Checks', items: ['Plumbing & electrical', 'Pest control'] }], cta1: { label: 'Get a Maintenance Plan', href: '/contact' }, cta2: { label: 'View Packages', href: '/services/maintenance' }, image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=85', steps: ['Contact us via call or WhatsApp', 'Free on-site assessment', 'We schedule & execute the work', 'Sign-off when you are satisfied'] },
+        { headline: 'Fast fixes. Zero hassle.', body: 'Our vetted team responds the same day and gets it right the first time — 7 days a week.', groups: [{ label: 'Common', items: ['Plumbing & electrical', 'Carpentry & flooring'] }, { label: 'Finishes', items: ['Painting & patching', 'Fixture replacement'] }], cta1: { label: 'Request a Repair', href: '/contact' }, cta2: { label: 'See All Repair Jobs', href: '/services/repairs' }, image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&q=85', steps: ['Describe the issue to our team', 'Technician arrives same day', 'Repair completed & tested', 'You approve before we leave'] },
+        { headline: 'Reimagine your space.', body: 'From a single room to a full fit-out — on budget, on schedule, beautifully finished.', groups: [{ label: 'Spaces', items: ['Kitchen & bathroom', 'Full interior fit-out'] }, { label: 'Finishes', items: ['Flooring & tiling', 'Painting & joinery'] }], cta1: { label: 'Start Your Renovation', href: '/contact' }, cta2: { label: 'View Past Projects', href: '/services/renovation' }, image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&q=85', steps: ['Share your vision & budget', 'We present a design proposal', 'Construction begins on schedule', 'Final walkthrough & handover'] },
     ];
 
     const team = [
@@ -757,36 +756,14 @@ const AboutUs = () => {
         { name: 'Priya Sharma', role: 'Client Relations Lead', specialty: 'Expat & Family Homes', deals: '150+', image: 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=400&q=85', langs: ['English', 'Hindi'] },
     ];
 
-    const leftPhotos = [
-        { src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=85', h: 180 },
-        { src: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=85', h: 220 },
-        { src: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&q=85', h: 195 },
-        { src: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&q=85', h: 205 },
-        { src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=85', h: 180 },
-        { src: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=85', h: 220 },
-        { src: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&q=85', h: 195 },
-        { src: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&q=85', h: 205 },
-    ];
-    const rightPhotos = [
-        { src: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&q=85', h: 210 },
-        { src: 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=300&q=85', h: 175 },
-        { src: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=85', h: 225 },
-        { src: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&q=85', h: 190 },
-        { src: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&q=85', h: 210 },
-        { src: 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=300&q=85', h: 175 },
-        { src: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=85', h: 225 },
-        { src: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&q=85', h: 190 },
-    ];
+    const leftPhotos = [{ src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=85', h: 180 }, { src: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=85', h: 220 }, { src: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&q=85', h: 195 }, { src: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&q=85', h: 205 }, { src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=85', h: 180 }, { src: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=85', h: 220 }, { src: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&q=85', h: 195 }, { src: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&q=85', h: 205 }];
+    const rightPhotos = [{ src: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&q=85', h: 210 }, { src: 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=300&q=85', h: 175 }, { src: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=85', h: 225 }, { src: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&q=85', h: 190 }, { src: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&q=85', h: 210 }, { src: 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=300&q=85', h: 175 }, { src: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=85', h: 225 }, { src: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&q=85', h: 190 }];
 
     const svc = serviceDetails[activeService];
 
     const StarRow = () => (
         <div className="trev-stars">
-            {[0, 1, 2, 3, 4].map(s => (
-                <svg key={s} className="trev-star" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                </svg>
-            ))}
+            {[0, 1, 2, 3, 4].map(s => <svg key={s} className="trev-star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>)}
         </div>
     );
 
@@ -795,147 +772,148 @@ const AboutUs = () => {
             <style dangerouslySetInnerHTML={{ __html: ABOUT_STYLES }} />
             <Navbar />
 
-            {/* ═══════════ STACKED SCROLL WRAPPER ═══════════ */}
             <div className="stack-wrap">
 
                 {/* ── Panel 1: Hero ── */}
                 <section className="stack-panel panel-hero" ref={heroRef}>
-                    {/* Desktop */}
-                    <div className="desktop-layout">
-                        <div className="side-col">
-                            <div className="photo-item p1"><div className="photo-circle"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=85" alt="" /></div></div>
-                            <div className="photo-item p2"><div className="photo-circle"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=85" alt="" /></div></div>
+                    <div className="panel-inner">
+                        <div className="desktop-layout">
+                            <div className="side-col">
+                                <div className="photo-item p1"><div className="photo-circle"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=85" alt="" /></div></div>
+                                <div className="photo-item p2"><div className="photo-circle"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=85" alt="" /></div></div>
+                            </div>
+                            <div className="center-text">
+                                <div className="badge"><div className="dot" /><span>RERA Licensed · Est. 2012 · UAE</span></div>
+                                <h1 className="heading">Real estate,<br />done the <em>right way.</em></h1>
+                                <p className="sub">12 years of honest deals.<br />Built on referrals, not ads.</p>
+                                <div className="buttons">
+                                    <a href="#our-story" className="btn-dark">Our Story <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
+                                    <a href="#team" className="btn-ghost">Meet the Team</a>
+                                </div>
+                            </div>
+                            <div className="side-col">
+                                <div className="photo-item p3"><div className="photo-circle"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=85" alt="" /></div></div>
+                                <div className="photo-item p4"><div className="photo-circle"><img src="https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=400&q=85" alt="" /></div></div>
+                            </div>
                         </div>
-                        <div className="center-text">
-                            <div className="badge"><div className="dot" /><span>RERA Licensed · Est. 2012 · UAE</span></div>
-                            <h1 className="heading">Real estate,<br />done the <em>right way.</em></h1>
-                            <p className="sub">12 years of honest deals.<br />Built on referrals, not ads.</p>
-                            <div className="buttons">
+                        <div className="mobile-layout">
+                            <div className="mob-text">
+                                <h1 className="mob-heading">Real estate,<br />done the <em>right way.</em></h1>
+                                <p className="mob-sub">12 years of honest deals. Built on referrals, not ads.</p>
+                            </div>
+                            <div className="mob-photos">
+                                <div className="mob-photo-item mp1"><div className="mob-photo-circle"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=85" alt="" /></div></div>
+                                <div className="mob-photo-item mp2"><div className="mob-photo-circle"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=85" alt="" /></div></div>
+                                <div className="mob-photo-item mp3"><div className="mob-photo-circle"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=85" alt="" /></div></div>
+                                <div className="mob-photo-item mp4"><div className="mob-photo-circle"><img src="https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=400&q=85" alt="" /></div></div>
+                            </div>
+                            <div className="mob-buttons">
                                 <a href="#our-story" className="btn-dark">Our Story <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
                                 <a href="#team" className="btn-ghost">Meet the Team</a>
                             </div>
-                        </div>
-                        <div className="side-col">
-                            <div className="photo-item p3"><div className="photo-circle"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=85" alt="" /></div></div>
-                            <div className="photo-item p4"><div className="photo-circle"><img src="https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=400&q=85" alt="" /></div></div>
-                        </div>
-                    </div>
-                    {/* Mobile */}
-                    <div className="mobile-layout">
-                        <div className="mob-text">
-                            <h1 className="mob-heading">Real estate,<br />done the <em>right way.</em></h1>
-                            <p className="mob-sub">12 years of honest deals. Built on referrals, not ads.</p>
-                        </div>
-                        <div className="mob-photos">
-                            <div className="mob-photo-item mp1"><div className="mob-photo-circle"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=85" alt="" /></div></div>
-                            <div className="mob-photo-item mp2"><div className="mob-photo-circle"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=85" alt="" /></div></div>
-                            <div className="mob-photo-item mp3"><div className="mob-photo-circle"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=85" alt="" /></div></div>
-                            <div className="mob-photo-item mp4"><div className="mob-photo-circle"><img src="https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=400&q=85" alt="" /></div></div>
-                        </div>
-                        <div className="mob-buttons">
-                            <a href="#our-story" className="btn-dark">Our Story <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
-                            <a href="#team" className="btn-ghost">Meet the Team</a>
                         </div>
                     </div>
                 </section>
 
                 {/* ── Panel 2: CEO Quote ── */}
                 <section className="stack-panel panel-ceo" ref={ceoRef}>
-                    <div className="ceo-bg-quote">&ldquo;</div>
-                    <div className="ceo-inner">
-                        <div className="ceo-label"><div className="ceo-label-line" /><span>A message from our founder</span><div className="ceo-label-line" /></div>
-                        <p className="ceo-quote">"Real estate should feel like <em>empowerment, not a trap.</em> We built Al Areeq on one promise — to always put our clients first, no matter what."</p>
-                        <div className="ceo-divider" />
-                        <div className="ceo-identity">
-                            <div className="ceo-avatar-wrap"><img className="ceo-avatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=85" alt="Mohammed Al Areeq" /></div>
-                            <div className="ceo-name">Mohammed Al Areeq</div>
-                            <div className="ceo-title-text">Founder & CEO · Al Areeq Real Estate</div>
+                    <div className="panel-inner">
+                        <div className="ceo-bg-quote">&ldquo;</div>
+                        <div className="ceo-inner">
+                            <div className="ceo-label"><div className="ceo-label-line" /><span>A message from our founder</span><div className="ceo-label-line" /></div>
+                            <p className="ceo-quote">&ldquo;Real estate should feel like <em>empowerment, not a trap.</em> We built Al Areeq on one promise — to always put our clients first, no matter what.&rdquo;</p>
+                            <div className="ceo-divider" />
+                            <div className="ceo-identity">
+                                <div className="ceo-avatar-wrap"><img className="ceo-avatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=85" alt="Mohammed Al Areeq" /></div>
+                                <div className="ceo-name">Mohammed Al Areeq</div>
+                                <div className="ceo-title-text">Founder &amp; CEO · Al Areeq Real Estate</div>
+                            </div>
                         </div>
                     </div>
                 </section>
 
                 {/* ── Panel 3: Who We Are ── */}
                 <section className="stack-panel panel-who" ref={whoRef}>
-                    <div className="who-inner">
-                        <div className="who-top">
-                            <div className="who-img-wrap">
-                                <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=900&q=85" alt="Al Areeq Real Estate Dubai" />
-                            </div>
-                            <div className="who-text">
-                                <div className="who-eyebrow"><div className="who-eyebrow-line" />Who We Are</div>
-                                <h2 className="who-title">A Dubai agency you can actually trust.</h2>
-                                <p className="who-body">Founded in Dubai in 2012, Al Areeq is a RERA-licensed agency built on one principle — honest, pressure-free guidance for every client.</p>
-                                <p className="who-body-2">Every client we have ever had came through a referral. No ads, no gimmicks — just 12 years of deals done right.</p>
-                                <div className="who-rule" />
-                            </div>
-                        </div>
-                        <div className="who-stats">
-                            {stats.map((s, i) => (
-                                <div key={i} className="stat-card" data-target={s.target} data-suffix={s.suffix} ref={el => { statRefs.current[i] = el; }}>
-                                    <div className="stat-icon-wrap">
-                                        {i === 0 && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" /><path d="M9 21V12h6v9" /></svg>}
-                                        {i === 1 && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>}
-                                        {i === 2 && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" /></svg>}
-                                    </div>
-                                    <div className="stat-num">0{s.suffix}</div>
-                                    <div className="stat-label">{s.label}</div>
-                                    <div className="stat-desc">{s.desc}</div>
+                    <div className="panel-inner">
+                        <div className="who-inner">
+                            <div className="who-top">
+                                <div className="who-img-wrap"><img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=900&q=85" alt="Al Areeq Real Estate Dubai" /></div>
+                                <div className="who-text">
+                                    <div className="who-eyebrow"><div className="who-eyebrow-line" />Who We Are</div>
+                                    <h2 className="who-title">A Dubai agency you can actually trust.</h2>
+                                    <p className="who-body">Founded in Dubai in 2012, Al Areeq is a RERA-licensed agency built on one principle — honest, pressure-free guidance for every client.</p>
+                                    <p className="who-body-2">Every client we have ever had came through a referral. No ads, no gimmicks — just 12 years of deals done right.</p>
+                                    <div className="who-rule" />
                                 </div>
-                            ))}
+                            </div>
+                            <div className="who-stats">
+                                {stats.map((s, i) => (
+                                    <div key={i} className="stat-card" data-target={s.target} data-suffix={s.suffix} ref={el => { statRefs.current[i] = el; }}>
+                                        <div className="stat-icon-wrap">
+                                            {i === 0 && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" /><path d="M9 21V12h6v9" /></svg>}
+                                            {i === 1 && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>}
+                                            {i === 2 && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" /></svg>}
+                                        </div>
+                                        <div className="stat-num">0{s.suffix}</div>
+                                        <div className="stat-label">{s.label}</div>
+                                        <div className="stat-desc">{s.desc}</div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </section>
 
                 {/* ── Panel 4: Services ── */}
                 <section className="stack-panel panel-services" ref={servRef}>
-                    <div className="serv-inner">
-                        <div className="serv-header">
-                            <div className="serv-eyebrow"><div className="serv-eyebrow-line" />Our Services<div className="serv-eyebrow-line" /></div>
-                            <h2 className="serv-title">Everything your property needs.</h2>
-                            <p className="serv-subtitle">From routine maintenance to full renovations — all under one roof.</p>
-                        </div>
-                        <div className="serv-tabs-wrap">
-                            <div className="serv-tabs">
-                                {serviceCategories.map(cat => (
-                                    <button key={cat.id} className={`serv-tab${activeService === cat.id ? ' active' : ''}`} onClick={() => setActiveService(cat.id)}>{cat.tab}</button>
-                                ))}
+                    <div className="panel-inner">
+                        <div className="serv-inner">
+                            <div className="serv-header">
+                                <div className="serv-eyebrow"><div className="serv-eyebrow-line" />Our Services<div className="serv-eyebrow-line" /></div>
+                                <h2 className="serv-title">Everything your property needs.</h2>
+                                <p className="serv-subtitle">From routine maintenance to full renovations — all under one roof.</p>
                             </div>
-                        </div>
-                        <div className="serv-panel" key={activeService}>
-                            <div className="serv-panel-left-wrap">
-                                <div className="serv-panel-category-label">{serviceCategories[activeService].tab}</div>
-                                <div className="serv-panel-headline">{svc.headline}</div>
-                                <p className="serv-panel-body">{svc.body}</p>
-                                <div className="serv-groups">
-                                    {svc.groups.map((group, gi) => (
-                                        <div key={gi}>
-                                            <div className="serv-group-label">{group.label}</div>
-                                            <div className="serv-group-items">
-                                                {group.items.map((item, ii) => <div key={ii} className="serv-group-item"><div className="serv-group-dot" />{item}</div>)}
+                            <div className="serv-tabs-wrap">
+                                <div className="serv-tabs">
+                                    {serviceCategories.map(cat => (
+                                        <button key={cat.id} className={`serv-tab${activeService === cat.id ? ' active' : ''}`} onClick={() => setActiveService(cat.id)}>{cat.tab}</button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="serv-panel" key={activeService}>
+                                <div className="serv-panel-left-wrap">
+                                    <div className="serv-panel-category-label">{serviceCategories[activeService].tab}</div>
+                                    <div className="serv-panel-headline">{svc.headline}</div>
+                                    <p className="serv-panel-body">{svc.body}</p>
+                                    <div className="serv-groups">
+                                        {svc.groups.map((group, gi) => (
+                                            <div key={gi}>
+                                                <div className="serv-group-label">{group.label}</div>
+                                                <div className="serv-group-items">{group.items.map((item, ii) => <div key={ii} className="serv-group-item"><div className="serv-group-dot" />{item}</div>)}</div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
+                                    <div className="serv-divider" />
+                                    <div className="serv-ctas">
+                                        <a href={svc.cta1.href} className="serv-btn-primary">{svc.cta1.label} <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
+                                        <a href={svc.cta2.href} className="serv-btn-secondary">{svc.cta2.label}</a>
+                                    </div>
+                                    <div className="serv-img-wrap-mobile"><img src={svc.image} alt={svc.headline} className="serv-img" /></div>
+                                    <div className="serv-ctas-mobile">
+                                        <a href={svc.cta1.href} className="serv-btn-primary">{svc.cta1.label} <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
+                                        <a href={svc.cta2.href} className="serv-btn-secondary">{svc.cta2.label}</a>
+                                    </div>
                                 </div>
-                                <div className="serv-divider" />
-                                <div className="serv-ctas">
-                                    <a href={svc.cta1.href} className="serv-btn-primary">{svc.cta1.label} <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
-                                    <a href={svc.cta2.href} className="serv-btn-secondary">{svc.cta2.label}</a>
-                                </div>
-                                <div className="serv-img-wrap-mobile"><img src={svc.image} alt={svc.headline} className="serv-img" /></div>
-                                <div className="serv-ctas-mobile">
-                                    <a href={svc.cta1.href} className="serv-btn-primary">{svc.cta1.label} <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
-                                    <a href={svc.cta2.href} className="serv-btn-secondary">{svc.cta2.label}</a>
-                                </div>
-                            </div>
-                            <div className="serv-panel-right">
-                                <div className="serv-visual">
-                                    <div className="serv-visual-label">How it works</div>
-                                    {svc.steps.map((step, j) => (
-                                        <div key={j} className="serv-step">
-                                            <div className="serv-step-num">{j + 1}</div>
-                                            <div><div className="serv-step-title">{step}</div></div>
-                                        </div>
-                                    ))}
+                                <div className="serv-panel-right">
+                                    <div className="serv-visual">
+                                        <div className="serv-visual-label">How it works</div>
+                                        {svc.steps.map((step, j) => (
+                                            <div key={j} className="serv-step">
+                                                <div className="serv-step-num">{j + 1}</div>
+                                                <div><div className="serv-step-title">{step}</div></div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -944,102 +922,77 @@ const AboutUs = () => {
 
                 {/* ── Panel 5: Team ── */}
                 <section className="stack-panel panel-team" ref={teamRef} id="team">
-                    <div className="team-inner">
-                        <div className="team-header">
-                            <div className="team-eyebrow">
-                                <div className="team-eyebrow-line" />
-                                The People Behind Every Deal
-                                <div className="team-eyebrow-line" />
+                    <div className="panel-inner">
+                        <div className="team-inner">
+                            <div className="team-header">
+                                <div className="team-eyebrow"><div className="team-eyebrow-line" />The People Behind Every Deal<div className="team-eyebrow-line" /></div>
+                                <h2 className="team-title">Meet our team.</h2>
+                                <p className="team-subtitle">Specialists across every segment of Dubai real estate — residential, commercial, and beyond.</p>
                             </div>
-                            <h2 className="team-title">Meet our team.</h2>
-                            <p className="team-subtitle">Specialists across every segment of Dubai real estate — residential, commercial, and beyond.</p>
-                        </div>
-                        <div className="team-swipe-hint">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
-                            swipe
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                        </div>
-                        <div className="team-grid" ref={teamGridRef}>
-                            {team.map((member, i) => (
-                                <div key={i} className="team-card" ref={el => { teamCardRefs.current[i] = el; }}>
-                                    <div className="team-photo-wrap"><img src={member.image} alt={member.name} /></div>
-                                    <div className="team-card-name">{member.name}</div>
-                                    <div className="team-card-role">{member.role}</div>
-                                    <div className="team-card-divider" />
-                                    <div className="team-card-specialty-label">Speciality</div>
-                                    <div className="team-card-specialty">{member.specialty}</div>
-                                    <div className="team-card-meta">
-                                        <div className="team-card-deals">
-                                            <div className="team-card-deals-num">{member.deals}</div>
-                                            <div className="team-card-deals-label">Deals closed</div>
-                                        </div>
-                                        <div className="team-card-langs">
-                                            {member.langs.map((lang, li) => <span key={li} className="team-card-lang">{lang}</span>)}
+                            <div className="team-swipe-hint">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
+                                swipe
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                            </div>
+                            <div className="team-grid" ref={teamGridRef}>
+                                {team.map((member, i) => (
+                                    <div key={i} className="team-card" ref={el => { teamCardRefs.current[i] = el; }}>
+                                        <div className="team-photo-wrap"><img src={member.image} alt={member.name} /></div>
+                                        <div className="team-card-name">{member.name}</div>
+                                        <div className="team-card-role">{member.role}</div>
+                                        <div className="team-card-divider" />
+                                        <div className="team-card-specialty-label">Speciality</div>
+                                        <div className="team-card-specialty">{member.specialty}</div>
+                                        <div className="team-card-meta">
+                                            <div className="team-card-deals"><div className="team-card-deals-num">{member.deals}</div><div className="team-card-deals-label">Deals closed</div></div>
+                                            <div className="team-card-langs">{member.langs.map((lang, li) => <span key={li} className="team-card-lang">{lang}</span>)}</div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="team-dots">
-                            {team.map((_, i) => <div key={i} className={`team-dot${activeDot === i ? ' active' : ''}`} />)}
+                                ))}
+                            </div>
+                            <div className="team-dots">{team.map((_, i) => <div key={i} className={`team-dot${activeDot === i ? ' active' : ''}`} />)}</div>
                         </div>
                     </div>
                 </section>
 
                 {/* ── Panel 6: Vision & Mission ── */}
                 <section className="stack-panel panel-vision" ref={visionRef}>
-                    <div className="vision-inner">
-                        <div className="vision-header">
-                            <div className="vision-eyebrow">
-                                <div className="vision-eyebrow-line" />Our Purpose<div className="vision-eyebrow-line" />
+                    <div className="panel-inner">
+                        <div className="vision-inner">
+                            <div className="vision-header">
+                                <div className="vision-eyebrow"><div className="vision-eyebrow-line" />Our Purpose<div className="vision-eyebrow-line" /></div>
+                                <h2 className="vision-heading">Vision &amp; <em>Mission.</em></h2>
+                                <p className="vision-sub">Two sides of the same promise — where we stand today, and where we&#39;re taking our clients tomorrow.</p>
                             </div>
-                            <h2 className="vision-heading">Vision &amp; <em>Mission.</em></h2>
-                            <p className="vision-sub">Two sides of the same promise — where we stand today, and where we&#39;re taking our clients tomorrow.</p>
-                        </div>
-                        <div className="vision-carousel">
-                            <div className="vision-track-wrap">
-                                <div className="vision-track" style={{ transform: `translateX(-${activeVision * 100}%)` }}>
-                                    <div className="vision-card">
-                                        <div className="vision-card-icon">
-                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" /></svg>
+                            <div className="vision-carousel">
+                                <div className="vision-track-wrap">
+                                    <div className="vision-track" style={{ transform: `translateX(-${activeVision * 100}%)` }}>
+                                        <div className="vision-card">
+                                            <div className="vision-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" /></svg></div>
+                                            <div className="vision-card-tag"><div className="vision-card-tag-dot" />Mission</div>
+                                            <div className="vision-card-title">What we do, every single day.</div>
+                                            <p className="vision-card-body">We deliver honest, expert guidance to every client — buyers, sellers, and investors alike. No pressure, no gimmicks. Just 12 years of doing the right thing, one deal at a time.</p>
+                                            <div className="vision-card-pills"><span className="vision-pill">Transparent Advice</span><span className="vision-pill">Client-First</span><span className="vision-pill">RERA Licensed</span></div>
                                         </div>
-                                        <div className="vision-card-tag"><div className="vision-card-tag-dot" />Mission</div>
-                                        <div className="vision-card-title">What we do, every single day.</div>
-                                        <p className="vision-card-body">We deliver honest, expert guidance to every client — buyers, sellers, and investors alike. No pressure, no gimmicks. Just 12 years of doing the right thing, one deal at a time.</p>
-                                        <div className="vision-card-pills">
-                                            <span className="vision-pill">Transparent Advice</span>
-                                            <span className="vision-pill">Client-First</span>
-                                            <span className="vision-pill">RERA Licensed</span>
-                                        </div>
-                                    </div>
-                                    <div className="vision-card vision-card--dark">
-                                        <div className="vision-card-icon">
-                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
-                                        </div>
-                                        <div className="vision-card-tag"><div className="vision-card-tag-dot" />Vision</div>
-                                        <div className="vision-card-title">Where we&#39;re heading.</div>
-                                        <p className="vision-card-body">To become Dubai&#39;s most trusted real estate name — not the largest, but the most referred. A firm where every client becomes a lifelong advocate because we never stopped earning their trust.</p>
-                                        <div className="vision-card-pills">
-                                            <span className="vision-pill">Long-Term Trust</span>
-                                            <span className="vision-pill">Built on Referrals</span>
-                                            <span className="vision-pill">Dubai &amp; Beyond</span>
+                                        <div className="vision-card vision-card--dark">
+                                            <div className="vision-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg></div>
+                                            <div className="vision-card-tag"><div className="vision-card-tag-dot" />Vision</div>
+                                            <div className="vision-card-title">Where we&#39;re heading.</div>
+                                            <p className="vision-card-body">To become Dubai&#39;s most trusted real estate name — not the largest, but the most referred. A firm where every client becomes a lifelong advocate because we never stopped earning their trust.</p>
+                                            <div className="vision-card-pills"><span className="vision-pill">Long-Term Trust</span><span className="vision-pill">Built on Referrals</span><span className="vision-pill">Dubai &amp; Beyond</span></div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="vision-nav">
-                                <div className="vision-nav-dots">
-                                    <button className={`vision-nav-dot${activeVision === 0 ? ' active' : ''}`} onClick={() => setActiveVision(0)} aria-label="Mission" />
-                                    <button className={`vision-nav-dot${activeVision === 1 ? ' active' : ''}`} onClick={() => setActiveVision(1)} aria-label="Vision" />
-                                </div>
-                                <div className="vision-nav-label">{activeVision === 0 ? 'Mission' : 'Vision'}</div>
-                                <div className="vision-nav-arrows">
-                                    <button className="vision-arrow" onClick={() => setActiveVision(0)} disabled={activeVision === 0} aria-label="Previous">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                                    </button>
-                                    <button className="vision-arrow" onClick={() => setActiveVision(1)} disabled={activeVision === 1} aria-label="Next">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-                                    </button>
+                                <div className="vision-nav">
+                                    <div className="vision-nav-dots">
+                                        <button className={`vision-nav-dot${activeVision === 0 ? ' active' : ''}`} onClick={() => setActiveVision(0)} aria-label="Mission" />
+                                        <button className={`vision-nav-dot${activeVision === 1 ? ' active' : ''}`} onClick={() => setActiveVision(1)} aria-label="Vision" />
+                                    </div>
+                                    <div className="vision-nav-label">{activeVision === 0 ? 'Mission' : 'Vision'}</div>
+                                    <div className="vision-nav-arrows">
+                                        <button className="vision-arrow" onClick={() => setActiveVision(0)} disabled={activeVision === 0} aria-label="Previous"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg></button>
+                                        <button className="vision-arrow" onClick={() => setActiveVision(1)} disabled={activeVision === 1} aria-label="Next"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg></button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1048,120 +1001,81 @@ const AboutUs = () => {
 
                 {/* ── Panel 7: Testimonials ── */}
                 <section className="stack-panel panel-testimonials" ref={testRef}>
-                    {/* Left photo column */}
-                    <div className="test-col test-col--left">
-                        <div className="test-strip test-strip--up">
-                            {leftPhotos.map((p, i) => (
-                                <div key={i} className="test-strip-photo" style={{ height: p.h }}>
-                                    <img src={p.src} alt="" style={{ height: p.h }} />
-                                </div>
-                            ))}
+                    <div className="panel-inner" style={{ flexDirection: 'row', alignItems: 'stretch' }}>
+                        <div className="test-col test-col--left">
+                            <div className="test-strip test-strip--up">
+                                {leftPhotos.map((p, i) => <div key={i} className="test-strip-photo" style={{ height: p.h }}><img src={p.src} alt="" style={{ height: p.h }} /></div>)}
+                            </div>
                         </div>
-                    </div>
-
-                    {/* Center content */}
-                    <div className="test-center">
-                        <div className="test-badge"><div className="test-badge-dot" />Client Reviews</div>
-                        <h2 className="test-heading">Trusted by clients<br /><span className="test-heading-muted">across Dubai.</span></h2>
-                        <p className="test-sub">Every client we&#39;ve worked with came through a referral. Here&#39;s what they say.</p>
-
-                        <div className="trev-slider">
-                            <div className="trev-track-wrap">
-                                <div className="trev-track" style={{ transform: `translateX(-${activeReview * 100}%)` }}>
-                                    {[
-                                        { quote: '"Al Areeq found us our dream villa in under two weeks. Mohammed was honest, never pushy, and negotiated an incredible deal on our behalf. From first call to keys in hand, every step felt effortless. We felt like family, not just clients."', name: 'Sarah & James Mitchell', loc: 'Dubai Hills, UAE', img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=85' },
-                                        { quote: '"As a first-time investor I was nervous about every decision. Sara guided me through every step — market data, contract terms, risk, everything. Transparent, patient, and deeply results-driven. The best financial decision I\'ve made in Dubai."', name: 'Carlos Reyes', loc: 'Downtown Dubai, UAE', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=85' },
-                                        { quote: '"We relocated from London with two kids and zero knowledge of Dubai. Al Areeq handled everything — school district advice, contract review, neighbourhood walkthroughs, the lot. They went far beyond what any agency would do."', name: 'Priya & Arjun Shah', loc: 'Palm Jumeirah, UAE', img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&q=85' },
-                                        { quote: '"I\'ve dealt with agencies across three countries. Al Areeq stands alone. No hard selling, no hidden agendas — just honest professionals who know their market cold. Closed my penthouse in Business Bay in 9 days. Extraordinary."', name: 'David Okonkwo', loc: 'Business Bay, UAE', img: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&q=85' },
-                                    ].map((r, i) => (
-                                        <div key={i} className="trev-card">
-                                            <StarRow />
-                                            <p className="trev-quote">{r.quote}</p>
-                                            <div className="trev-author">
-                                                <div className="trev-avatar"><img src={r.img} alt={r.name} /></div>
-                                                <div className="trev-author-info">
-                                                    <div className="trev-name">{r.name}</div>
-                                                    <div className="trev-loc">
-                                                        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
-                                                        {r.loc}
+                        <div className="test-center">
+                            <div className="test-badge"><div className="test-badge-dot" />Client Reviews</div>
+                            <h2 className="test-heading">Trusted by clients<br /><span className="test-heading-muted">across Dubai.</span></h2>
+                            <p className="test-sub">Every client we&#39;ve worked with came through a referral. Here&#39;s what they say.</p>
+                            <div className="trev-slider">
+                                <div className="trev-track-wrap">
+                                    <div className="trev-track" style={{ transform: `translateX(-${activeReview * 100}%)` }}>
+                                        {[
+                                            { quote: '"Al Areeq found us our dream villa in under two weeks. Mohammed was honest, never pushy, and negotiated an incredible deal on our behalf. From first call to keys in hand, every step felt effortless. We felt like family, not just clients."', name: 'Sarah & James Mitchell', loc: 'Dubai Hills, UAE', img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=85' },
+                                            { quote: '"As a first-time investor I was nervous about every decision. Sara guided me through every step — market data, contract terms, risk, everything. Transparent, patient, and deeply results-driven. The best financial decision I\'ve made in Dubai."', name: 'Carlos Reyes', loc: 'Downtown Dubai, UAE', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=85' },
+                                            { quote: '"We relocated from London with two kids and zero knowledge of Dubai. Al Areeq handled everything — school district advice, contract review, neighbourhood walkthroughs, the lot. They went far beyond what any agency would do."', name: 'Priya & Arjun Shah', loc: 'Palm Jumeirah, UAE', img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&q=85' },
+                                            { quote: '"I\'ve dealt with agencies across three countries. Al Areeq stands alone. No hard selling, no hidden agendas — just honest professionals who know their market cold. Closed my penthouse in Business Bay in 9 days. Extraordinary."', name: 'David Okonkwo', loc: 'Business Bay, UAE', img: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&q=85' },
+                                        ].map((r, i) => (
+                                            <div key={i} className="trev-card">
+                                                <StarRow />
+                                                <p className="trev-quote">{r.quote}</p>
+                                                <div className="trev-author">
+                                                    <div className="trev-avatar"><img src={r.img} alt={r.name} /></div>
+                                                    <div className="trev-author-info">
+                                                        <div className="trev-name">{r.name}</div>
+                                                        <div className="trev-loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>{r.loc}</div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="trev-nav">
-                                <div className="trev-nav-dots">
-                                    {[0, 1, 2, 3].map(i => (
-                                        <button key={i} className={`trev-nav-dot${activeReview === i ? ' active' : ''}`} onClick={() => setActiveReview(i)} aria-label={`Review ${i + 1}`} />
-                                    ))}
-                                </div>
-                                <div className="trev-nav-counter">{activeReview + 1} / 4</div>
-                                <div className="trev-nav-arrows">
-                                    <button className="trev-arrow" onClick={() => setActiveReview(r => Math.max(0, r - 1))} disabled={activeReview === 0} aria-label="Previous review">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                                    </button>
-                                    <button className="trev-arrow" onClick={() => setActiveReview(r => Math.min(3, r + 1))} disabled={activeReview === 3} aria-label="Next review">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-                                    </button>
+                                <div className="trev-nav">
+                                    <div className="trev-nav-dots">{[0, 1, 2, 3].map(i => <button key={i} className={`trev-nav-dot${activeReview === i ? ' active' : ''}`} onClick={() => setActiveReview(i)} aria-label={`Review ${i + 1}`} />)}</div>
+                                    <div className="trev-nav-counter">{activeReview + 1} / 4</div>
+                                    <div className="trev-nav-arrows">
+                                        <button className="trev-arrow" onClick={() => setActiveReview(r => Math.max(0, r - 1))} disabled={activeReview === 0} aria-label="Previous review"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg></button>
+                                        <button className="trev-arrow" onClick={() => setActiveReview(r => Math.min(3, r + 1))} disabled={activeReview === 3} aria-label="Next review"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg></button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    {/* Right photo column */}
-                    <div className="test-col test-col--right">
-                        <div className="test-strip test-strip--down">
-                            {rightPhotos.map((p, i) => (
-                                <div key={i} className="test-strip-photo" style={{ height: p.h }}>
-                                    <img src={p.src} alt="" style={{ height: p.h }} />
-                                </div>
-                            ))}
+                        <div className="test-col test-col--right">
+                            <div className="test-strip test-strip--down">
+                                {rightPhotos.map((p, i) => <div key={i} className="test-strip-photo" style={{ height: p.h }}><img src={p.src} alt="" style={{ height: p.h }} /></div>)}
+                            </div>
                         </div>
                     </div>
                 </section>
 
                 {/* ── Panel 8: CTA ── */}
                 <section className="stack-panel panel-cta" ref={ctaRef}>
-                    <div className="cta-inner">
-                        <div className="cta-eyebrow"><div className="cta-eyebrow-dot" />Let&#39;s Get Started</div>
-                        <h2 className="cta-heading">Ready to Find Your<br /><em>Dream Property?</em></h2>
-                        <p className="cta-sub">Whether you&#39;re buying, selling, or investing — our team is ready to guide you every step of the way.</p>
-                        <div className="cta-buttons">
-                            <a href="#contact" className="cta-btn-primary">
-                                Contact Us
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                            </a>
-                            <a href="#listings" className="cta-btn-secondary">
-                                View Listings
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                            </a>
-                        </div>
-                        <div className="cta-stats">
-                            <div className="cta-stat">
-                                <div className="cta-stat-num">{ctaInView ? ctaCounters.deals : 0}+</div>
-                                <div className="cta-stat-label">Deals Closed</div>
+                    <div className="panel-inner">
+                        <span className="cta-bg-text" aria-hidden="true">AL AREEQ</span>
+                        <div className="cta-inner">
+                            <div className="cta-eyebrow"><div className="cta-eyebrow-dot" />Let&#39;s Get Started</div>
+                            <h2 className="cta-heading">Ready to Find Your<br /><em>Dream Property?</em></h2>
+                            <p className="cta-sub">Whether you&#39;re buying, selling, or investing — our team is ready to guide you every step of the way.</p>
+                            <div className="cta-buttons">
+                                <a href="#contact" className="cta-btn-primary">Contact Us <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
+                                <a href="#listings" className="cta-btn-secondary">View Listings <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
                             </div>
-                            <div className="cta-stat">
-                                <div className="cta-stat-num">{ctaInView ? ctaCounters.exp : 0}yr</div>
-                                <div className="cta-stat-label">Experience</div>
-                            </div>
-                            <div className="cta-stat">
-                                <div className="cta-stat-num">{ctaInView ? ctaCounters.sat : 0}%</div>
-                                <div className="cta-stat-label">Client Satisfaction</div>
-                            </div>
-                            <div className="cta-stat">
-                                <div className="cta-stat-num">{ctaInView ? (ctaCounters.rating / 10).toFixed(1) : '0.0'}★</div>
-                                <div className="cta-stat-label">Average Rating</div>
+                            <div className="cta-stats">
+                                <div className="cta-stat"><div className="cta-stat-num">{ctaInView ? ctaCounters.deals : 0}+</div><div className="cta-stat-label">Deals Closed</div></div>
+                                <div className="cta-stat"><div className="cta-stat-num">{ctaInView ? ctaCounters.exp : 0}yr</div><div className="cta-stat-label">Experience</div></div>
+                                <div className="cta-stat"><div className="cta-stat-num">{ctaInView ? ctaCounters.sat : 0}%</div><div className="cta-stat-label">Client Satisfaction</div></div>
+                                <div className="cta-stat"><div className="cta-stat-num">{ctaInView ? (ctaCounters.rating / 10).toFixed(1) : '0.0'}★</div><div className="cta-stat-label">Average Rating</div></div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-            </div>{/* end stack-wrap */}
+            </div>
 
-            {/* ── Footer ── */}
             <footer className="about-footer">
                 <div className="about-footer-cta">
                     <h2>Find your dream home today.</h2>
@@ -1171,30 +1085,14 @@ const AboutUs = () => {
                     </div>
                 </div>
                 <div className="about-footer-main">
-                    <div className="about-footer-brand">
-                        <h3>Al Areeq</h3>
-                        <p>Trusted real estate partner helping families buy, rent and invest in premium Dubai properties since 2012.</p>
-                    </div>
-                    <div>
-                        <h4>Properties</h4>
-                        <ul><li><a href="#">Buy</a></li><li><a href="#">Rent</a></li><li><a href="#">Luxury</a></li><li><a href="#">Off-Plan</a></li></ul>
-                    </div>
-                    <div>
-                        <h4>Company</h4>
-                        <ul><li><a href="#">About</a></li><li><a href="#">Agents</a></li><li><a href="#">Careers</a></li><li><a href="#">Contact</a></li></ul>
-                    </div>
-                    <div>
-                        <h4>Resources</h4>
-                        <ul><li><a href="#">Mortgage Calculator</a></li><li><a href="#">Market Reports</a></li><li><a href="#">Area Guides</a></li><li><a href="#">Blog</a></li></ul>
-                    </div>
+                    <div className="about-footer-brand"><h3>Al Areeq</h3><p>Trusted real estate partner helping families buy, rent and invest in premium Dubai properties since 2012.</p></div>
+                    <div><h4>Properties</h4><ul><li><a href="#">Buy</a></li><li><a href="#">Rent</a></li><li><a href="#">Luxury</a></li><li><a href="#">Off-Plan</a></li></ul></div>
+                    <div><h4>Company</h4><ul><li><a href="#">About</a></li><li><a href="#">Agents</a></li><li><a href="#">Careers</a></li><li><a href="#">Contact</a></li></ul></div>
+                    <div><h4>Resources</h4><ul><li><a href="#">Mortgage Calculator</a></li><li><a href="#">Market Reports</a></li><li><a href="#">Area Guides</a></li><li><a href="#">Blog</a></li></ul></div>
                 </div>
                 <div className="about-footer-bottom">
                     <p>© {new Date().getFullYear()} Al Areeq Real Estate. All rights reserved.</p>
-                    <div className="about-footer-legal">
-                        <a href="#">Privacy</a>
-                        <a href="#">Terms</a>
-                        <a href="#">RERA Licensed</a>
-                    </div>
+                    <div className="about-footer-legal"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">RERA Licensed</a></div>
                 </div>
             </footer>
         </>
