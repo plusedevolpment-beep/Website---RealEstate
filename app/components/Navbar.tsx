@@ -46,7 +46,6 @@ const NAV_ITEMS = [
     { label: 'Rent', dropdown: [{ label: 'Houses for Rent', href: '#' }, { label: 'Apartments for Rent', href: '#' }, { label: 'Commercial Rentals', href: '#' }] },
     { label: 'Sell', dropdown: [{ label: 'Sell Your Property', href: '#' }, { label: 'Free Property Valuation', href: '#' }, { label: 'Seller Guide', href: '#' }] },
     { label: 'Projects', dropdown: [{ label: 'New Launches', href: '#' }, { label: 'Upcoming Projects', href: '#' }, { label: 'Investment Opportunities', href: '#' }] },
-    { label: 'Agents', dropdown: [{ label: 'Meet the Team', href: '#' }, { label: 'Agent Profiles', href: '#' }, { label: 'Become an Agent', href: '#' }] },
     { label: 'About', href: '/about', dropdown: [{ label: 'Company Overview', href: '/about#au-intro' }, { label: 'Mission & Vision', href: '/about#au-values' }, { label: 'Meet the Team', href: '/about#au-team' }, { label: 'Testimonials', href: '/about#au-testimonials' }] },
     { label: 'Blog', href: '/blog', dropdown: [{ label: 'Market Trends', href: '/Blog' }, { label: 'Investment Tips', href: '/Blog' }, { label: 'News & Updates', href: '/Blog' }] },
     { label: 'Contact', href: '/contact' },
