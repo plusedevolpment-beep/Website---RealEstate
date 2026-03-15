@@ -1,0 +1,67 @@
+{
+  "navbar": {
+    "home": "Startseite",
+    "buy": "Kaufen",
+    "rent": "Mieten",
+    "sell": "Verkaufen",
+    "projects": "Projekte",
+    "agents": "Makler",
+    "about": "Über uns",
+    "blog": "Blog",
+    "contact": "Kontakt",
+    "search": "Suchen",
+    "saved": "Gespeichert",
+    "phone": "+971 4 123 4567",
+    "email": "info@alareeq.com",
+    "languages": {
+      "en": "English",
+      "ar": "العربية",
+      "fr": "Français",
+      "es": "Español",
+      "de": "Deutsch"
+    }
+  },
+  "buy": {
+    "propertyTypes": "Immobilientypen",
+    "housesForSale": "Häuser zum Verkauf",
+    "apartments": "Wohnungen",
+    "luxuryHomes": "Luxushäuser",
+    "newProjects": "Neue Projekte",
+    "openHouses": "Offene Häuser",
+    "tools": "Werkzeuge",
+    "mortgageCalculator": "Hypothekenrechner",
+    "priceTrends": "Preisentwicklungen",
+    "neighborhoodGuide": "Nachbarschaftsführer"
+  },
+  "rent": {
+    "housesForRent": "Häuser zur Miete",
+    "apartmentsForRent": "Wohnungen zur Miete",
+    "commercialRentals": "Gewerbemieten"
+  },
+  "sell": {
+    "sellYourProperty": "Verkaufen Sie Ihre Immobilie",
+    "freePropertyValuation": "Kostenlose Immobilienbewertung",
+    "sellerGuide": "Verkäuferleitfaden"
+  },
+  "projects": {
+    "newLaunches": "Neue Launches",
+    "upcomingProjects": "Kommende Projekte",
+    "investmentOpportunities": "Investitionsmöglichkeiten"
+  },
+  "agents": {
+    "meetTheTeam": "Das Team kennenlernen",
+    "agentProfiles": "Maklerprofile",
+    "becomeAnAgent": "Makler werden"
+  },
+  "about": {
+    "companyOverview": "Unternehmensübersicht",
+    "missionVision": "Mission und Vision",
+    "meetTheTeam": "Das Team kennenlernen",
+    "testimonials": "Referenzen"
+  },
+  "blog": {
+    "marketTrends": "Marktentwicklungen",
+    "investmentTips": "Investmenttipps",
+    "newsUpdates": "Nachrichten und Updates"
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "navbar": {
+    "home": "Home",
+    "buy": "Buy",
+    "rent": "Rent",
+    "sell": "Sell",
+    "projects": "Projects",
+    "agents": "Agents",
+    "about": "About",
+    "blog": "Blog",
+    "contact": "Contact",
+    "search": "Search",
+    "saved": "Saved",
+    "phone": "+971 4 123 4567",
+    "email": "info@alareeq.com",
+    "languages": {
+      "en": "English",
+      "ar": "العربية"
+    }
+  },
+  "buy": {
+    "propertyTypes": "Property Types",
+    "housesForSale": "Houses for Sale",
+    "apartments": "Apartments",
+    "luxuryHomes": "Luxury Homes",
+    "newProjects": "New Projects",
+    "openHouses": "Open Houses",
+    "tools": "Tools",
+    "mortgageCalculator": "Mortgage Calculator",
+    "priceTrends": "Price Trends",
+    "neighborhoodGuide": "Neighborhood Guide"
+  },
+  "rent": {
+    "housesForRent": "Houses for Rent",
+    "apartmentsForRent": "Apartments for Rent",
+    "commercialRentals": "Commercial Rentals"
+  },
+  "sell": {
+    "sellYourProperty": "Sell Your Property",
+    "freePropertyValuation": "Free Property Valuation",
+    "sellerGuide": "Seller Guide"
+  },
+  "projects": {
+    "newLaunches": "New Launches",
+    "upcomingProjects": "Upcoming Projects",
+    "investmentOpportunities": "Investment Opportunities"
+  },
+  "agents": {
+    "meetTheTeam": "Meet The Team",
+    "agentProfiles": "Agent Profiles",
+    "becomeAnAgent": "Become An Agent"
+  },
+  "about": {
+    "companyOverview": "Company Overview",
+    "missionVision": "Mission & Vision",
+    "meetTheTeam": "Meet The Team",
+    "testimonials": "Testimonials"
+  },
+  "blog": {
+    "marketTrends": "Market Trends",
+    "investmentTips": "Investment Tips",
+    "newsUpdates": "News & Updates"
+  }
+}

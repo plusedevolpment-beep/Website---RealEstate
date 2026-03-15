@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
+import { useLanguage } from './LanguageProvider';
 
 const IcHouse = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>;
 const IcBuilding = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="18" rx="2" /><line x1="8" y1="3" x2="8" y2="21" /><line x1="16" y1="3" x2="16" y2="21" /><line x1="2" y1="9" x2="22" y2="9" /><line x1="2" y1="15" x2="22" y2="15" /></svg>;
@@ -19,51 +20,73 @@ const IcPhone = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none
 const IcMail = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>;
 const IcGlobe = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></svg>;
 
-const NAV_ITEMS = [
-    { label: 'Home', href: '/' },
-    {
-        label: 'Buy', mega: true,
-        groups: [
-            {
-                heading: 'Property Types', links: [
-                    { label: 'Houses for Sale', href: '#', Icon: IcHouse },
-                    { label: 'Apartments', href: '#', Icon: IcBuilding },
-                    { label: 'Luxury Homes', href: '#', Icon: IcStar },
-                    { label: 'New Projects', href: '#', Icon: IcCrane },
-                    { label: 'Open Houses', href: '#', Icon: IcCalendar },
-                ]
-            },
-            {
-                heading: 'Tools', links: [
-                    { label: 'Mortgage Calculator', href: '#', Icon: IcCalc },
-                    { label: 'Price Trends', href: '#', Icon: IcTrend },
-                    { label: 'Neighborhood Guide', href: '#', Icon: IcMap },
-                ]
-            },
-        ],
-        featured: { label: 'New Launches', sub: 'Discover premium projects before they sell out.', href: '#', img: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=360&q=80' },
-    },
-    { label: 'Rent', dropdown: [{ label: 'Houses for Rent', href: '#' }, { label: 'Apartments for Rent', href: '#' }, { label: 'Commercial Rentals', href: '#' }] },
-    { label: 'Sell', dropdown: [{ label: 'Sell Your Property', href: '#' }, { label: 'Free Property Valuation', href: '#' }, { label: 'Seller Guide', href: '#' }] },
-    { label: 'Projects', dropdown: [{ label: 'New Launches', href: '#' }, { label: 'Upcoming Projects', href: '#' }, { label: 'Investment Opportunities', href: '#' }] },
-    { label: 'Agents', dropdown: [{ label: 'Meet the Team', href: '#' }, { label: 'Agent Profiles', href: '#' }, { label: 'Become an Agent', href: '#' }] },
-    { label: 'About', href: '/about', dropdown: [{ label: 'Company Overview', href: '/about#au-intro' }, { label: 'Mission & Vision', href: '/about#au-values' }, { label: 'Meet the Team', href: '/about#au-team' }, { label: 'Testimonials', href: '/about#au-testimonials' }] },
-    { label: 'Blog', href: '/blog', dropdown: [{ label: 'Market Trends', href: '/Blog' }, { label: 'Investment Tips', href: '/Blog' }, { label: 'News & Updates', href: '/Blog' }] },
-    { label: 'Contact', href: '/contact' },
-];
-
-export const NAVBAR_HEIGHT_DESKTOP = 102;
-export const NAVBAR_HEIGHT_MOBILE = 64;
-
 const Navbar = () => {
+    const { t, currentLanguage, changeLanguage, availableLanguages } = useLanguage();
     const [isScrolled, setIsScrolled] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
     const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
     const [searchOpen, setSearchOpen] = useState(false);
     const [langOpen, setLangOpen] = useState(false);
-    const [lang, setLang] = useState<'EN' | 'AR'>('EN');
     const [savedCount] = useState(3);
     const navRef = useRef<HTMLDivElement>(null);
+
+    const NAV_ITEMS = [
+        { label: t('navbar.home'), href: '/' },
+        {
+            label: t('navbar.buy'), mega: true,
+            groups: [
+                {
+                    heading: t('buy.propertyTypes'), links: [
+                        { label: t('buy.housesForSale'), href: '#', Icon: IcHouse },
+                        { label: t('buy.apartments'), href: '#', Icon: IcBuilding },
+                        { label: t('buy.luxuryHomes'), href: '#', Icon: IcStar },
+                        { label: t('buy.newProjects'), href: '#', Icon: IcCrane },
+                        { label: t('buy.openHouses'), href: '#', Icon: IcCalendar },
+                    ]
+                },
+                {
+                    heading: t('buy.tools'), links: [
+                        { label: t('buy.mortgageCalculator'), href: '#', Icon: IcCalc },
+                        { label: t('buy.priceTrends'), href: '#', Icon: IcTrend },
+                        { label: t('buy.neighborhoodGuide'), href: '#', Icon: IcMap },
+                    ]
+                },
+            ],
+            featured: { label: t('projects.newLaunches'), sub: t('mega.newLaunchesSub'), href: '#', img: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=360&q=80' },
+        },
+        { label: t('navbar.rent'), dropdown: [
+            { label: t('rent.housesForRent'), href: '#' },
+            { label: t('rent.apartmentsForRent'), href: '#' },
+            { label: t('rent.commercialRentals'), href: '#' }
+        ] },
+        { label: t('navbar.sell'), dropdown: [
+            { label: t('sell.sellYourProperty'), href: '#' },
+            { label: t('sell.freePropertyValuation'), href: '#' },
+            { label: t('sell.sellerGuide'), href: '#' }
+        ] },
+        { label: t('navbar.projects'), dropdown: [
+            { label: t('projects.newLaunches'), href: '#' },
+            { label: t('projects.upcomingProjects'), href: '#' },
+            { label: t('projects.investmentOpportunities'), href: '#' }
+        ] },
+        { label: t('navbar.agents'), dropdown: [
+            { label: t('agents.meetTheTeam'), href: '#' },
+            { label: t('agents.agentProfiles'), href: '#' },
+            { label: t('agents.becomeAnAgent'), href: '#' }
+        ] },
+        { label: t('navbar.about'), href: '/about', dropdown: [
+            { label: t('about.companyOverview'), href: '/about#au-intro' },
+            { label: t('about.missionVision'), href: '/about#au-values' },
+            { label: t('about.meetTheTeam'), href: '/about#au-team' },
+            { label: t('about.testimonials'), href: '/about#au-testimonials' }
+        ] },
+        { label: t('navbar.blog'), href: '/blog', dropdown: [
+            { label: t('blog.marketTrends'), href: '/Blog' },
+            { label: t('blog.investmentTips'), href: '/Blog' },
+            { label: t('blog.newsUpdates'), href: '/Blog' }
+        ] },
+        { label: t('navbar.contact'), href: '/contact' },
+    ];
 
     useEffect(() => {
         const onScroll = () => setIsScrolled(window.scrollY > 50);
@@ -216,31 +239,36 @@ html,body{margin:0;padding:0;overflow-x:hidden;}
             <div className={`nv ${isScrolled ? 'scrolled' : ''}`} ref={navRef}>
                 {!isScrolled && (
                     <div className="nv-utility">
-                        <a href="tel:+97141234567" className="nv-util-link"><IcPhone /> +971 4 123 4567</a>
+                        <a href="tel:+97141234567" className="nv-util-link"><IcPhone /> {t('navbar.phone')}</a>
                         <div className="nv-util-sep" />
-                        <a href="mailto:info@alareeq.com" className="nv-util-link"><IcMail /> info@alareeq.com</a>
+                        <a href="mailto:info@alareeq.com" className="nv-util-link"><IcMail /> {t('navbar.email')}</a>
                         <div className="nv-util-sep" />
                         <div className="nv-util-lang" onClick={() => setLangOpen(o => !o)} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && setLangOpen(o => !o)}>
-                            <IcGlobe /> {lang} <IcChevron />
+                            <IcGlobe /> {currentLanguage.toUpperCase()} <IcChevron />
                             <div className={`nv-lang-dd ${langOpen ? 'open' : ''}`}>
-                                <button className={`nv-lang-opt ${lang === 'EN' ? 'active' : ''}`} onClick={e => { e.stopPropagation(); setLang('EN'); setLangOpen(false); }}>
-                                    <span>English</span>
-                                    <span className="nv-lang-opt-sub">EN</span>
-                                    <svg className="nv-lang-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                                </button>
-                                <button className={`nv-lang-opt ${lang === 'AR' ? 'active' : ''}`} onClick={e => { e.stopPropagation(); setLang('AR'); setLangOpen(false); }}>
-                                    <span>العربية</span>
-                                    <span className="nv-lang-opt-sub">AR</span>
-                                    <svg className="nv-lang-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                                </button>
+                                {availableLanguages.map((lang) => (
+                                    <button
+                                        key={lang.code}
+                                        className={`nv-lang-opt ${currentLanguage === lang.code ? 'active' : ''}`}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            changeLanguage(lang.code);
+                                            setLangOpen(false);
+                                        }}
+                                    >
+                                        <span>{lang.nativeName}</span>
+                                        <span className="nv-lang-opt-sub">{lang.code.toUpperCase()}</span>
+                                        <svg className="nv-lang-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                    </button>
+                                ))}
                             </div>
                         </div>
                     </div>
                 )}
                 <div className="nv-main">
                     <a href="/" className="nv-logo">
-                        <span className="nv-logo-name">Al Areeq</span>
-                        <span className="nv-logo-tag">Luxury Real Estate</span>
+                        <span className="nv-logo-name">{t('branding.name')}</span>
+                        <span className="nv-logo-tag">{t('branding.tag')}</span>
                     </a>
                     <ul className="nv-links">
                         {NAV_ITEMS.map((item) => {
@@ -299,18 +327,18 @@ html,body{margin:0;padding:0;overflow-x:hidden;}
                         <div className="nv-sw">
                             <button className="nv-icon" onClick={() => setSearchOpen(o => !o)} aria-label="Search"><IcSearch /></button>
                             <div className={`nv-sp ${searchOpen ? 'open' : ''}`}>
-                                <div className="sf"><span className="sf-label">Location</span><input placeholder="City or area..." /></div>
-                                <div className="sf"><span className="sf-label">Type</span><select><option>Any Type</option><option>Apartment</option><option>Villa</option><option>Penthouse</option></select></div>
-                                <div className="sf"><span className="sf-label">Price</span><select><option>Any Price</option><option>Under $500K</option><option>$500K-$1M</option><option>$1M-$3M</option><option>$3M+</option></select></div>
-                                <button className="sg"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>Go</button>
+                                <div className="sf"><span className="sf-label">{t('search.locationPlaceholder')}</span><input placeholder={t('search.locationPlaceholder')} /></div>
+                                <div className="sf"><span className="sf-label">{t('search.typeLabel')}</span><select><option>{t('search.anyType')}</option><option>{t('search.typeApartment')}</option><option>{t('search.typeVilla')}</option><option>{t('search.typePenthouse')}</option></select></div>
+                                <div className="sf"><span className="sf-label">{t('search.priceLabel')}</span><select><option>{t('search.anyPrice')}</option><option>{t('search.priceUnder500')}</option><option>{t('search.price500to1')}</option><option>{t('search.price1to3')}</option><option>{t('search.price3Plus')}</option></select></div>
+                                <button className="sg"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>{t('search.goButton')}</button>
                             </div>
                         </div>
                         <button className="nv-icon" aria-label="Saved">
                             <IcHeart />
                             {savedCount > 0 && <span className="nv-badge">{savedCount}</span>}
                         </button>
-                        <button className="nv-btn-out">Log In</button>
-                        <button className="nv-btn-prim">List Property</button>
+                        <button className="nv-btn-out">{t('mobile.login')}</button>
+                        <button className="nv-btn-prim">{t('mobile.listProperty')}</button>
                         <button className={`nv-ham ${mobileOpen ? 'open' : ''}`} onClick={() => setMobileOpen(o => !o)} aria-label="Menu">
                             <span className="ham-l" /><span className="ham-l" /><span className="ham-l" />
                         </button>
@@ -322,15 +350,15 @@ html,body{margin:0;padding:0;overflow-x:hidden;}
 
             <div className={`nv-dr ${mobileOpen ? 'open' : ''}`}>
                 <div className="mob-hd">
-                    <span className="mob-hd-tag">Luxury Real Estate</span>
+                    <span className="mob-hd-tag">{t('mobile.utilTag')}</span>
                     <button className="mob-cl" onClick={() => setMobileOpen(false)} aria-label="Close"><IcClose /></button>
                 </div>
-                <div className="mob-srch"><IcSearch /><input placeholder="Search properties..." /></div>
+                <div className="mob-srch"><IcSearch /><input placeholder={t('mobile.searchPlaceholder')} /></div>
                 <div className="mob-utils">
-                    <a href="#" className="mob-ua">Log In</a>
-                    <a href="#" className="mob-ua">Sign Up</a>
-                    <button className="mob-ua mob-lang-btn" onClick={() => setLang(l => l === 'EN' ? 'AR' : 'EN')}>
-                        <IcGlobe /> {lang === 'EN' ? 'العربية' : 'English'}
+                    <a href="#" className="mob-ua">{t('mobile.login')}</a>
+                    <a href="#" className="mob-ua">{t('mobile.signup')}</a>
+                    <button className="mob-ua mob-lang-btn" onClick={() => changeLanguage(currentLanguage === 'en' ? 'ar' : 'en')}>
+                        <IcGlobe /> {currentLanguage === 'en' ? 'العربية' : 'English'}
                     </button>
                 </div>
                 <ul className="mob-list">
@@ -358,8 +386,8 @@ html,body{margin:0;padding:0;overflow-x:hidden;}
                     })}
                 </ul>
                 <div className="mob-ft">
-                    <button className="mob-cp">List Your Property</button>
-                    <button className="mob-cs">Book a Viewing</button>
+                    <button className="mob-cp">{t('mobile.listProperty')}</button>
+                    <button className="mob-cs">{t('mobile.bookViewing')}</button>
                 </div>
             </div>
         </>

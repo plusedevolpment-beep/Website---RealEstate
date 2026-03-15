@@ -1,0 +1,67 @@
+{
+  "navbar": {
+    "home": "Inicio",
+    "buy": "Comprar",
+    "rent": "Alquilar",
+    "sell": "Vender",
+    "projects": "Proyectos",
+    "agents": "Agentes",
+    "about": "Acerca de",
+    "blog": "Blog",
+    "contact": "Contacto",
+    "search": "Buscar",
+    "saved": "Guardado",
+    "phone": "+971 4 123 4567",
+    "email": "info@alareeq.com",
+    "languages": {
+      "en": "English",
+      "ar": "العربية",
+      "fr": "Français",
+      "es": "Español",
+      "de": "Deutsch"
+    }
+  },
+  "buy": {
+    "propertyTypes": "Tipos de propiedad",
+    "housesForSale": "Casas en venta",
+    "apartments": "Apartamentos",
+    "luxuryHomes": "Casas de lujo",
+    "newProjects": "Nuevos proyectos",
+    "openHouses": "Casas abiertas",
+    "tools": "Herramientas",
+    "mortgageCalculator": "Calculadora de hipoteca",
+    "priceTrends": "Tendencias de precios",
+    "neighborhoodGuide": "Guía de barrios"
+  },
+  "rent": {
+    "housesForRent": "Casas en alquiler",
+    "apartmentsForRent": "Apartamentos en alquiler",
+    "commercialRentals": "Alquileres comerciales"
+  },
+  "sell": {
+    "sellYourProperty": "Vende tu propiedad",
+    "freePropertyValuation": "Valoración inmobiliaria gratuita",
+    "sellerGuide": "Guía del vendedor"
+  },
+  "projects": {
+    "newLaunches": "Nuevos lanzamientos",
+    "upcomingProjects": "Próximos proyectos",
+    "investmentOpportunities": "Oportunidades de inversión"
+  },
+  "agents": {
+    "meetTheTeam": "Conoce al equipo",
+    "agentProfiles": "Perfiles de agentes",
+    "becomeAnAgent": "Conviértete en agente"
+  },
+  "about": {
+    "companyOverview": "Resumen de la empresa",
+    "missionVision": "Misión y visión",
+    "meetTheTeam": "Conoce al equipo",
+    "testimonials": "Testimonios"
+  },
+  "blog": {
+    "marketTrends": "Tendencias del mercado",
+    "investmentTips": "Consejos de inversión",
+    "newsUpdates": "Noticias y actualizaciones"
+  }
+}

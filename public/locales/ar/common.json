@@ -1,0 +1,67 @@
+{
+  "navbar": {
+    "home": "الرئيسية",
+    "buy": "شراء",
+    "rent": "إيجار",
+    "sell": "بيع",
+    "projects": "المشاريع",
+    "agents": "الوكلاء",
+    "about": "حولنا",
+    "blog": "المدونة",
+    "contact": "اتصل بنا",
+    "search": "بحث",
+    "saved": "المحفوظات",
+    "phone": "+971 4 123 4567",
+    "email": "info@alareeq.com",
+    "languages": {
+      "en": "English",
+      "ar": "العربية",
+      "fr": "Français",
+      "es": "Español",
+      "de": "Deutsch"
+    }
+  },
+  "buy": {
+    "propertyTypes": "أنواع العقارات",
+    "housesForSale": "منازل للبيع",
+    "apartments": "شقق",
+    "luxuryHomes": "منازل فاخرة",
+    "newProjects": "مشاريع جديدة",
+    "openHouses": "منازل مفتوحة",
+    "tools": "أدوات",
+    "mortgageCalculator": "حاسبة الرهن العقاري",
+    "priceTrends": "اتجاهات الأسعار",
+    "neighborhoodGuide": "دليل الأحياء"
+  },
+  "rent": {
+    "housesForRent": "منازل للإيجار",
+    "apartmentsForRent": "شقق للإيجار",
+    "commercialRentals": "إيجارات تجارية"
+  },
+  "sell": {
+    "sellYourProperty": "بيع عقارك",
+    "freePropertyValuation": "تقييم عقاري مجاني",
+    "sellerGuide": "دليل البائع"
+  },
+  "projects": {
+    "newLaunches": "إطلاقات جديدة",
+    "upcomingProjects": "مشاريع قادمة",
+    "investmentOpportunities": "فرص استثمارية"
+  },
+  "agents": {
+    "meetTheTeam": "تعرف على الفريق",
+    "agentProfiles": "ملفات الوكلاء",
+    "becomeAnAgent": "كن وكيلاً"
+  },
+  "about": {
+    "companyOverview": "نظرة عامة على الشركة",
+    "missionVision": "الرسالة والرؤية",
+    "meetTheTeam": "تعرف على الفريق",
+    "testimonials": "الشهادات"
+  },
+  "blog": {
+    "marketTrends": "اتجاهات السوق",
+    "investmentTips": "نصائح الاستثمار",
+    "newsUpdates": "الأخبار والتحديثات"
+  }
+}

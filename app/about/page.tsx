@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import Navbar from '../components/Navbar';
+import { useLanguage } from '../components/LanguageProvider';
 
 const ABOUT_STYLES = `
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap');
@@ -573,6 +574,7 @@ body { font-family: 'DM Sans', sans-serif; background: #18181b; -webkit-font-smo
 `;
 
 const AboutUs = () => {
+    const { t } = useLanguage();
     const heroRef = useRef<HTMLElement>(null);
     const ceoRef = useRef<HTMLElement>(null);
     const whoRef = useRef<HTMLElement>(null);
@@ -732,22 +734,52 @@ const AboutUs = () => {
 
     /* ─── DATA ─── */
     const stats = [
-        { target: 500, suffix: '+', label: 'Properties Sold', desc: 'Across Dubai & the UAE' },
-        { target: 12, suffix: '+', label: 'Years Experience', desc: 'Licensed since 2012' },
-        { target: 1000, suffix: '+', label: 'Happy Clients', desc: 'Families & investors' },
+        { target: 500, suffix: '+', label: t('about.page.stats.dealsLabel'), desc: t('about.page.stats.coverage') },
+        { target: 12, suffix: '+', label: t('about.page.stats.yearsExperience'), desc: t('about.page.stats.starLabel') },
+        { target: 1000, suffix: '+', label: t('about.page.stats.happyClients'), desc: t('about.page.stats.clientLabel') },
     ];
 
-    const serviceCategories = [
-        { id: 0, tab: 'Home Maintenance' },
-        { id: 1, tab: 'Repair Work' },
-        { id: 2, tab: 'House Renovation' },
-    ];
+    const serviceKeys = ['maintenance', 'repairs', 'renovation'] as const;
 
-    const serviceDetails = [
-        { headline: 'Proactive care, year-round.', body: 'We keep your property in peak condition so small issues never become expensive ones.', groups: [{ label: 'Upkeep', items: ['AC servicing', 'Deep cleaning'] }, { label: 'Checks', items: ['Plumbing & electrical', 'Pest control'] }], cta1: { label: 'Get a Maintenance Plan', href: '/contact' }, cta2: { label: 'View Packages', href: '/services/maintenance' }, image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=85', steps: ['Contact us via call or WhatsApp', 'Free on-site assessment', 'We schedule & execute the work', 'Sign-off when you are satisfied'] },
-        { headline: 'Fast fixes. Zero hassle.', body: 'Our vetted team responds the same day and gets it right the first time — 7 days a week.', groups: [{ label: 'Common', items: ['Plumbing & electrical', 'Carpentry & flooring'] }, { label: 'Finishes', items: ['Painting & patching', 'Fixture replacement'] }], cta1: { label: 'Request a Repair', href: '/contact' }, cta2: { label: 'See All Repair Jobs', href: '/services/repairs' }, image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&q=85', steps: ['Describe the issue to our team', 'Technician arrives same day', 'Repair completed & tested', 'You approve before we leave'] },
-        { headline: 'Reimagine your space.', body: 'From a single room to a full fit-out — on budget, on schedule, beautifully finished.', groups: [{ label: 'Spaces', items: ['Kitchen & bathroom', 'Full interior fit-out'] }, { label: 'Finishes', items: ['Flooring & tiling', 'Painting & joinery'] }], cta1: { label: 'Start Your Renovation', href: '/contact' }, cta2: { label: 'View Past Projects', href: '/services/renovation' }, image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&q=85', steps: ['Share your vision & budget', 'We present a design proposal', 'Construction begins on schedule', 'Final walkthrough & handover'] },
-    ];
+    const serviceCategories = serviceKeys.map((key, index) => ({
+        id: index,
+        key,
+        tab: t(`about.page.services.categories.${key}`),
+    }));
+
+    const serviceAssets: Record<typeof serviceKeys[number], { image: string; cta2: string }> = {
+        maintenance: {
+            image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=85',
+            cta2: '/services/maintenance',
+        },
+        repairs: {
+            image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&q=85',
+            cta2: '/services/repairs',
+        },
+        renovation: {
+            image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&q=85',
+            cta2: '/services/renovation',
+        },
+    };
+
+    const serviceDetails = serviceKeys.map((key) => {
+        const base = `about.page.services.items.${key}`;
+        const groups = (t(`${base}.groups`) as any[]).map((group: any) => ({
+            label: group.label,
+            items: group.items,
+        }));
+        const steps = (t(`${base}.steps`) as string[]) ?? [];
+
+        return {
+            headline: t(`${base}.headline`),
+            body: t(`${base}.body`),
+            groups,
+            cta1: { label: t(`${base}.cta1`), href: '/contact' },
+            cta2: { label: t(`${base}.cta2`), href: serviceAssets[key].cta2 },
+            image: serviceAssets[key].image,
+            steps,
+        };
+    });
 
     const team = [
         { name: 'Mohammed Al Areeq', role: 'Founder & CEO', specialty: 'Luxury Residential', deals: '340+', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=85', langs: ['Arabic', 'English'] },
@@ -783,12 +815,12 @@ const AboutUs = () => {
                                 <div className="photo-item p2"><div className="photo-circle"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=85" alt="" /></div></div>
                             </div>
                             <div className="center-text">
-                                <div className="badge"><div className="dot" /><span>RERA Licensed · Est. 2012 · UAE</span></div>
-                                <h1 className="heading">Real estate,<br />done the <em>right way.</em></h1>
-                                <p className="sub">12 years of honest deals.<br />Built on referrals, not ads.</p>
+                                <div className="badge"><div className="dot" /><span>{t('about.page.hero.badge')}</span></div>
+                                <h1 className="heading">{t('about.page.hero.title')}<br />{t('about.page.hero.titleAccent')}</h1>
+                                <p className="sub">{t('about.page.hero.subtitle')}</p>
                                 <div className="buttons">
-                                    <a href="#our-story" className="btn-dark">Our Story <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
-                                    <a href="#team" className="btn-ghost">Meet the Team</a>
+                                    <a href="#our-story" className="btn-dark">{t('about.page.hero.buttonStory')} <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
+                                    <a href="#team" className="btn-ghost">{t('about.page.hero.buttonTeam')}</a>
                                 </div>
                             </div>
                             <div className="side-col">
@@ -798,8 +830,8 @@ const AboutUs = () => {
                         </div>
                         <div className="mobile-layout">
                             <div className="mob-text">
-                                <h1 className="mob-heading">Real estate,<br />done the <em>right way.</em></h1>
-                                <p className="mob-sub">12 years of honest deals. Built on referrals, not ads.</p>
+                                <h1 className="mob-heading">{t('about.page.hero.title')}<br />{t('about.page.hero.titleAccent')}</h1>
+                                <p className="mob-sub">{t('about.page.hero.subtitle')}</p>
                             </div>
                             <div className="mob-photos">
                                 <div className="mob-photo-item mp1"><div className="mob-photo-circle"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=85" alt="" /></div></div>
@@ -808,8 +840,8 @@ const AboutUs = () => {
                                 <div className="mob-photo-item mp4"><div className="mob-photo-circle"><img src="https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=400&q=85" alt="" /></div></div>
                             </div>
                             <div className="mob-buttons">
-                                <a href="#our-story" className="btn-dark">Our Story <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
-                                <a href="#team" className="btn-ghost">Meet the Team</a>
+                                <a href="#our-story" className="btn-dark">{t('about.page.hero.buttonStory')} <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
+                                <a href="#team" className="btn-ghost">{t('about.page.hero.buttonTeam')}</a>
                             </div>
                         </div>
                     </div>
@@ -820,13 +852,13 @@ const AboutUs = () => {
                     <div className="panel-inner">
                         <div className="ceo-bg-quote">&ldquo;</div>
                         <div className="ceo-inner">
-                            <div className="ceo-label"><div className="ceo-label-line" /><span>A message from our founder</span><div className="ceo-label-line" /></div>
-                            <p className="ceo-quote">&ldquo;Real estate should feel like <em>empowerment, not a trap.</em> We built Al Areeq on one promise — to always put our clients first, no matter what.&rdquo;</p>
+                            <div className="ceo-label"><div className="ceo-label-line" /><span>{t('about.page.ceo.title')}</span><div className="ceo-label-line" /></div>
+                            <p className="ceo-quote">&ldquo;{t('about.page.ceo.quote')}&rdquo;</p>
                             <div className="ceo-divider" />
                             <div className="ceo-identity">
-                                <div className="ceo-avatar-wrap"><img className="ceo-avatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=85" alt="Mohammed Al Areeq" /></div>
-                                <div className="ceo-name">Mohammed Al Areeq</div>
-                                <div className="ceo-title-text">Founder &amp; CEO · Al Areeq Real Estate</div>
+                                <div className="ceo-avatar-wrap"><img className="ceo-avatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=85" alt={t('about.page.ceo.name')} /></div>
+                                <div className="ceo-name">{t('about.page.ceo.name')}</div>
+                                <div className="ceo-title-text">{t('about.page.ceo.role')}</div>
                             </div>
                         </div>
                     </div>
@@ -839,10 +871,10 @@ const AboutUs = () => {
                             <div className="who-top">
                                 <div className="who-img-wrap"><img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=900&q=85" alt="Al Areeq Real Estate Dubai" /></div>
                                 <div className="who-text">
-                                    <div className="who-eyebrow"><div className="who-eyebrow-line" />Who We Are</div>
-                                    <h2 className="who-title">A Dubai agency you can actually trust.</h2>
-                                    <p className="who-body">Founded in Dubai in 2012, Al Areeq is a RERA-licensed agency built on one principle — honest, pressure-free guidance for every client.</p>
-                                    <p className="who-body-2">Every client we have ever had came through a referral. No ads, no gimmicks — just 12 years of deals done right.</p>
+                                    <div className="who-eyebrow"><div className="who-eyebrow-line" />{t('about.page.who.eyebrow')}</div>
+                                    <h2 className="who-title">{t('about.page.who.title')}</h2>
+                                    <p className="who-body">{t('about.page.who.body1')}</p>
+                                    <p className="who-body-2">{t('about.page.who.body2')}</p>
                                     <div className="who-rule" />
                                 </div>
                             </div>
@@ -869,9 +901,9 @@ const AboutUs = () => {
                     <div className="panel-inner">
                         <div className="serv-inner">
                             <div className="serv-header">
-                                <div className="serv-eyebrow"><div className="serv-eyebrow-line" />Our Services<div className="serv-eyebrow-line" /></div>
-                                <h2 className="serv-title">Everything your property needs.</h2>
-                                <p className="serv-subtitle">From routine maintenance to full renovations — all under one roof.</p>
+                                <div className="serv-eyebrow"><div className="serv-eyebrow-line" />{t('about.page.services.header')}<div className="serv-eyebrow-line" /></div>
+                                <h2 className="serv-title">{t('about.page.services.title')}</h2>
+                                <p className="serv-subtitle">{t('about.page.services.subtitle')}</p>
                             </div>
                             <div className="serv-tabs-wrap">
                                 <div className="serv-tabs">
@@ -906,7 +938,7 @@ const AboutUs = () => {
                                 </div>
                                 <div className="serv-panel-right">
                                     <div className="serv-visual">
-                                        <div className="serv-visual-label">How it works</div>
+                                        <div className="serv-visual-label">{t('about.page.services.howItWorks')}</div>
                                         {svc.steps.map((step, j) => (
                                             <div key={j} className="serv-step">
                                                 <div className="serv-step-num">{j + 1}</div>
@@ -925,13 +957,13 @@ const AboutUs = () => {
                     <div className="panel-inner">
                         <div className="team-inner">
                             <div className="team-header">
-                                <div className="team-eyebrow"><div className="team-eyebrow-line" />The People Behind Every Deal<div className="team-eyebrow-line" /></div>
-                                <h2 className="team-title">Meet our team.</h2>
-                                <p className="team-subtitle">Specialists across every segment of Dubai real estate — residential, commercial, and beyond.</p>
+                                <div className="team-eyebrow"><div className="team-eyebrow-line" />{t('about.page.team.eyebrow')}<div className="team-eyebrow-line" /></div>
+                                <h2 className="team-title">{t('about.page.team.title')}</h2>
+                                <p className="team-subtitle">{t('about.page.team.subtitle')}</p>
                             </div>
                             <div className="team-swipe-hint">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
-                                swipe
+                                {t('about.page.team.swipeHint')}
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                             </div>
                             <div className="team-grid" ref={teamGridRef}>
@@ -941,10 +973,10 @@ const AboutUs = () => {
                                         <div className="team-card-name">{member.name}</div>
                                         <div className="team-card-role">{member.role}</div>
                                         <div className="team-card-divider" />
-                                        <div className="team-card-specialty-label">Speciality</div>
+                                        <div className="team-card-specialty-label">{t('about.page.team.speciality')}</div>
                                         <div className="team-card-specialty">{member.specialty}</div>
                                         <div className="team-card-meta">
-                                            <div className="team-card-deals"><div className="team-card-deals-num">{member.deals}</div><div className="team-card-deals-label">Deals closed</div></div>
+                                            <div className="team-card-deals"><div className="team-card-deals-num">{member.deals}</div><div className="team-card-deals-label">{t('about.page.team.dealsClosed')}</div></div>
                                             <div className="team-card-langs">{member.langs.map((lang, li) => <span key={li} className="team-card-lang">{lang}</span>)}</div>
                                         </div>
                                     </div>
@@ -960,38 +992,38 @@ const AboutUs = () => {
                     <div className="panel-inner">
                         <div className="vision-inner">
                             <div className="vision-header">
-                                <div className="vision-eyebrow"><div className="vision-eyebrow-line" />Our Purpose<div className="vision-eyebrow-line" /></div>
-                                <h2 className="vision-heading">Vision &amp; <em>Mission.</em></h2>
-                                <p className="vision-sub">Two sides of the same promise — where we stand today, and where we&#39;re taking our clients tomorrow.</p>
+                                <div className="vision-eyebrow"><div className="vision-eyebrow-line" />{t('about.page.vision.eyebrow')}<div className="vision-eyebrow-line" /></div>
+                                <h2 className="vision-heading">{t('about.page.vision.headingPrefix')} <em>{t('about.page.vision.headingEm')}</em></h2>
+                                <p className="vision-sub">{t('about.page.vision.sub')}</p>
                             </div>
                             <div className="vision-carousel">
                                 <div className="vision-track-wrap">
                                     <div className="vision-track" style={{ transform: `translateX(-${activeVision * 100}%)` }}>
                                         <div className="vision-card">
                                             <div className="vision-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" /></svg></div>
-                                            <div className="vision-card-tag"><div className="vision-card-tag-dot" />Mission</div>
-                                            <div className="vision-card-title">What we do, every single day.</div>
-                                            <p className="vision-card-body">We deliver honest, expert guidance to every client — buyers, sellers, and investors alike. No pressure, no gimmicks. Just 12 years of doing the right thing, one deal at a time.</p>
-                                            <div className="vision-card-pills"><span className="vision-pill">Transparent Advice</span><span className="vision-pill">Client-First</span><span className="vision-pill">RERA Licensed</span></div>
+                                            <div className="vision-card-tag"><div className="vision-card-tag-dot" />{t('about.page.vision.cards.mission.tag')}</div>
+                                            <div className="vision-card-title">{t('about.page.vision.cards.mission.title')}</div>
+                                            <p className="vision-card-body">{t('about.page.vision.cards.mission.body')}</p>
+                                            <div className="vision-card-pills">{(t('about.page.vision.cards.mission.pills') as string[]).map((pill, idx) => <span key={idx} className="vision-pill">{pill}</span>)}</div>
                                         </div>
                                         <div className="vision-card vision-card--dark">
                                             <div className="vision-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg></div>
-                                            <div className="vision-card-tag"><div className="vision-card-tag-dot" />Vision</div>
-                                            <div className="vision-card-title">Where we&#39;re heading.</div>
-                                            <p className="vision-card-body">To become Dubai&#39;s most trusted real estate name — not the largest, but the most referred. A firm where every client becomes a lifelong advocate because we never stopped earning their trust.</p>
-                                            <div className="vision-card-pills"><span className="vision-pill">Long-Term Trust</span><span className="vision-pill">Built on Referrals</span><span className="vision-pill">Dubai &amp; Beyond</span></div>
+                                            <div className="vision-card-tag"><div className="vision-card-tag-dot" />{t('about.page.vision.cards.vision.tag')}</div>
+                                            <div className="vision-card-title">{t('about.page.vision.cards.vision.title')}</div>
+                                            <p className="vision-card-body">{t('about.page.vision.cards.vision.body')}</p>
+                                            <div className="vision-card-pills">{(t('about.page.vision.cards.vision.pills') as string[]).map((pill, idx) => <span key={idx} className="vision-pill">{pill}</span>)}</div>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="vision-nav">
                                     <div className="vision-nav-dots">
-                                        <button className={`vision-nav-dot${activeVision === 0 ? ' active' : ''}`} onClick={() => setActiveVision(0)} aria-label="Mission" />
-                                        <button className={`vision-nav-dot${activeVision === 1 ? ' active' : ''}`} onClick={() => setActiveVision(1)} aria-label="Vision" />
+                                        <button className={`vision-nav-dot${activeVision === 0 ? ' active' : ''}`} onClick={() => setActiveVision(0)} aria-label={t('about.page.vision.nav.mission')} />
+                                        <button className={`vision-nav-dot${activeVision === 1 ? ' active' : ''}`} onClick={() => setActiveVision(1)} aria-label={t('about.page.vision.nav.vision')} />
                                     </div>
-                                    <div className="vision-nav-label">{activeVision === 0 ? 'Mission' : 'Vision'}</div>
+                                    <div className="vision-nav-label">{activeVision === 0 ? t('about.page.vision.nav.mission') : t('about.page.vision.nav.vision')}</div>
                                     <div className="vision-nav-arrows">
-                                        <button className="vision-arrow" onClick={() => setActiveVision(0)} disabled={activeVision === 0} aria-label="Previous"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg></button>
-                                        <button className="vision-arrow" onClick={() => setActiveVision(1)} disabled={activeVision === 1} aria-label="Next"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg></button>
+                                        <button className="vision-arrow" onClick={() => setActiveVision(0)} disabled={activeVision === 0} aria-label={t('about.page.vision.nav.previous')}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg></button>
+                                        <button className="vision-arrow" onClick={() => setActiveVision(1)} disabled={activeVision === 1} aria-label={t('about.page.vision.nav.next')}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg></button>
                                     </div>
                                 </div>
                             </div>
@@ -1008,9 +1040,9 @@ const AboutUs = () => {
                             </div>
                         </div>
                         <div className="test-center">
-                            <div className="test-badge"><div className="test-badge-dot" />Client Reviews</div>
-                            <h2 className="test-heading">Trusted by clients<br /><span className="test-heading-muted">across Dubai.</span></h2>
-                            <p className="test-sub">Every client we&#39;ve worked with came through a referral. Here&#39;s what they say.</p>
+                            <div className="test-badge"><div className="test-badge-dot" />{t('about.page.testimonials.badge')}</div>
+                            <h2 className="test-heading">{t('about.page.testimonials.heading')}<br /><span className="test-heading-muted">{t('about.page.testimonials.headingMuted')}</span></h2>
+                            <p className="test-sub">{t('about.page.testimonials.sub')}</p>
                             <div className="trev-slider">
                                 <div className="trev-track-wrap">
                                     <div className="trev-track" style={{ transform: `translateX(-${activeReview * 100}%)` }}>
@@ -1038,8 +1070,8 @@ const AboutUs = () => {
                                     <div className="trev-nav-dots">{[0, 1, 2, 3].map(i => <button key={i} className={`trev-nav-dot${activeReview === i ? ' active' : ''}`} onClick={() => setActiveReview(i)} aria-label={`Review ${i + 1}`} />)}</div>
                                     <div className="trev-nav-counter">{activeReview + 1} / 4</div>
                                     <div className="trev-nav-arrows">
-                                        <button className="trev-arrow" onClick={() => setActiveReview(r => Math.max(0, r - 1))} disabled={activeReview === 0} aria-label="Previous review"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg></button>
-                                        <button className="trev-arrow" onClick={() => setActiveReview(r => Math.min(3, r + 1))} disabled={activeReview === 3} aria-label="Next review"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg></button>
+                                        <button className="trev-arrow" onClick={() => setActiveReview(r => Math.max(0, r - 1))} disabled={activeReview === 0} aria-label={t('about.page.testimonials.nav.previous')}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg></button>
+                                        <button className="trev-arrow" onClick={() => setActiveReview(r => Math.min(3, r + 1))} disabled={activeReview === 3} aria-label={t('about.page.testimonials.nav.next')}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg></button>
                                     </div>
                                 </div>
                             </div>
@@ -1057,18 +1089,18 @@ const AboutUs = () => {
                     <div className="panel-inner">
                         <span className="cta-bg-text" aria-hidden="true">AL AREEQ</span>
                         <div className="cta-inner">
-                            <div className="cta-eyebrow"><div className="cta-eyebrow-dot" />Let&#39;s Get Started</div>
-                            <h2 className="cta-heading">Ready to Find Your<br /><em>Dream Property?</em></h2>
-                            <p className="cta-sub">Whether you&#39;re buying, selling, or investing — our team is ready to guide you every step of the way.</p>
+                            <div className="cta-eyebrow"><div className="cta-eyebrow-dot" />{t('about.page.cta.eyebrow')}</div>
+                            <h2 className="cta-heading">{t('about.page.cta.headingPrefix')}<br /><em>{t('about.page.cta.headingEm')}</em></h2>
+                            <p className="cta-sub">{t('about.page.cta.sub')}</p>
                             <div className="cta-buttons">
-                                <a href="#contact" className="cta-btn-primary">Contact Us <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
-                                <a href="#listings" className="cta-btn-secondary">View Listings <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
+                                <a href="#contact" className="cta-btn-primary">{t('about.page.cta.primary')} <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
+                                <a href="#listings" className="cta-btn-secondary">{t('about.page.cta.secondary')} <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a>
                             </div>
                             <div className="cta-stats">
-                                <div className="cta-stat"><div className="cta-stat-num">{ctaInView ? ctaCounters.deals : 0}+</div><div className="cta-stat-label">Deals Closed</div></div>
-                                <div className="cta-stat"><div className="cta-stat-num">{ctaInView ? ctaCounters.exp : 0}yr</div><div className="cta-stat-label">Experience</div></div>
-                                <div className="cta-stat"><div className="cta-stat-num">{ctaInView ? ctaCounters.sat : 0}%</div><div className="cta-stat-label">Client Satisfaction</div></div>
-                                <div className="cta-stat"><div className="cta-stat-num">{ctaInView ? (ctaCounters.rating / 10).toFixed(1) : '0.0'}★</div><div className="cta-stat-label">Average Rating</div></div>
+                                <div className="cta-stat"><div className="cta-stat-num">{ctaInView ? ctaCounters.deals : 0}+</div><div className="cta-stat-label">{t('about.page.cta.stats.deals')}</div></div>
+                                <div className="cta-stat"><div className="cta-stat-num">{ctaInView ? ctaCounters.exp : 0}yr</div><div className="cta-stat-label">{t('about.page.cta.stats.experience')}</div></div>
+                                <div className="cta-stat"><div className="cta-stat-num">{ctaInView ? ctaCounters.sat : 0}%</div><div className="cta-stat-label">{t('about.page.cta.stats.satisfaction')}</div></div>
+                                <div className="cta-stat"><div className="cta-stat-num">{ctaInView ? (ctaCounters.rating / 10).toFixed(1) : '0.0'}★</div><div className="cta-stat-label">{t('about.page.cta.stats.rating')}</div></div>
                             </div>
                         </div>
                     </div>
@@ -1078,21 +1110,21 @@ const AboutUs = () => {
 
             <footer className="about-footer">
                 <div className="about-footer-cta">
-                    <h2>Find your dream home today.</h2>
+                    <h2>{t('home.footer.ctaTitle')}</h2>
                     <div className="about-footer-cta-buttons">
-                        <a href="/listings" className="about-footer-btn-primary">Browse Listings</a>
-                        <a href="/contact" className="about-footer-btn-outline">Contact Agent</a>
+                        <a href="/listings" className="about-footer-btn-primary">{t('home.footer.browseListings')}</a>
+                        <a href="/contact" className="about-footer-btn-outline">{t('home.footer.contactAgent')}</a>
                     </div>
                 </div>
                 <div className="about-footer-main">
-                    <div className="about-footer-brand"><h3>Al Areeq</h3><p>Trusted real estate partner helping families buy, rent and invest in premium Dubai properties since 2012.</p></div>
-                    <div><h4>Properties</h4><ul><li><a href="#">Buy</a></li><li><a href="#">Rent</a></li><li><a href="#">Luxury</a></li><li><a href="#">Off-Plan</a></li></ul></div>
-                    <div><h4>Company</h4><ul><li><a href="#">About</a></li><li><a href="#">Agents</a></li><li><a href="#">Careers</a></li><li><a href="#">Contact</a></li></ul></div>
-                    <div><h4>Resources</h4><ul><li><a href="#">Mortgage Calculator</a></li><li><a href="#">Market Reports</a></li><li><a href="#">Area Guides</a></li><li><a href="#">Blog</a></li></ul></div>
+                    <div className="about-footer-brand"><h3>{t('branding.name')}</h3><p>{t('home.footer.brandDesc')}</p></div>
+                    <div><h4>{t('home.footer.properties')}</h4><ul><li><a href="#">{t('home.footer.buy')}</a></li><li><a href="#">{t('home.footer.rent')}</a></li><li><a href="#">{t('home.footer.luxury')}</a></li><li><a href="#">{t('home.footer.about')}</a></li></ul></div>
+                    <div><h4>{t('home.footer.company')}</h4><ul><li><a href="#">{t('home.footer.about')}</a></li><li><a href="#">{t('home.footer.agents')}</a></li><li><a href="#">{t('home.footer.terms')}</a></li><li><a href="#">{t('home.footer.contact')}</a></li></ul></div>
+                    <div><h4>{t('home.footer.resources')}</h4><ul><li><a href="#">{t('home.footer.mortgageCalculator')}</a></li><li><a href="#">{t('home.footer.marketReports')}</a></li><li><a href="#">{t('home.footer.privacy')}</a></li><li><a href="#">{t('home.footer.about')}</a></li></ul></div>
                 </div>
                 <div className="about-footer-bottom">
-                    <p>© {new Date().getFullYear()} Al Areeq Real Estate. All rights reserved.</p>
-                    <div className="about-footer-legal"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">RERA Licensed</a></div>
+                    <p>{t('home.footer.copyright').replace('{year}', String(new Date().getFullYear())).replace('{brand}', t('branding.name'))}</p>
+                    <div className="about-footer-legal"><a href="#">{t('home.footer.privacy')}</a><a href="#">{t('home.footer.terms')}</a><a href="#">{t('about.page.footer.rera')}</a></div>
                 </div>
             </footer>
         </>

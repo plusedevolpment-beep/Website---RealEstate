@@ -1,9 +1,11 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from './components/Navbar';
+import { useLanguage } from './components/LanguageProvider';
 import './globals.css';
 
 const DreamHomes = () => {
+  const { t } = useLanguage();
   const [searchMode, setSearchMode] = useState('rent');
 
   // Two separate state values — avoids all DOM manipulation
@@ -154,9 +156,9 @@ const DreamHomes = () => {
   }, []);
 
   const properties = [
-    { id: 1, image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&q=80', priceType: 'rent', period: '/mo', location: 'Beverly Hills, CA', beds: 4, baths: 3, area: '3,200', tag: 'Featured', tagColor: '#18181b', priceNum: 12000 },
-    { id: 2, image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80', priceType: 'sale', period: '', location: 'Santa Monica, CA', beds: 3, baths: 2, area: '2,100', tag: 'New', tagColor: '#22c55e', priceNum: 850000 },
-    { id: 3, image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80', priceType: 'rent', period: '/mo', location: 'Downtown LA, CA', beds: 2, baths: 2, area: '1,450', tag: 'Hot', tagColor: '#ef4444', priceNum: 5500 },
+    { id: 1, image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&q=80', priceType: 'rent', period: '/mo', location: 'Beverly Hills, CA', beds: 4, baths: 3, area: '3,200', tag: 'featured', tagColor: '#18181b', priceNum: 12000 },
+    { id: 2, image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80', priceType: 'sale', period: '', location: 'Santa Monica, CA', beds: 3, baths: 2, area: '2,100', tag: 'new', tagColor: '#22c55e', priceNum: 850000 },
+    { id: 3, image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80', priceType: 'rent', period: '/mo', location: 'Downtown LA, CA', beds: 2, baths: 2, area: '1,450', tag: 'hot', tagColor: '#ef4444', priceNum: 5500 },
   ];
 
   const filteredProperties = properties.filter(p =>
@@ -469,7 +471,7 @@ const DreamHomes = () => {
                   <rect x="12" y="21" width="8" height="8" rx="1" fill="white" />
                 </svg>
               </div>
-              <div className="loader-text">Al Areeq</div>
+              <div className="loader-text">{t('branding.name')}</div>
             </div>
           </div>
           <div className="loading-bottom"></div>
@@ -486,22 +488,22 @@ const DreamHomes = () => {
           <div className="decoration-circle circle-3"></div>
         </div>
         <div className="hero-left">
-          <div className="trust-badge"><div className="badge-icon"></div><span className="badge-text">Trusted by 10,000+ Families</span></div>
-          <h1 className="hero-title">Find Your Perfect <span className="hero-title-highlight">Home</span></h1>
+          <div className="trust-badge"><div className="badge-icon"></div><span className="badge-text">{t('home.hero.trustBadge')}</span></div>
+          <h1 className="hero-title">{t('home.hero.title')} <span className="hero-title-highlight">{t('home.hero.titleAccent')}</span></h1>
           <p className="hero-description">
-            <span className="desktop-description">Verified properties, transparent pricing, trusted by thousands.</span>
-            <span className="mobile-description">Find your perfect home with verified listings.</span>
+            <span className="desktop-description">{t('home.hero.description')}</span>
+            <span className="mobile-description">{t('home.hero.mobileDescription')}</span>
           </p>
-          <div className="hero-buttons"><button className="btn-primary">Get Started</button></div>
+          <div className="hero-buttons"><button className="btn-primary">{t('home.hero.cta')}</button></div>
           <div className="search-toggle">
-            <button className={`toggle-option ${searchMode === 'rent' ? 'active' : ''}`} onClick={() => setSearchMode('rent')}>For Rent</button>
-            <button className={`toggle-option ${searchMode === 'buy' ? 'active' : ''}`} onClick={() => setSearchMode('buy')}>For Sale</button>
+            <button className={`toggle-option ${searchMode === 'rent' ? 'active' : ''}`} onClick={() => setSearchMode('rent')}>{t('home.hero.search.rentTab')}</button>
+            <button className={`toggle-option ${searchMode === 'buy' ? 'active' : ''}`} onClick={() => setSearchMode('buy')}>{t('home.hero.search.buyTab')}</button>
           </div>
           <div className="search-bar">
-            <div className="search-field"><div className="search-field-label">Location</div><select><option>Los Angeles, California</option><option>New York, New York</option><option>Miami, Florida</option></select></div>
-            <div className="search-field"><div className="search-field-label">Property Type</div><select><option>Classic Apartment</option><option>Modern Villa</option><option>Luxury Condo</option></select></div>
-            <div className="search-field"><div className="search-field-label">{searchMode === 'rent' ? 'Monthly Rent' : 'Price Range'}</div>
-              <select>{searchMode === 'rent' ? <><option>$8,000–$12,000/mo</option><option>$12,000–$20,000/mo</option></> : <><option>$500K–$1M</option><option>$1M–$2M</option></>}</select>
+            <div className="search-field"><div className="search-field-label">{t('home.hero.search.locationLabel')}</div><select><option>Los Angeles, California</option><option>New York, New York</option><option>Miami, Florida</option></select></div>
+            <div className="search-field"><div className="search-field-label">{t('home.hero.search.propertyTypeLabel')}</div><select><option>Classic Apartment</option><option>Modern Villa</option><option>Luxury Condo</option></select></div>
+            <div className="search-field"><div className="search-field-label">{searchMode === 'rent' ? t('home.hero.search.rentLabel') : t('home.hero.search.priceLabel')}</div>
+              <select>{searchMode === 'rent' ? <><option>{t('home.hero.search.rentOption1')}</option><option>{t('home.hero.search.rentOption2')}</option></> : <><option>{t('home.hero.search.saleOption1')}</option><option>{t('home.hero.search.saleOption2')}</option></>}</select>
             </div>
             <button className="search-button"><svg className="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg></button>
           </div>
@@ -517,7 +519,7 @@ const DreamHomes = () => {
             <div className="carousel-counter">{String(currentSlide + 1).padStart(2, '0')} / {String(heroImages.length).padStart(2, '0')}</div>
             <div className="carousel-dots">{heroImages.map((_, i) => (<button key={i} className={`carousel-dot ${i === currentSlide ? 'active' : ''}`} onClick={() => { advanceSlide(i); startTimer(); }} />))}</div>
           </div>
-          <div className="floating-badge"><div className="badge-dot"></div><span className="badge-dot-text">Available Now</span></div>
+          <div className="floating-badge"><div className="badge-dot"></div><span className="badge-dot-text">{t('home.hero.availableNow')}</span></div>
         </div>
       </section>
 
@@ -526,13 +528,13 @@ const DreamHomes = () => {
       <section id="properties" className={`listings-section ${listingsInView ? 'in-view' : ''}`} ref={listingsRef}>
         <div className="listings-section-header reveal">
           <div className="listings-title-block reveal-left">
-            <div className="listings-eyebrow"><div className="listings-eyebrow-line"></div>Featured Listings</div>
-            <h2 className="listings-heading">Handpicked <span>Properties</span> For You</h2>
+            <div className="listings-eyebrow"><div className="listings-eyebrow-line"></div>{t('home.listings.eyebrow')}</div>
+            <h2 className="listings-heading">{t('home.listings.heading')}</h2>
           </div>
-          <button className="listings-view-all">View All <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg></button>
+          <button className="listings-view-all">{t('home.listings.viewAll')} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg></button>
         </div>
         <div className="filter-bar reveal">
-          {[['all', 'All'], ['rent', 'For Rent'], ['sale', 'For Sale']].map(([val, label]) => (
+          {[["all", t('home.listings.filters.all')], ["rent", t('home.listings.filters.rent')], ["sale", t('home.listings.filters.sale')]].map(([val, label]) => (
             <button key={val} className={`filter-btn ${activeFilter === val ? 'active' : ''}`} onClick={() => setActiveFilter(val)}>{label}</button>
           ))}
         </div>
@@ -541,7 +543,7 @@ const DreamHomes = () => {
             <div key={p.id} className="property-card reveal-scale" style={{ transitionDelay: listingsInView ? `${0.05 + i * 0.07}s` : '0s' }}>
               <div className="card-img-wrapper">
                 <img src={p.image} alt={p.location} className="card-img" loading="lazy" />
-                <div className="card-tag" style={{ background: p.tagColor }}>{p.tag}</div>
+                <div className="card-tag" style={{ background: p.tagColor }}>{t(`home.propertyTags.${p.tag}`)}</div>
                 <button className="card-save-btn"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg></button>
               </div>
               <div className="card-body">
@@ -549,26 +551,26 @@ const DreamHomes = () => {
                 <div className="card-location"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>{p.location}</div>
                 <div className="card-divider"></div>
                 <div className="card-specs">
-                  <div className="card-spec"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>{p.beds} Beds</div>
-                  <div className="card-spec"><svg viewBox="0 0 24 24"><path d="M4 12h16M4 6h16M4 18h16" /></svg>{p.baths} Baths</div>
-                  <div className="card-spec"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" /></svg>{p.area} ft²</div>
+                  <div className="card-spec"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>{p.beds} {t('home.propertySpecs.beds')}</div>
+                  <div className="card-spec"><svg viewBox="0 0 24 24"><path d="M4 12h16M4 6h16M4 18h16" /></svg>{p.baths} {t('home.propertySpecs.baths')}</div>
+                  <div className="card-spec"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" /></svg>{p.area} {t('home.propertySpecs.area')}</div>
                 </div>
                 <button className="card-view-btn">View Details <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg></button>
               </div>
             </div>
-          )) : <div className="no-results"><p>🏠 No properties match your filters.</p></div>}
+          )) : <div className="no-results"><p>{t('home.listings.noResults')}</p></div>}
         </div>
       </section>
 
       <div className="section-divider reveal"></div>
 
       <section className={`stats-section ${statsInView ? 'in-view' : ''}`} ref={statsRef}>
-        <div className="stats-header"><h2>Why Choose Dream Homes</h2><p>Join thousands of satisfied clients who found their perfect property with us</p></div>
+        <div className="stats-header"><h2>{t('home.listings.stats.title')}</h2><p>{t('home.listings.stats.subtitle')}</p></div>
         <div className="stats-grid">
           {[
-            { icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>, number: `${counters.listings.toLocaleString()}+`, label: 'Verified Listings', delay: '0.1s' },
-            { icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>, number: `${counters.areas}+`, label: 'Areas Covered', delay: '0.2s' },
-            { icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>, number: `${counters.satisfaction}%`, label: 'Client Satisfaction', delay: '0.3s' },
+            { icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>, number: `${counters.listings.toLocaleString()}+`, label: t('home.listings.stats.verifiedListings'), delay: '0.1s' },
+            { icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>, number: `${counters.areas}+`, label: t('home.listings.stats.areasCovered'), delay: '0.2s' },
+            { icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>, number: `${counters.satisfaction}%`, label: t('home.listings.stats.clientSatisfaction'), delay: '0.3s' },
           ].map((s, i) => (
             <div key={i} className={`stat-card ${statsInView ? 'animate' : ''}`} style={{ transitionDelay: s.delay }}>
               <div className="stat-card-icon" style={{ transitionDelay: `${parseFloat(s.delay) + 0.1}s` }}>{s.icon}</div>
@@ -583,18 +585,18 @@ const DreamHomes = () => {
 
       <section id="about" className={`about-section ${aboutInView ? 'in-view' : ''}`} ref={aboutRef}>
         <div className="about-inner">
-          <div className="about-top"><span className="about-eyebrow">What We Offer</span><h2 className="about-title">Everything your <em>property needs.</em></h2></div>
+          <div className="about-top"><span className="about-eyebrow">{t('home.aboutSection.eyebrow')}</span><h2 className="about-title">{t('home.aboutSection.title')}</h2></div>
           <div className="about-bento">
             <div className="bento-video-card bento-cell">
               <video autoPlay muted loop playsInline preload="metadata" src="https://www.pexels.com/download/video/7578552/" />
-              <div className="bento-img-caption"><div className="bento-img-caption-label">Est. 2012 · Los Angeles</div><div className="bento-img-caption-title">Trusted by 10,000+ Families</div></div>
+              <div className="bento-img-caption"><div className="bento-img-caption-label">Est. 2012 · Los Angeles</div><div className="bento-img-caption-title">{t('home.aboutSection.trustedBy')}</div></div>
             </div>
-            <div className="bento-svc-card bento-cell" style={{ gridColumn: 3, gridRow: 1 }}><div className="bento-svc-icon">{services[0].icon}</div><div className="bento-svc-title">{services[0].title}</div><div className="bento-svc-desc">{services[0].description}</div></div>
-            <div className="bento-svc-card bento-cell" style={{ gridColumn: 1, gridRow: 2 }}><div className="bento-svc-icon">{services[1].icon}</div><div className="bento-svc-title">{services[1].title}</div><div className="bento-svc-desc">{services[1].description}</div></div>
-            <div className="bento-svc-card bento-cell" style={{ gridColumn: 2, gridRow: 2 }}><div className="bento-svc-icon">{services[2].icon}</div><div className="bento-svc-title">{services[2].title}</div><div className="bento-svc-desc">{services[2].description}</div></div>
-            <div className="bento-cta-card bento-cell"><div><div className="bento-cta-card-label">Ready to start?</div><div className="bento-cta-card-title">Let's find your perfect home today.</div></div><a href="/contact" className="bento-cta-card-btn">Get Started <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a></div>
+            <div className="bento-svc-card bento-cell" style={{ gridColumn: 3, gridRow: 1 }}><div className="bento-svc-icon">{services[0].icon}</div><div className="bento-svc-title">{t('home.services.realEstate.title')}</div><div className="bento-svc-desc">{t('home.services.realEstate.description')}</div></div>
+            <div className="bento-svc-card bento-cell" style={{ gridColumn: 1, gridRow: 2 }}><div className="bento-svc-icon">{services[1].icon}</div><div className="bento-svc-title">{t('home.services.maintenance.title')}</div><div className="bento-svc-desc">{t('home.services.maintenance.description')}</div></div>
+            <div className="bento-svc-card bento-cell" style={{ gridColumn: 2, gridRow: 2 }}><div className="bento-svc-icon">{services[2].icon}</div><div className="bento-svc-title">{t('home.services.renovation.title')}</div><div className="bento-svc-desc">{t('home.services.renovation.description')}</div></div>
+            <div className="bento-cta-card bento-cell"><div><div className="bento-cta-card-label">{t('home.aboutSection.ctaTitle')}</div><div className="bento-cta-card-title">{t('home.aboutSection.ctaSubtitle')}</div></div><a href="/contact" className="bento-cta-card-btn">{t('home.aboutSection.ctaButton')} <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a></div>
           </div>
-          <div className="about-learn-more"><a href="/about" className="about-learn-btn">Learn More <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a></div>
+          <div className="about-learn-more"><a href="/about" className="about-learn-btn">{t('home.aboutSection.learnMore')} <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg></a></div>
         </div>
       </section>
 
@@ -614,18 +616,18 @@ const DreamHomes = () => {
 
       <a href="https://wa.me/123456789" target="_blank" rel="noopener noreferrer" className="floating-whatsapp">
         <svg className="whatsapp-icon" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" /></svg>
-        <span className="whatsapp-text">Talk to Agent</span>
+        <span className="whatsapp-text">{t('home.footer.contactAgent')}</span>
       </a>
 
       <footer className="footer-clean">
-        <div className="footer-cta"><h2>Find your dream home today.</h2><div className="footer-cta-buttons"><a href="/listings" className="btn-footer-primary">Browse Listings</a><a href="/contact" className="btn-outline">Contact Agent</a></div></div>
+        <div className="footer-cta"><h2>{t('home.footer.ctaTitle')}</h2><div className="footer-cta-buttons"><a href="/listings" className="btn-footer-primary">{t('home.footer.browseListings')}</a><a href="/contact" className="btn-outline">{t('home.footer.contactAgent')}</a></div></div>
         <div className="footer-main">
-          <div className="footer-brand"><h3>DreamHomes</h3><p>Trusted real estate partner helping families buy, rent and invest in premium properties since 2012.</p></div>
-          <div><h4>Properties</h4><ul><li><a href="#">Buy</a></li><li><a href="#">Rent</a></li><li><a href="#">Luxury</a></li></ul></div>
-          <div><h4>Company</h4><ul><li><a href="#">About</a></li><li><a href="#">Agents</a></li><li><a href="#">Contact</a></li></ul></div>
-          <div><h4>Resources</h4><ul><li><a href="#">Mortgage Calculator</a></li><li><a href="#">Market Reports</a></li></ul></div>
+          <div className="footer-brand"><h3>{t('branding.name')}</h3><p>{t('home.footer.brandDesc')}</p></div>
+          <div><h4>{t('home.footer.properties')}</h4><ul><li><a href="#">{t('home.footer.buy')}</a></li><li><a href="#">{t('home.footer.rent')}</a></li><li><a href="#">{t('home.footer.luxury')}</a></li></ul></div>
+          <div><h4>{t('home.footer.company')}</h4><ul><li><a href="#">{t('home.footer.about')}</a></li><li><a href="#">{t('home.footer.agents')}</a></li><li><a href="#">{t('home.footer.contact')}</a></li></ul></div>
+          <div><h4>{t('home.footer.resources')}</h4><ul><li><a href="#">{t('home.footer.mortgageCalculator')}</a></li><li><a href="#">{t('home.footer.marketReports')}</a></li></ul></div>
         </div>
-        <div className="footer-bottom"><p>© {new Date().getFullYear()} DreamHomes. All rights reserved.</p><div className="footer-legal"><a href="#">Privacy</a><a href="#">Terms</a></div></div>
+        <div className="footer-bottom"><p>{t('home.footer.copyright').replace('{year}', String(new Date().getFullYear())).replace('{brand}', t('branding.name'))}</p><div className="footer-legal"><a href="#">{t('home.footer.privacy')}</a><a href="#">{t('home.footer.terms')}</a></div></div>
       </footer>
     </>
   );
