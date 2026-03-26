@@ -8,8 +8,8 @@
 import { useState, useEffect, useRef } from 'react';
 import Navbar from '../components/Navbar';
 import {
-    getAllPosts, getPostBySlug, getRelatedPosts,
-    formatDate, CAT_COLORS, type Post,
+  getAllPosts, getPostBySlug, getRelatedPosts,
+  formatDate, CAT_COLORS, type Post,
 } from './blogData';
 
 const categories = ['All', 'Buying Guide', 'Market Insights', 'Investment', 'Renting', 'Neighbourhood', 'Legal & Finance'];
@@ -88,99 +88,99 @@ const SHARED_CSS = `
 
 // ─── InView hook ──────────────────────────────────────────────────────────────
 function useInView(ref: React.RefObject<Element>, threshold = 0.12) {
-    const [v, setV] = useState(false);
-    useEffect(() => {
-        const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setV(true); obs.disconnect(); } }, { threshold });
-        if (ref.current) obs.observe(ref.current);
-        return () => obs.disconnect();
-    }, []);
-    return v;
+  const [v, setV] = useState(false);
+  useEffect(() => {
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setV(true); obs.disconnect(); } }, { threshold });
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, []);
+  return v;
 }
 
 // ─── Animated post card ───────────────────────────────────────────────────────
 function PostCard({ p, delay, onOpen }: { p: Post; delay: number; onOpen: (p: Post) => void }) {
-    const ref = useRef<HTMLDivElement>(null);
-    const inView = useInView(ref as React.RefObject<Element>);
-    return (
-        <div
-            ref={ref}
-            className="bp-card"
-            onClick={() => onOpen(p)}
-            style={{
-                opacity: inView ? 1 : 0,
-                transform: inView ? 'translateY(0)' : 'translateY(28px)',
-                transition: `opacity .6s cubic-bezier(.16,1,.3,1) ${delay}s,
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref as React.RefObject<Element>);
+  return (
+    <div
+      ref={ref}
+      className="bp-card"
+      onClick={() => onOpen(p)}
+      style={{
+        opacity: inView ? 1 : 0,
+        transform: inView ? 'translateY(0)' : 'translateY(28px)',
+        transition: `opacity .6s cubic-bezier(.16,1,.3,1) ${delay}s,
                      transform .6s cubic-bezier(.16,1,.3,1) ${delay}s`,
-            }}
-        >
-            <div className="bp-card-img-wrap">
-                <img src={p.coverImage} alt={p.title} className="bp-card-img" loading="lazy" />
-            </div>
-            <div className="bp-card-body">
-                <div className="bp-card-cat" style={{ color: CAT_COLORS[p.category] }}>{p.category}</div>
-                <div className="bp-card-title">{p.title}</div>
-                <div className="bp-card-excerpt">{p.excerpt}</div>
-                <div className="bp-card-meta">
-                    <img src={p.author.avatar} alt={p.author.name} className="bp-card-av" />
-                    <span className="bp-card-meta-txt">
-                        <strong>{p.author.name}</strong> · {p.readTime} read
-                    </span>
-                </div>
-            </div>
+      }}
+    >
+      <div className="bp-card-img-wrap">
+        <img src={p.coverImage} alt={p.title} className="bp-card-img" loading="lazy" />
+      </div>
+      <div className="bp-card-body">
+        <div className="bp-card-cat" style={{ color: CAT_COLORS[p.category] }}>{p.category}</div>
+        <div className="bp-card-title">{p.title}</div>
+        <div className="bp-card-excerpt">{p.excerpt}</div>
+        <div className="bp-card-meta">
+          <img src={p.author.avatar} alt={p.author.name} className="bp-card-av" />
+          <span className="bp-card-meta-txt">
+            <strong>{p.author.name}</strong> · {p.readTime} read
+          </span>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
 
 // SVG icons for stat cards — no emojis
 const StatIcons: Record<string, JSX.Element> = {
-    clock: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>,
-    list: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M9 6h10M9 12h10M9 18h10M5 6h.01M5 12h.01M5 18h.01" /></svg>,
-    percent: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M19 5L5 19" /><circle cx="6.5" cy="6.5" r="2.5" /><circle cx="17.5" cy="17.5" r="2.5" /></svg>,
-    trending: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M22 7l-8.5 8.5-5-5L2 17" /><path d="M16 7h6v6" /></svg>,
-    building: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 9h6M9 13h6M9 17h6" /></svg>,
-    globe: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></svg>,
-    chart: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M18 20V10M12 20V4M6 20v-6" /></svg>,
-    key: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="7.5" cy="15.5" r="5.5" /><path d="M21 2l-9.6 9.6M15.5 7.5l3 3" /></svg>,
-    flash: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>,
-    home: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>,
-    school: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c0 2 6 3 6 3s6-1 6-3v-5" /></svg>,
-    leaf: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M17 8C8 10 5.9 16.17 3.82 19.34c.93.24 1.94.42 3 .5C10 20 13 19 14 16c0 0 2 5 6 5-1-5 1-10-3-13z" /></svg>,
-    car: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M5 17H3a2 2 0 0 1-2-2V9l3-4h12l3 4v6a2 2 0 0 1-2 2h-2" /><circle cx="7" cy="17" r="2" /><circle cx="17" cy="17" r="2" /></svg>,
-    doc: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="9" y1="13" x2="15" y2="13" /><line x1="9" y1="17" x2="15" y2="17" /></svg>,
-    bank: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 10v11M12 10v11M16 10v11" /></svg>,
+  clock: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>,
+  list: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M9 6h10M9 12h10M9 18h10M5 6h.01M5 12h.01M5 18h.01" /></svg>,
+  percent: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M19 5L5 19" /><circle cx="6.5" cy="6.5" r="2.5" /><circle cx="17.5" cy="17.5" r="2.5" /></svg>,
+  trending: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M22 7l-8.5 8.5-5-5L2 17" /><path d="M16 7h6v6" /></svg>,
+  building: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 9h6M9 13h6M9 17h6" /></svg>,
+  globe: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></svg>,
+  chart: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M18 20V10M12 20V4M6 20v-6" /></svg>,
+  key: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="7.5" cy="15.5" r="5.5" /><path d="M21 2l-9.6 9.6M15.5 7.5l3 3" /></svg>,
+  flash: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>,
+  home: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>,
+  school: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c0 2 6 3 6 3s6-1 6-3v-5" /></svg>,
+  leaf: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M17 8C8 10 5.9 16.17 3.82 19.34c.93.24 1.94.42 3 .5C10 20 13 19 14 16c0 0 2 5 6 5-1-5 1-10-3-13z" /></svg>,
+  car: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M5 17H3a2 2 0 0 1-2-2V9l3-4h12l3 4v6a2 2 0 0 1-2 2h-2" /><circle cx="7" cy="17" r="2" /><circle cx="17" cy="17" r="2" /></svg>,
+  doc: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="9" y1="13" x2="15" y2="13" /><line x1="9" y1="17" x2="15" y2="17" /></svg>,
+  bank: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 10v11M12 10v11M16 10v11" /></svg>,
 };
 
 const POST_STATS: Record<string, { iconKey: string; label: string; value: string }[]> = {
-    'Buying Guide': [{ iconKey: 'clock', label: 'Avg. Time to Buy', value: '60–90 days' }, { iconKey: 'list', label: 'Key Steps', value: '5 stages' }, { iconKey: 'percent', label: 'Extra Budget', value: '6–8% on top' }],
-    'Market Insights': [{ iconKey: 'trending', label: 'YoY Price Growth', value: '+8.4%' }, { iconKey: 'building', label: 'Q1 Transactions', value: '12,400+' }, { iconKey: 'globe', label: 'Foreign Buyers', value: '42% share' }],
-    'Investment': [{ iconKey: 'chart', label: 'Avg. Gross Yield', value: '6–8%' }, { iconKey: 'clock', label: 'Typical Horizon', value: '5–10 yrs' }, { iconKey: 'bank', label: 'Min. Deposit', value: '20–25%' }],
-    'Renting': [{ iconKey: 'chart', label: 'Price-Rent Ratio', value: '~18x' }, { iconKey: 'key', label: 'Avg. Tenancy', value: '1–2 years' }, { iconKey: 'flash', label: 'Flexibility', value: 'High' }],
-    'Neighbourhood': [{ iconKey: 'school', label: 'Nearby Schools', value: '12 rated' }, { iconKey: 'leaf', label: 'Green Space', value: 'Abundant' }, { iconKey: 'car', label: 'Avg. Commute', value: '18 min' }],
-    'Legal & Finance': [{ iconKey: 'doc', label: 'Registration Fee', value: '2–4%' }, { iconKey: 'percent', label: 'Agent Commission', value: '2%' }, { iconKey: 'bank', label: 'Mortgage Fee', value: '~1%' }],
+  'Buying Guide': [{ iconKey: 'clock', label: 'Avg. Time to Buy', value: '60–90 days' }, { iconKey: 'list', label: 'Key Steps', value: '5 stages' }, { iconKey: 'percent', label: 'Extra Budget', value: '6–8% on top' }],
+  'Market Insights': [{ iconKey: 'trending', label: 'YoY Price Growth', value: '+8.4%' }, { iconKey: 'building', label: 'Q1 Transactions', value: '12,400+' }, { iconKey: 'globe', label: 'Foreign Buyers', value: '42% share' }],
+  'Investment': [{ iconKey: 'chart', label: 'Avg. Gross Yield', value: '6–8%' }, { iconKey: 'clock', label: 'Typical Horizon', value: '5–10 yrs' }, { iconKey: 'bank', label: 'Min. Deposit', value: '20–25%' }],
+  'Renting': [{ iconKey: 'chart', label: 'Price-Rent Ratio', value: '~18x' }, { iconKey: 'key', label: 'Avg. Tenancy', value: '1–2 years' }, { iconKey: 'flash', label: 'Flexibility', value: 'High' }],
+  'Neighbourhood': [{ iconKey: 'school', label: 'Nearby Schools', value: '12 rated' }, { iconKey: 'leaf', label: 'Green Space', value: 'Abundant' }, { iconKey: 'car', label: 'Avg. Commute', value: '18 min' }],
+  'Legal & Finance': [{ iconKey: 'doc', label: 'Registration Fee', value: '2–4%' }, { iconKey: 'percent', label: 'Agent Commission', value: '2%' }, { iconKey: 'bank', label: 'Mortgage Fee', value: '~1%' }],
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  POST DETAIL OVERLAY
 // ─────────────────────────────────────────────────────────────────────────────
 function PostDetail({ post, onClose, onOpenRelated }: { post: Post; onClose: () => void; onOpenRelated: (p: Post) => void }) {
-    const related = getRelatedPosts(post.slug, post.category);
-    const stats = POST_STATS[post.category] ?? [];
-    const catColor = CAT_COLORS[post.category] ?? '#0369a1';
+  const related = getRelatedPosts(post.slug, post.category);
+  const stats = POST_STATS[post.category] ?? [];
+  const catColor = CAT_COLORS[post.category] ?? '#0369a1';
 
-    useEffect(() => {
-        document.body.style.overflow = 'hidden';
-        return () => { document.body.style.overflow = ''; };
-    }, []);
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
 
-    useEffect(() => {
-        const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-        window.addEventListener('keydown', h);
-        return () => window.removeEventListener('keydown', h);
-    }, [onClose]);
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [onClose]);
 
-    return (
-        <>
-            <style>{`
+  return (
+    <>
+      <style>{`
         @keyframes pd-in   { from{opacity:0} to{opacity:1} }
         @keyframes pd-rise { from{opacity:0;transform:translateY(32px)} to{opacity:1;transform:translateY(0)} }
 
@@ -478,124 +478,124 @@ function PostDetail({ post, onClose, onOpenRelated }: { post: Post; onClose: () 
         }
       `}</style>
 
-            <div className="pd-backdrop" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-                <div className="pd-sheet">
+      <div className="pd-backdrop" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+        <div className="pd-sheet">
 
-                    {/* COVER */}
-                    <div className="pd-cover">
-                        <img src={post.coverImage} alt={post.title} className="pd-cover-img" />
-                        <div className="pd-cover-gradient" />
-                        <button className="pd-close" onClick={onClose} aria-label="Close">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                                <path d="M18 6L6 18M6 6l12 12" />
-                            </svg>
-                        </button>
-                        <div className="pd-cover-content">
-                            <div className="pd-cat-pill" style={{ background: `${catColor}44`, borderColor: `${catColor}88` }}>
-                                {post.category}
-                            </div>
-                            <div className="pd-cover-title">{post.title}</div>
-                            <div className="pd-byline">
-                                <img src={post.author.avatar} alt={post.author.name} className="pd-byline-av" />
-                                <div className="pd-byline-txt">
-                                    <strong>{post.author.name}</strong><br />
-                                    {formatDate(post.date)} &nbsp;·&nbsp; {post.readTime} read
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* STATS */}
-                    {stats.length > 0 && (
-                        <div className="pd-stats">
-                            {stats.map(s => (
-                                <div key={s.label} className="pd-stat">
-                                    <div className="pd-stat-icon" style={{ background: catColor }}>
-                                        {StatIcons[s.iconKey]}
-                                    </div>
-                                    <div className="pd-stat-value">{s.value}</div>
-                                    <div className="pd-stat-label">{s.label}</div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* TAGS */}
-                    {post.tags && post.tags.length > 0 && (
-                        <div className="pd-tags">
-                            {post.tags.map(t => <span key={t} className="pd-tag">{t}</span>)}
-                        </div>
-                    )}
-
-                    {/* ARTICLE */}
-                    <div className="pd-article" dangerouslySetInnerHTML={{ __html: post.content }} />
-
-                    {/* DIVIDER */}
-                    <div className="pd-divider">Key Insight</div>
-
-                    {/* PULL QUOTE */}
-                    <div className="pd-pullquote">
-                        <div className="pd-pullquote-text">{post.excerpt}</div>
-                        <div className="pd-pullquote-source">{post.author.name} · Al Areeq Real Estate</div>
-                    </div>
-
-                    {/* CTA */}
-                    <div className="pd-cta">
-                        <div className="pd-cta-left">
-                            <div className="pd-cta-label">Free Consultation</div>
-                            <div className="pd-cta-title">Looking for the right property?</div>
-                            <div className="pd-cta-sub">Our agents are available to guide you every step of the way.</div>
-                        </div>
-                        <a href="/contact" className="pd-cta-btn">Speak to an Agent</a>
-                    </div>
-
-                    {/* RELATED */}
-                    {related.length > 0 && (
-                        <div className="pd-related">
-                            <div className="pd-related-label">More in {post.category}</div>
-                            <div className="pd-related-grid">
-                                {related.map(r => (
-                                    <div key={r.id} className="pd-related-card" onClick={() => onOpenRelated(r)}>
-                                        <img src={r.coverImage} alt={r.title} className="pd-related-img" />
-                                        <div className="pd-related-body">
-                                            <div className="pd-related-cat" style={{ color: CAT_COLORS[r.category] }}>{r.category}</div>
-                                            <div className="pd-related-title">{r.title}</div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
+          {/* COVER */}
+          <div className="pd-cover">
+            <img src={post.coverImage} alt={post.title} className="pd-cover-img" />
+            <div className="pd-cover-gradient" />
+            <button className="pd-close" onClick={onClose} aria-label="Close">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="pd-cover-content">
+              <div className="pd-cat-pill" style={{ background: `${catColor}44`, borderColor: `${catColor}88` }}>
+                {post.category}
+              </div>
+              <div className="pd-cover-title">{post.title}</div>
+              <div className="pd-byline">
+                <img src={post.author.avatar} alt={post.author.name} className="pd-byline-av" />
+                <div className="pd-byline-txt">
+                  <strong>{post.author.name}</strong><br />
+                  {formatDate(post.date)} &nbsp;·&nbsp; {post.readTime} read
                 </div>
+              </div>
             </div>
-        </>
-    );
+          </div>
+
+          {/* STATS */}
+          {stats.length > 0 && (
+            <div className="pd-stats">
+              {stats.map(s => (
+                <div key={s.label} className="pd-stat">
+                  <div className="pd-stat-icon" style={{ background: catColor }}>
+                    {StatIcons[s.iconKey]}
+                  </div>
+                  <div className="pd-stat-value">{s.value}</div>
+                  <div className="pd-stat-label">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* TAGS */}
+          {post.tags && post.tags.length > 0 && (
+            <div className="pd-tags">
+              {post.tags.map(t => <span key={t} className="pd-tag">{t}</span>)}
+            </div>
+          )}
+
+          {/* ARTICLE */}
+          <div className="pd-article" dangerouslySetInnerHTML={{ __html: post.content }} />
+
+          {/* DIVIDER */}
+          <div className="pd-divider">Key Insight</div>
+
+          {/* PULL QUOTE */}
+          <div className="pd-pullquote">
+            <div className="pd-pullquote-text">{post.excerpt}</div>
+            <div className="pd-pullquote-source">{post.author.name} · Al Areeq Real Estate</div>
+          </div>
+
+          {/* CTA */}
+          <div className="pd-cta">
+            <div className="pd-cta-left">
+              <div className="pd-cta-label">Free Consultation</div>
+              <div className="pd-cta-title">Looking for the right property?</div>
+              <div className="pd-cta-sub">Our agents are available to guide you every step of the way.</div>
+            </div>
+            <a href="/contact" className="pd-cta-btn">Speak to an Agent</a>
+          </div>
+
+          {/* RELATED */}
+          {related.length > 0 && (
+            <div className="pd-related">
+              <div className="pd-related-label">More in {post.category}</div>
+              <div className="pd-related-grid">
+                {related.map(r => (
+                  <div key={r.id} className="pd-related-card" onClick={() => onOpenRelated(r)}>
+                    <img src={r.coverImage} alt={r.title} className="pd-related-img" />
+                    <div className="pd-related-body">
+                      <div className="pd-related-cat" style={{ color: CAT_COLORS[r.category] }}>{r.category}</div>
+                      <div className="pd-related-title">{r.title}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+        </div>
+      </div>
+    </>
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  MAIN PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 export default function BlogPage() {
-    const [activeTab, setActiveTab] = useState('All');
-    const [openPost, setOpenPost] = useState<Post | null>(null);
+  const [activeTab, setActiveTab] = useState('All');
+  const [openPost, setOpenPost] = useState<Post | null>(null);
 
-    const heroRef = useRef<HTMLDivElement>(null);
-    const sbRef = useRef<HTMLElement>(null);
-    const secRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const sbRef = useRef<HTMLElement>(null);
+  const secRef = useRef<HTMLDivElement>(null);
 
-    const heroIn = useInView(heroRef as React.RefObject<Element>, 0.05);
-    const sbIn = useInView(sbRef as React.RefObject<Element>, 0.05);
-    const secIn = useInView(secRef as React.RefObject<Element>, 0.08);
+  const heroIn = useInView(heroRef as React.RefObject<Element>, 0.05);
+  const sbIn = useInView(sbRef as React.RefObject<Element>, 0.05);
+  const secIn = useInView(secRef as React.RefObject<Element>, 0.08);
 
-    const allPosts = getAllPosts();
-    const featured = allPosts.find(p => p.featured)!;
-    const rest = allPosts.filter(p => !p.featured);
-    const grid = activeTab === 'All' ? rest : rest.filter(p => p.category === activeTab);
+  const allPosts = getAllPosts();
+  const featured = allPosts.find(p => p.featured)!;
+  const rest = allPosts.filter(p => !p.featured);
+  const grid = activeTab === 'All' ? rest : rest.filter(p => p.category === activeTab);
 
-    return (
-        <>
-            <style>{`
+  return (
+    <>
+      <style>{`
         ${SHARED_CSS}
 
         @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
@@ -833,172 +833,172 @@ export default function BlogPage() {
         @media(min-width:769px) { .bp-mob-strip { display:none !important; } }
       `}</style>
 
-            <Navbar />
+      <Navbar />
 
-            {/* Render post detail overlay when a post is open */}
-            {openPost && <PostDetail post={openPost} onClose={() => setOpenPost(null)} onOpenRelated={(p) => setOpenPost(p)} />}
+      {/* Render post detail overlay when a post is open */}
+      {openPost && <PostDetail post={openPost} onClose={() => setOpenPost(null)} onOpenRelated={(p) => setOpenPost(p)} />}
 
-            <div className="bp">
+      <div className="bp">
 
-                {/* ── HERO ── */}
-                <div className="bp-hero">
-                    <div
-                        ref={heroRef}
-                        className="bp-feat"
-                        onClick={() => setOpenPost(featured)}
-                        style={{
-                            opacity: heroIn ? 1 : 0,
-                            transform: heroIn ? 'scale(1) translateY(0)' : 'scale(.97) translateY(18px)',
-                            transition: 'opacity .75s cubic-bezier(.16,1,.3,1), transform .75s cubic-bezier(.16,1,.3,1)',
-                        }}
-                    >
-                        <img src={featured.coverImage} alt={featured.title} className="bp-feat-img" />
-                        <div className="bp-feat-overlay">
-                            <span className="bp-badge" style={{ background: CAT_COLORS[featured.category] }}>
-                                {featured.category}
-                            </span>
-                            <h1 className="bp-feat-title">{featured.title}</h1>
-                            <div className="bp-feat-meta">
-                                <img src={featured.author.avatar} alt={featured.author.name} className="bp-feat-av" />
-                                <span className="bp-feat-meta-txt">
-                                    <strong>{featured.author.name}</strong> · {featured.readTime} read · {formatDate(featured.date)}
-                                </span>
-                            </div>
-                            <div className="bp-feat-hint">
-                                Read article
-                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    <aside
-                        ref={sbRef}
-                        className="bp-sidebar"
-                        style={{
-                            opacity: sbIn ? 1 : 0,
-                            transform: sbIn ? 'translateX(0)' : 'translateX(22px)',
-                            transition: 'opacity .7s cubic-bezier(.16,1,.3,1) .12s, transform .7s cubic-bezier(.16,1,.3,1) .12s',
-                        }}
-                    >
-                        <div className="bp-sb-heading">Other featured posts</div>
-                        {rest.slice(0, 5).map((p, i) => (
-                            <div
-                                key={p.id}
-                                className="bp-sb-item"
-                                onClick={() => setOpenPost(p)}
-                                style={{
-                                    opacity: sbIn ? 1 : 0,
-                                    transform: sbIn ? 'translateX(0)' : 'translateX(14px)',
-                                    transition: `opacity .5s ease ${0.18 + i * 0.07}s, transform .5s cubic-bezier(.16,1,.3,1) ${0.18 + i * 0.07}s`,
-                                }}
-                            >
-                                <img src={p.coverImage} alt={p.title} className="bp-sb-thumb" />
-                                <div>
-                                    <div className="bp-sb-cat" style={{ color: CAT_COLORS[p.category] }}>{p.category}</div>
-                                    <div className="bp-sb-title">{p.title}</div>
-                                </div>
-                            </div>
-                        ))}
-                    </aside>
-                </div>
-
-                {/* ── MOBILE STRIP ── */}
-                <div className="bp-mob-strip">
-                    {rest.map(p => (
-                        <div className="bp-mob-card" key={p.id} onClick={() => setOpenPost(p)}>
-                            <img src={p.coverImage} alt={p.title} className="bp-mob-card-img" />
-                            <div className="bp-mob-card-body">
-                                <div className="bp-mob-cat" style={{ color: CAT_COLORS[p.category] }}>{p.category}</div>
-                                <div className="bp-mob-title">{p.title}</div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {/* ── SECTION HEADER ── */}
-                <div
-                    ref={secRef}
-                    className="bp-section-head"
-                    style={{
-                        opacity: secIn ? 1 : 0,
-                        transform: secIn ? 'translateY(0)' : 'translateY(18px)',
-                        transition: 'opacity .6s ease, transform .6s cubic-bezier(.16,1,.3,1)',
-                    }}
-                >
-                    <div className="bp-section-left">
-                        <div className={`bp-section-title${secIn ? ' line-in' : ''}`}>Recent Posts</div>
-                        <div className="bp-section-sub">{rest.length} articles published</div>
-                    </div>
-                    <div className="bp-tabs">
-                        {categories.map(c => (
-                            <button
-                                key={c}
-                                className={`bp-tab${activeTab === c ? ' active' : ''}`}
-                                onClick={() => setActiveTab(c)}
-                            >{c}</button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* ── POSTS GRID ── */}
-                <div className="bp-grid">
-                    {grid.length === 0 && <div className="bp-empty">No posts in this category yet.</div>}
-                    {grid.map((p, i) => (
-                        <PostCard key={p.id} p={p} delay={i * 0.09} onOpen={setOpenPost} />
-                    ))}
-                </div>
-
-                {/* ── FOOTER ── */}
-                <footer className="footer-clean">
-                    <div className="footer-cta">
-                        <h2>Stay ahead with our latest insights.</h2>
-                        <div className="footer-cta-buttons">
-                            <a href="/blog" className="btn-footer-primary">All Articles</a>
-                            <a href="/contact" className="btn-outline">Contact Us</a>
-                        </div>
-                    </div>
-                    <div className="footer-main">
-                        <div className="footer-brand">
-                            <h3>Al Areeq</h3>
-                            <p>Trusted real estate partner helping families buy, rent and invest in premium properties since 2012.</p>
-                        </div>
-                        <div>
-                            <h4>Properties</h4>
-                            <ul>
-                                <li><a href="#">Buy</a></li>
-                                <li><a href="#">Rent</a></li>
-                                <li><a href="#">Luxury</a></li>
-                                <li><a href="#">New Projects</a></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4>Company</h4>
-                            <ul>
-                                <li><a href="/about">About</a></li>
-                                <li><a href="#">Agents</a></li>
-                                <li><a href="/blog">Blog</a></li>
-                                <li><a href="/contact">Contact</a></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4>Resources</h4>
-                            <ul>
-                                <li><a href="#">Mortgage Calculator</a></li>
-                                <li><a href="#">Market Reports</a></li>
-                                <li><a href="#">Investment Guide</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div className="footer-bottom">
-                        <p>© {new Date().getFullYear()} Al Areeq Real Estate. All rights reserved.</p>
-                        <div className="footer-legal">
-                            <a href="#">Privacy</a>
-                            <a href="#">Terms</a>
-                        </div>
-                    </div>
-                </footer>
-
+        {/* ── HERO ── */}
+        <div className="bp-hero">
+          <div
+            ref={heroRef}
+            className="bp-feat"
+            onClick={() => setOpenPost(featured)}
+            style={{
+              opacity: heroIn ? 1 : 0,
+              transform: heroIn ? 'scale(1) translateY(0)' : 'scale(.97) translateY(18px)',
+              transition: 'opacity .75s cubic-bezier(.16,1,.3,1), transform .75s cubic-bezier(.16,1,.3,1)',
+            }}
+          >
+            <img src={featured.coverImage} alt={featured.title} className="bp-feat-img" />
+            <div className="bp-feat-overlay">
+              <span className="bp-badge" style={{ background: CAT_COLORS[featured.category] }}>
+                {featured.category}
+              </span>
+              <h1 className="bp-feat-title">{featured.title}</h1>
+              <div className="bp-feat-meta">
+                <img src={featured.author.avatar} alt={featured.author.name} className="bp-feat-av" />
+                <span className="bp-feat-meta-txt">
+                  <strong>{featured.author.name}</strong> · {featured.readTime} read · {formatDate(featured.date)}
+                </span>
+              </div>
+              <div className="bp-feat-hint">
+                Read article
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+              </div>
             </div>
-        </>
-    );
+          </div>
+
+          <aside
+            ref={sbRef}
+            className="bp-sidebar"
+            style={{
+              opacity: sbIn ? 1 : 0,
+              transform: sbIn ? 'translateX(0)' : 'translateX(22px)',
+              transition: 'opacity .7s cubic-bezier(.16,1,.3,1) .12s, transform .7s cubic-bezier(.16,1,.3,1) .12s',
+            }}
+          >
+            <div className="bp-sb-heading">Other featured posts</div>
+            {rest.slice(0, 5).map((p, i) => (
+              <div
+                key={p.id}
+                className="bp-sb-item"
+                onClick={() => setOpenPost(p)}
+                style={{
+                  opacity: sbIn ? 1 : 0,
+                  transform: sbIn ? 'translateX(0)' : 'translateX(14px)',
+                  transition: `opacity .5s ease ${0.18 + i * 0.07}s, transform .5s cubic-bezier(.16,1,.3,1) ${0.18 + i * 0.07}s`,
+                }}
+              >
+                <img src={p.coverImage} alt={p.title} className="bp-sb-thumb" />
+                <div>
+                  <div className="bp-sb-cat" style={{ color: CAT_COLORS[p.category] }}>{p.category}</div>
+                  <div className="bp-sb-title">{p.title}</div>
+                </div>
+              </div>
+            ))}
+          </aside>
+        </div>
+
+        {/* ── MOBILE STRIP ── */}
+        <div className="bp-mob-strip">
+          {rest.map(p => (
+            <div className="bp-mob-card" key={p.id} onClick={() => setOpenPost(p)}>
+              <img src={p.coverImage} alt={p.title} className="bp-mob-card-img" />
+              <div className="bp-mob-card-body">
+                <div className="bp-mob-cat" style={{ color: CAT_COLORS[p.category] }}>{p.category}</div>
+                <div className="bp-mob-title">{p.title}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── SECTION HEADER ── */}
+        <div
+          ref={secRef}
+          className="bp-section-head"
+          style={{
+            opacity: secIn ? 1 : 0,
+            transform: secIn ? 'translateY(0)' : 'translateY(18px)',
+            transition: 'opacity .6s ease, transform .6s cubic-bezier(.16,1,.3,1)',
+          }}
+        >
+          <div className="bp-section-left">
+            <div className={`bp-section-title${secIn ? ' line-in' : ''}`}>Recent Posts</div>
+            <div className="bp-section-sub">{rest.length} articles published</div>
+          </div>
+          <div className="bp-tabs">
+            {categories.map(c => (
+              <button
+                key={c}
+                className={`bp-tab${activeTab === c ? ' active' : ''}`}
+                onClick={() => setActiveTab(c)}
+              >{c}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── POSTS GRID ── */}
+        <div className="bp-grid">
+          {grid.length === 0 && <div className="bp-empty">No posts in this category yet.</div>}
+          {grid.map((p, i) => (
+            <PostCard key={p.id} p={p} delay={i * 0.09} onOpen={setOpenPost} />
+          ))}
+        </div>
+
+        {/* ── FOOTER ── */}
+        <footer className="footer-clean">
+          <div className="footer-cta">
+            <h2>Stay ahead with our latest insights.</h2>
+            <div className="footer-cta-buttons">
+              <a href="/blog" className="btn-footer-primary">All Articles</a>
+              <a href="/contact" className="btn-outline">Contact Us</a>
+            </div>
+          </div>
+          <div className="footer-main">
+            <div className="footer-brand">
+              <h3>Al Areeq</h3>
+              <p>Trusted real estate partner helping families buy, rent and invest in premium properties since 2012.</p>
+            </div>
+            <div>
+              <h4>Properties</h4>
+              <ul>
+                <li><a href="#">Buy</a></li>
+                <li><a href="#">Rent</a></li>
+                <li><a href="#">Luxury</a></li>
+                <li><a href="#">New Projects</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4>Company</h4>
+              <ul>
+                <li><a href="/about">About</a></li>
+                <li><a href="#">Agents</a></li>
+                <li><a href="/blog">Blog</a></li>
+                <li><a href="/contact">Contact</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4>Resources</h4>
+              <ul>
+                <li><a href="#">Mortgage Calculator</a></li>
+                <li><a href="#">Market Reports</a></li>
+                <li><a href="#">Investment Guide</a></li>
+              </ul>
+            </div>
+          </div>
+          <div className="footer-bottom">
+            <p>© {new Date().getFullYear()} Al Areeq Real Estate. All rights reserved.</p>
+            <div className="footer-legal">
+              <a href="#">Privacy</a>
+              <a href="#">Terms</a>
+            </div>
+          </div>
+        </footer>
+
+      </div>
+    </>
+  );
 }
