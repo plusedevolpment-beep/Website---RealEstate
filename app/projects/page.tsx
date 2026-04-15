@@ -201,10 +201,10 @@ const PRICE_LABELS  = ["$100K","$250K","$500K","$750K","$1M","$2M","$5M+"];
 const PAGE_SIZE = 6;
 
 // ─── Tour Scheduler Modal ─────────────────────────────────────────────────────
-const OWNER_EMAIL  = "owner@yourdomain.com"; // ← change to real owner email
-const EMAILJS_SVC  = "your_service_id";      // ← EmailJS service ID
-const EMAILJS_TPL  = "your_template_id";     // ← EmailJS template ID
-const EMAILJS_KEY  = "your_public_key";      // ← EmailJS public key
+const OWNER_EMAIL  = "ahmadapsdci@gmail.com";
+const EMAILJS_SVC  = "service_q7hjidg";
+const EMAILJS_TPL  = "template_aq874dn";
+const EMAILJS_KEY  = "Kyr-rqxEAliF3v_mT";
 
 const TOUR_SLOTS: Record<string, string[]> = {
   Monday:    ["09:00 AM","10:00 AM","11:00 AM","02:00 PM","03:00 PM","04:00 PM"],
@@ -252,38 +252,77 @@ const TourScheduler = ({ listing, onClose, onBack }: { listing: Listing; onClose
     setAvailDays(days);
   }, []);
 
-  // Load EmailJS once on client
+  const ejsReady = useRef(false);
+
+  // Load EmailJS once on client — track when truly ready
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if ((window as any).emailjs) return;
+    const win = window as any;
+    // Already loaded and initialized
+    if (win.emailjs && ejsReady.current) return;
+    if (win.emailjs) {
+      win.emailjs.init(EMAILJS_KEY);
+      ejsReady.current = true;
+      return;
+    }
     const script = document.createElement("script");
     script.src = "https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js";
-    script.onload = () => { (window as any).emailjs.init(EMAILJS_KEY); };
+    script.async = true;
+    script.onload = () => {
+      win.emailjs.init(EMAILJS_KEY);
+      ejsReady.current = true;
+    };
     document.head.appendChild(script);
   }, []);
+
+  // Wait up to 5s for EmailJS to be ready, then call send
+  const waitForEJS = (): Promise<any> =>
+    new Promise((resolve, reject) => {
+      const win = window as any;
+      if (win.emailjs && ejsReady.current) { resolve(win.emailjs); return; }
+      let attempts = 0;
+      const interval = setInterval(() => {
+        attempts++;
+        if (win.emailjs && ejsReady.current) {
+          clearInterval(interval);
+          resolve(win.emailjs);
+        } else if (attempts > 50) {
+          clearInterval(interval);
+          reject(new Error("EmailJS failed to load"));
+        }
+      }, 100);
+    });
 
   const sendEmail = async () => {
     setStep("sending");
     try {
-      const ejs = (window as any).emailjs;
-      if (!ejs) throw new Error("EmailJS not loaded");
-      await ejs.send(EMAILJS_SVC, EMAILJS_TPL, {
+      const ejs = await waitForEJS();
+      const result = await ejs.send(EMAILJS_SVC, EMAILJS_TPL, {
         to_email:   OWNER_EMAIL,
         from_name:  name,
         from_email: email,
+        reply_to:   email,
         phone:      phone || "Not provided",
         note:       note  || "None",
         property:   listing.address,
         price:      listing.priceDisplay,
         tour_date:  selectedDay!.label,
         tour_time:  selectedTime,
+        message: `Tour booking request:\n\nProperty: ${listing.address}\nPrice: ${listing.priceDisplay}\nDate: ${selectedDay!.label}\nTime: ${selectedTime}\n\nFrom: ${name}\nEmail: ${email}\nPhone: ${phone || "Not provided"}\nNotes: ${note || "None"}`,
       });
+      console.log("EmailJS success:", result.status, result.text);
       setStep("done");
-    } catch {
+    } catch (err: any) {
+      // EmailJS errors come back as objects with status + text fields
+      const status  = err?.status  ?? "unknown";
+      const text    = err?.text    ?? JSON.stringify(err) ?? "Unknown error";
+      console.error(`EmailJS error — status: ${status}, message: ${text}`);
+      setErrorMsg(`${status}: ${text}`);
       setStep("error");
     }
   };
 
+  const [errorMsg, setErrorMsg] = useState("");
   const canSubmit = name.trim().length > 0 && email.trim().length > 0 && email.includes("@");
 
   // Don't render anything until we're on the client
@@ -405,9 +444,6 @@ const TourScheduler = ({ listing, onClose, onBack }: { listing: Listing; onClose
                 <button className="ts-submit" disabled={!canSubmit} onClick={sendEmail} style={{ background:canSubmit ? "#111" : "#e0e0e0", color:canSubmit ? "#fff" : "#aaa", cursor:canSubmit ? "pointer" : "not-allowed" }}>
                   Confirm Booking
                 </button>
-                <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:"11px", color:"#bbb", textAlign:"center", marginTop:"12px" }}>
-                  A confirmation will be sent to your email.
-                </div>
               </>
             )}
 
@@ -430,7 +466,7 @@ const TourScheduler = ({ listing, onClose, onBack }: { listing: Listing; onClose
                   <strong style={{ color:"#111" }}>{selectedDay!.label}</strong> at <strong style={{ color:"#111" }}>{selectedTime}</strong>
                 </div>
                 <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:"13px", color:"#aaa", marginBottom:"28px" }}>
-                  A confirmation has been sent to <strong style={{ color:"#555" }}>{email}</strong>
+                  Our team will contact you shortly to confirm your visit.
                 </div>
                 <button onClick={onClose} style={{ padding:"13px 36px", background:"#111", color:"#fff", border:"none", borderRadius:"12px", fontFamily:"'DM Sans',sans-serif", fontSize:"14px", fontWeight:700, cursor:"pointer" }}>Done</button>
               </div>
@@ -441,7 +477,12 @@ const TourScheduler = ({ listing, onClose, onBack }: { listing: Listing; onClose
               <div style={{ textAlign:"center", padding:"40px 0" }}>
                 <div style={{ width:"56px", height:"56px", borderRadius:"50%", background:"#f5f5f5", border:"2px solid #e0e0e0", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px", fontSize:"24px", color:"#999" }}>!</div>
                 <div style={{ fontFamily:"'Outfit',sans-serif", fontSize:"20px", fontWeight:900, color:"#111", marginBottom:"8px" }}>Something went wrong</div>
-                <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:"13px", color:"#aaa", marginBottom:"28px" }}>Could not send your booking. Please try again or call us directly.</div>
+                <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:"13px", color:"#aaa", marginBottom: errorMsg ? "12px" : "28px" }}>Could not send your booking. Please try again or call us directly.</div>
+                {errorMsg && (
+                  <div style={{ fontFamily:"'DM Sans',monospace", fontSize:"11px", color:"#e44", background:"#fff5f5", border:"1px solid #fcc", borderRadius:"8px", padding:"10px 14px", marginBottom:"20px", textAlign:"left", wordBreak:"break-word" }}>
+                    {errorMsg}
+                  </div>
+                )}
                 <div style={{ display:"flex", gap:"10px", justifyContent:"center" }}>
                   <button onClick={() => setStep("details")} style={{ padding:"12px 24px", background:"#111", color:"#fff", border:"none", borderRadius:"12px", fontFamily:"'DM Sans',sans-serif", fontSize:"13px", fontWeight:700, cursor:"pointer" }}>Try Again</button>
                   <button onClick={onClose} style={{ padding:"12px 24px", background:"#fff", color:"#555", border:"1.5px solid #e0e0e0", borderRadius:"12px", fontFamily:"'DM Sans',sans-serif", fontSize:"13px", fontWeight:600, cursor:"pointer" }}>Close</button>
