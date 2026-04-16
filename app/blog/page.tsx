@@ -5,7 +5,7 @@
 //  FILE LOCATION:  app/blog/page.tsx
 //  NAVBAR IMPORT:  adjust path to wherever your Navbar lives
 // ─────────────────────────────────────────────────────────────────────────────
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '../components/Navbar';
 import {
   getAllPosts, getPostBySlug, getRelatedPosts,
@@ -132,7 +132,7 @@ function PostCard({ p, delay, onOpen }: { p: Post; delay: number; onOpen: (p: Po
 }
 
 // SVG icons for stat cards — no emojis
-const StatIcons: Record<string, JSX.Element> = {
+const StatIcons: Record<string, React.ReactElement> = {
   clock: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>,
   list: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M9 6h10M9 12h10M9 18h10M5 6h.01M5 12h.01M5 18h.01" /></svg>,
   percent: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M19 5L5 19" /><circle cx="6.5" cy="6.5" r="2.5" /><circle cx="17.5" cy="17.5" r="2.5" /></svg>,
